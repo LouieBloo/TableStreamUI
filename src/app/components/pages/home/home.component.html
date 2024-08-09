@@ -1,0 +1,17 @@
+<div class="max-w-lg mx-auto my-10 p-6 shadow-md">
+    <h1 class="text-xl font-semibold mb-6">Join Room</h1>
+    <form #playerForm="ngForm" (ngSubmit)="onSubmit()">
+        <div class="mb-4">
+            <label for="playerName" class="block text-sm font-medium text-gray-700">Player Name:</label>
+            <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
+                class="mt-1 p-2 w-full border rounded-md shadow-sm">
+        </div>
+        <div class="mb-6">
+            <label for="roomName" class="block text-sm font-medium text-gray-700">Room Name:</label>
+            <input type="text" id="roomName" name="roomName" [(ngModel)]="player.roomName" required
+                class="mt-1 p-2 w-full border rounded-md shadow-sm">
+        </div>
+        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            [disabled]="!playerForm.valid">Join</button>
+    </form>
+</div>

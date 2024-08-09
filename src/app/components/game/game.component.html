@@ -1,0 +1,8 @@
+<div className="w-screen h-screen flex flex-wrap">
+    <div className="w-1/4  bg-red-500">
+        <app-local-user-stream></app-local-user-stream>
+    </div>
+    <div *ngFor="let id of remoteSocketIds" class="w-1/4 bg-green-500">
+        <app-remote-user-stream [socketId]="id"></app-remote-user-stream>
+    </div>
+</div>
