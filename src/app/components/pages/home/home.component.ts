@@ -19,7 +19,7 @@ export class HomeComponent {
   constructor(private router: Router, private webRTC: WebRTCService){}
 
   onSubmit() {
-    console.log('Player:', this.player);
+    console.log('Player:', this.player);;
     this.webRTC.setInfo(this.player.roomName, this.player.name)
     this.router.navigate(['/game']);
   }
