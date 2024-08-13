@@ -1,0 +1,15 @@
+<div class="relative">
+    <h4 class="absolute text-white bg-black bg-opacity-50">{{ !localStream ? "Remote: " + socketId : "Local User" }}
+    </h4>
+
+    <div class="absolute left-0 top-10 z-10">
+        <div class="dropdown">
+            <div tabindex="0" role="button" class="btn m-1"><ng-icon name="bootstrapGearFill"></ng-icon></div>
+            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                <li (click)="toggleFlip()"><a>Flip Video</a></li>
+            </ul>
+        </div>
+    </div>
+    <video #videoElement autoplay style="" class="w-full"></video>
+    <!-- <img class="w-20" src="https://as1.ftcdn.net/v2/jpg/01/63/11/70/1000_F_163117064_syJkTuCddASYjvl4WqyRmnuy8cDXpoQY.jpg"> -->
+</div>

@@ -1,18 +1,19 @@
 import { Component } from '@angular/core';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
-import { LocalUserStreamComponent } from '../users/local-user-stream/local-user-stream.component';
-import { RemoteUserStreamComponent } from '../users/remote-user-stream/remote-user-stream.component';
+import { UserStreamComponent } from '../users/user-stream/user-stream.component';
 import { NgFor } from '@angular/common';
+
+
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [LocalUserStreamComponent, RemoteUserStreamComponent, NgFor],
+  imports: [ NgFor, UserStreamComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
 export class GameComponent {
 
-  remoteSocketIds: string[] = []
+  remoteSocketIds: string[] = ["local","local","local","local"]
 
   constructor(private webRTC: WebRTCService) { }
 

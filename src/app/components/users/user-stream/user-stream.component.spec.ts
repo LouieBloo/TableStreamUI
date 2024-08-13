@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LocalUserStreamComponent } from './local-user-stream.component';
+import { UserStreamComponent } from './user-stream.component';
 
-describe('LocalUserStreamComponent', () => {
-  let component: LocalUserStreamComponent;
-  let fixture: ComponentFixture<LocalUserStreamComponent>;
+describe('UserStreamComponent', () => {
+  let component: UserStreamComponent;
+  let fixture: ComponentFixture<UserStreamComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LocalUserStreamComponent]
+      imports: [UserStreamComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(LocalUserStreamComponent);
+    fixture = TestBed.createComponent(UserStreamComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -11,6 +11,7 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
+  
   player = {
     name: '',
     roomName: ''
