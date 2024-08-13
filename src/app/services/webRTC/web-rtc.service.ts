@@ -20,7 +20,7 @@ export class WebRTCService {
   playerName: string = "";
 
   constructor() {
-    this.socket = io('http://localhost:3001');
+    this.socket = io('https://api.table-stream.com');
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);

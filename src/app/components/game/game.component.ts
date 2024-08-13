@@ -13,7 +13,7 @@ import { NgFor } from '@angular/common';
 })
 export class GameComponent {
 
-  remoteSocketIds: string[] = ["local","local","local","local"]
+  remoteSocketIds: string[] = ["local"]
 
   constructor(private webRTC: WebRTCService) { }
 
