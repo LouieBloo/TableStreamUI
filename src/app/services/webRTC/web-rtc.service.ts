@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import io, { Socket } from 'socket.io-client';
 import { Message } from '../../interfaces/message';
-
+import { environment } from '../../../environments/environment';
+import { IPlayer } from '../../interfaces/user';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ export class WebRTCService {
   localStream: MediaStream | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {};
-  onStreamAdded: ((id: string, stream: MediaStream) => void)[] = [];
+  onStreamAdded: ((id: string, stream: MediaStream, player:IPlayer) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
 
   onMessage: ((message: Message) => void)[] = [];
@@ -20,7 +21,7 @@ export class WebRTCService {
   playerName: string = "";
 
   constructor() {
-    this.socket = io('https://api.table-stream.com');
+    this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
@@ -35,7 +36,7 @@ export class WebRTCService {
     return this.localStream;
   }
 
-  public subscribeToStreamAdd(callback: (id: string, stream: MediaStream) => void) {
+  public subscribeToStreamAdd(callback: (id: string, stream: MediaStream, player: IPlayer) => void) {
     this.onStreamAdded.push(callback);
   }
 
@@ -48,7 +49,6 @@ export class WebRTCService {
   }
 
   public unSubscribeToStreamRemove(callback: any){
-    console.log("before: ", this.onStreamRemoved.length)
     this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback)=>{checkCallback !== callback})
     console.log(this.onStreamRemoved.length)
   }
@@ -58,9 +58,18 @@ export class WebRTCService {
     this.playerName = playerName;
   }
 
-  public joinRoom() {
+  public joinRoom(callback:any) {
     if (this.socket) {
-      this.socket.emit('joinRoom', {roomName: this.roomName,playerName: this.playerName });
+      this.socket.emit('joinRoom', {roomName: this.roomName, playerName: this.playerName }, (newPlayer:IPlayer) => {
+        console.log('Server responded with unique ID:', newPlayer.id);
+        callback(newPlayer, this.roomName)
+    });
+    }
+  }
+
+  public disconnect(){
+    if(this.socket){
+      this.socket.disconnect();
     }
   }
 
@@ -71,17 +80,16 @@ export class WebRTCService {
     return null;
   }
 
-  private handleSignal = async (data: { from: string; signal: any }) => {
+  private handleSignal = async (data: { from: string; signal: any, player: IPlayer }) => {
 
     console.log("Handle signal: ", data.from, data.signal)
 
     const { from, signal } = data;
     if (!this.peerConnections[from]) {
-      this.createPeerConnection(from);
+      this.createPeerConnection(from, data.player);
     }
     const peerConnection = this.peerConnections[from];
 
-    console.log("signal type: ", signal.type)
     if (signal.type === 'offer') {
       await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
       const answer = await peerConnection.createAnswer();
@@ -94,9 +102,9 @@ export class WebRTCService {
     }
   };
 
-  private handleNewPeer = (data: { socketId: string }) => {
+  private handleNewPeer = (data: { socketId: string, player: IPlayer }) => {
     const { socketId } = data;
-    this.createPeerConnection(socketId);
+    this.createPeerConnection(socketId, data.player);
   };
 
   private handlePeerDisconnected = (data: { socketId: string }) => {
@@ -117,7 +125,7 @@ export class WebRTCService {
     });
   };
 
-  private async createPeerConnection(socketId: string) {
+  private async createPeerConnection(socketId: string, player: IPlayer) {
     console.log("Creating peer connection: ", socketId)
     const configuration = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Add Google STUN server
@@ -132,17 +140,15 @@ export class WebRTCService {
     };
 
     peerConnection.ontrack = (event) => {
-      console.log("On track: ", event)
       // if (!this.remoteStreams[socketId]) {
       //   this.remoteStreams[socketId] = new MediaStream();
       // }
       // event.streams[0].getTracks().forEach(track => {
       //   this.remoteStreams[socketId].addTrack(track);
       // });
-      console.log("on track length ", this.onStreamAdded.length)
       this.remoteStreams[socketId] = event.streams[0];
       this.onStreamAdded.forEach(callback => {
-        callback(socketId, this.remoteStreams[socketId])
+        callback(socketId, this.remoteStreams[socketId], player)
       });
     };
 
@@ -154,10 +160,8 @@ export class WebRTCService {
 
     // Listen for negotiation needed event to handle offer/answer exchange
     peerConnection.onnegotiationneeded = async () => {
-      console.log("onnegationation")
       try {
         if (peerConnection.signalingState === 'stable') {
-          console.log("onnegationation stable")
           const offer = await peerConnection.createOffer({
             offerToReceiveVideo: true,
             offerToReceiveAudio: false
@@ -178,7 +182,6 @@ export class WebRTCService {
 
     let localS = await this.initLocalStream()
     localS.getTracks().forEach((track) => {
-      console.log("adding local tracks");
       peerConnection.addTrack(track, this.localStream!);
     });
 

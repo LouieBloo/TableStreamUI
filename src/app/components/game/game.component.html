@@ -5,11 +5,12 @@
         <div class="flex flex-col p-4">
             <h1>left column</h1>
             <h4>Stuff</h4>
+            <h4>Room: {{room.name}}</h4>
         </div>
 
         <div class="grid grid-cols-2 flex-grow">
-            <div *ngFor="let id of remoteSocketIds" class="bg-green-500">
-                <app-user-stream [socketId]="id" [localStream]="id == 'local'"></app-user-stream>
+            <div *ngFor="let player of sortedPlayers" class="bg-green-500">
+                <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
             </div>
         </div>
 

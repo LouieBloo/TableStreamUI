@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
+import { IPlayer } from '../../../interfaces/user';
 
 @Component({
   selector: 'app-user-stream',
@@ -13,7 +14,7 @@ import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 })
 export class UserStreamComponent {
 
-  @Input() socketId!: string;
+  @Input() player!: IPlayer;
   @Input() localStream: boolean = false;
   
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
@@ -28,9 +29,9 @@ export class UserStreamComponent {
 
     if(!this.localStream){
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
-      this.webRTC.subscribeToStreamRemove(this.streamRemoved);
+      // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
   
-      this.setStream(this.webRTC.getStream(this.socketId))
+      this.setStream(this.webRTC.getStream(this.player.socketId))
     }else{
       this.initLocalStream();
     }
@@ -45,15 +46,16 @@ export class UserStreamComponent {
     });
   }
 
-  streamAdded = (id: string, stream: MediaStream) => {
-    console.log("stream added: ", id)
-    if (id === this.socketId) {
-      this.setStream(stream);
+  streamAdded = (id: string, stream: MediaStream, player: IPlayer) => {
+    console.log("stream added: ", player)
+    if (player.id === this.player.id) {
+      //this.setStream(stream);
+      this.setStream(this.webRTC.getStream(this.player.socketId))
     }
   }
 
   streamRemoved = (id: string) => {
-    if (id === this.socketId) {
+    if (id === this.player.socketId) {
       this.setStream(null);
     }
   }
