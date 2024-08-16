@@ -20,11 +20,14 @@ export class HomeComponent {
   constructor(private router: Router, private webRTC: WebRTCService){}
 
   ngOnInit() {
-    //this.webRTC.disconnect();
+    this.webRTC.disconnect();
+    localStorage.removeItem("roomName");
   }
 
   onSubmit() {
-    this.webRTC.setInfo(this.player.roomName, this.player.name)
+    localStorage.setItem("playerName", this.player.name);
+    localStorage.setItem("roomName", this.player.roomName);
+
     this.router.navigate(['/game']);
   }
 }

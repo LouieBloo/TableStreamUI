@@ -31,7 +31,7 @@ export class GameComponent {
     this.webRTC.subscribeToStreamAdd(this.streamAdded);
     this.webRTC.subscribeToStreamRemove(this.streamRemoved);
 
-    this.webRTC.joinRoom((me:IPlayer, roomName: string)=>{
+    this.webRTC.joinRoom(localStorage.getItem('playerName'),localStorage.getItem('roomName'),(me:IPlayer, roomName: string)=>{
       this.room.name = roomName;
       this.localPlayerId = me.id;
       this.addPlayer(me);

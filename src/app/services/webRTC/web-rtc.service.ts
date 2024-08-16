@@ -17,15 +17,11 @@ export class WebRTCService {
 
   onMessage: ((message: Message) => void)[] = [];
 
-  roomName: string = "";
-  playerName: string = "";
+  // roomName: string = "";
+  // playerName: string = "";
 
   constructor() {
-    this.socket = io(environment.socketUrl);
-    this.socket.on('signal', this.handleSignal);
-    this.socket.on('newPeer', this.handleNewPeer);
-    this.socket.on('peerDisconnected', this.handlePeerDisconnected);
-    this.socket.on('message', this.handleMessage);
+    
   }
 
   public async initLocalStream(): Promise<MediaStream> {
@@ -53,16 +49,19 @@ export class WebRTCService {
     console.log(this.onStreamRemoved.length)
   }
 
-  public setInfo(roomName:string, playerName:string){
-    this.roomName = roomName;
-    this.playerName = playerName;
-  }
+  
 
-  public joinRoom(callback:any) {
+  public joinRoom(playerName: any, roomName: any, callback:any) {
+    this.socket = io(environment.socketUrl);
+    this.socket.on('signal', this.handleSignal);
+    this.socket.on('newPeer', this.handleNewPeer);
+    this.socket.on('peerDisconnected', this.handlePeerDisconnected);
+    this.socket.on('message', this.handleMessage);
+
     if (this.socket) {
-      this.socket.emit('joinRoom', {roomName: this.roomName, playerName: this.playerName }, (newPlayer:IPlayer) => {
+      this.socket.emit('joinRoom', {roomName: roomName, playerName: playerName }, (newPlayer:IPlayer) => {
         console.log('Server responded with unique ID:', newPlayer.id);
-        callback(newPlayer, this.roomName)
+        callback(newPlayer, roomName)
     });
     }
   }
@@ -70,6 +69,7 @@ export class WebRTCService {
   public disconnect(){
     if(this.socket){
       this.socket.disconnect();
+      this.socket = null;
     }
   }
 
@@ -188,13 +188,13 @@ export class WebRTCService {
   }
 
   public sendMessage(message: string) {
-    if (this.socket) {
-      this.socket.emit('message', {
-        roomName: this.roomName,
-        playerName: this.playerName,
-        message: message
-      });
-    }
+    // if (this.socket) {
+    //   this.socket.emit('message', {
+    //     roomName: this.roomName,
+    //     playerName: this.playerName,
+    //     message: message
+    //   });
+    // }
   }
 
   private handleMessage = (message: Message) => {
