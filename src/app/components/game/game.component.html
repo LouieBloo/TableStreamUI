@@ -1,23 +1,44 @@
-<div class="w-screen h-screen flex flex-col" >
+<div class="drawer">
+    <input id="my-drawer" type="checkbox" class="drawer-toggle" />
 
-    <div class="flex flex-row flex-grow">
+    <div class="w-screen h-screen flex flex-col drawer-content ">
 
-        <div class="flex flex-col p-4">
-            <h1>left column</h1>
-            <h4>Stuff</h4>
-            <h4>Room: {{room.name}}</h4>
-        </div>
+        <div class="flex flex-row flex-grow">
 
-        <div class="grid grid-cols-2 flex-grow">
-            <div *ngFor="let player of sortedPlayers" class="bg-green-500">
-                <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+            <!-- <div class="flex flex-col p-4">
+                <h1>left column</h1>
+                <h4>Stuff</h4>
+                <h4>Room: {{room.name}}</h4>
+            </div> -->
+
+
+            <div class="grid grid-cols-2 flex-grow">
+                <div *ngFor="let player of sortedPlayers" class="bg-green-500">
+                    <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+                </div>
             </div>
+
+            <div class="flex flex-col p-4 bg-yellow-500">
+                <label for="my-drawer" class="btn btn-primary drawer-button">Admin</label>
+                <h1>left column</h1>
+                <h4>Stuff</h4>
+                <h4>Room: {{room.name}}</h4>
+                <app-messenger></app-messenger>
+            </div>
+            
         </div>
 
-        <div class="">right ui</div>
+        
+    </div>
 
+    <div class="drawer-side">
+        <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
+            <!-- Sidebar content here -->
+            <li><a>Sidebar Item 1</a></li>
+            <li><a>Sidebar Item 2</a></li>
+        </ul>
     </div>
 
     
-
 </div>

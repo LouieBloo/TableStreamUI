@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import io, { Socket } from 'socket.io-client';
-import { Message } from '../../interfaces/message';
+import { IMessage } from '../../interfaces/message';
 import { environment } from '../../../environments/environment';
 import { IPlayer } from '../../interfaces/user';
+import { IGameStateUpdate } from '../../interfaces/game';
 
 @Injectable({
   providedIn: 'root'
@@ -14,8 +15,8 @@ export class WebRTCService {
   remoteStreams: { [key: string]: MediaStream } = {};
   onStreamAdded: ((id: string, stream: MediaStream, player:IPlayer) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
-
-  onMessage: ((message: Message) => void)[] = [];
+  onGameStateUpdate: ((update: IGameStateUpdate) => void)[] = [];
+  onMessage: ((message: IMessage) => void)[] = [];
 
   // roomName: string = "";
   // playerName: string = "";
@@ -57,6 +58,7 @@ export class WebRTCService {
     this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.socket.on('message', this.handleMessage);
+    this.socket.on('gameStateUpdate', this.gameStateUpdated);
 
     if (this.socket) {
       this.socket.emit('joinRoom', {roomName: roomName, playerName: playerName }, (newPlayer:IPlayer) => {
@@ -188,24 +190,30 @@ export class WebRTCService {
   }
 
   public sendMessage(message: string) {
-    // if (this.socket) {
-    //   this.socket.emit('message', {
-    //     roomName: this.roomName,
-    //     playerName: this.playerName,
-    //     message: message
-    //   });
-    // }
+    if (this.socket) {
+      this.socket.emit('message', {
+        text: message
+      });
+    }
   }
 
-  private handleMessage = (message: Message) => {
-    this.onMessage.forEach(callback => callback(message));
-  };
-
-  public subscribeToMessage = (callback: (message: Message) => void) => {
-    this.onMessage.push(callback);
+  handleMessage = (message: IMessage)=>{
+    this.onMessage.forEach(callback=>{
+      if(callback != null){
+        callback(message);
+      }
+    })
   }
 
-  public unSubscribeToMessage = (callback: (message: Message) => void) => {
-    this.onMessage = this.onMessage.filter((checkCallback) => { checkCallback != callback })
+  gameStateUpdated(update: IGameStateUpdate ){
+    this.onGameStateUpdate.forEach(callback=>{
+      if(callback != null){
+        callback(update)
+      }
+    })
+  }
+
+  public subscribeToGameUpdates(callback: (update: IGameStateUpdate) => void) {
+    this.onGameStateUpdate.push(callback);
   }
 }

@@ -1,4 +1,6 @@
-export interface Message {
-    playerName?: string;
-    message?: string;
+import { IPlayer } from "./user";
+
+export interface IMessage {
+    text: string;
+    player:IPlayer;
 }

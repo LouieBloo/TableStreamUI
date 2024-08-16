@@ -4,11 +4,12 @@ import { UserStreamComponent } from '../users/user-stream/user-stream.component'
 import { NgFor } from '@angular/common';
 import {IPlayer} from '../../interfaces/user';
 import {IRoom} from '../../interfaces/room';
+import { MessengerComponent } from '../messaging/messenger/messenger.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [ NgFor, UserStreamComponent],
+  imports: [ NgFor, UserStreamComponent, MessengerComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
