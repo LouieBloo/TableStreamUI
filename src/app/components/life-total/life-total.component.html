@@ -1,5 +1,16 @@
-<div>
-    <button type="button" class="btn" (click)="modifyCallback(-1)">-</button>
-    <p class="text-2xl">{{lifeTotal}}</p>
-    <button type="button" class="btn" (click)="modifyCallback(1)">+</button>
+<div class="flex flex-row">
+    @if(editable){
+        <div class="join ">
+            <button type="button" class="btn btn-outline text-white p-1 join-item" (click)="modifyCallback(-10)">-10</button>
+            <button type="button" class="btn btn-outline text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
+            <p class="text-lg btn btn-outline text-white join-item"><ng-icon name="bootstrapSuitHeartFill" [ngClass]="{'text-red-600': lifeTotal > 0, 'text-black': lifeTotal <= 0}"></ng-icon> {{lifeTotal}}</p>
+            <button type="button" class="btn btn-outline text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
+            <button type="button" class="btn btn-outline text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
+        </div>
+    }@else{
+        <div class="join">
+            <p class="text-lg btn btn-outline text-white join-item"><ng-icon name="bootstrapSuitHeartFill"  [ngClass]="{'text-red-600': lifeTotal > 0, 'text-black': lifeTotal <= 0}"></ng-icon> {{lifeTotal}}</p>
+        </div>
+    }
+    
 </div>
