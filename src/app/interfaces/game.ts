@@ -1,4 +1,22 @@
-export interface IGameStateUpdate {
-    event:string;
-    data:any;
+import { IPlayer } from "./user";
+
+export interface IGameEvent {
+    callingPlayer?:IPlayer;
+    event: GameEvent;
+    payload?:any;
+    response?: any;
 }
+
+export enum GameEvent{
+    RandomizePlayerOrder,
+    ModifyLifeTotal
+}
+
+export enum GameType{
+    MTGCommander
+}
+
+export interface IModifyPlayerLifeTotal{
+    amountToModify:number;
+}
+

@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { UserStreamComponent } from '../users/user-stream/user-stream.component';
-import { NgFor } from '@angular/common';
-import {IPlayer} from '../../interfaces/user';
-import {IRoom} from '../../interfaces/room';
+import { NgFor, NgIf } from '@angular/common';
+import { IPlayer } from '../../interfaces/user';
+import { IRoom } from '../../interfaces/room';
 import { MessengerComponent } from '../messaging/messenger/messenger.component';
+import { GameEvent, IGameEvent } from '../../interfaces/game';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [ NgFor, UserStreamComponent, MessengerComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -17,6 +18,7 @@ export class GameComponent {
 
   // players: IPlayer[] = []
   localPlayerId: string = ""
+  localPlayer!: IPlayer;
 
   room!: IRoom;
   sortedPlayers: IPlayer[] = [];
@@ -31,15 +33,17 @@ export class GameComponent {
 
     this.webRTC.subscribeToStreamAdd(this.streamAdded);
     this.webRTC.subscribeToStreamRemove(this.streamRemoved);
+    this.webRTC.subscribeToGameEvents(this.handleGameEvent);
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'),localStorage.getItem('roomName'),(me:IPlayer, roomName: string)=>{
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), (me: IPlayer, roomName: string) => {
       this.room.name = roomName;
       this.localPlayerId = me.id;
+      this.localPlayer = me;
       this.addPlayer(me);
     });
   }
 
-  streamAdded = (id: string, stream: MediaStream, player:IPlayer) => {
+  streamAdded = (id: string, stream: MediaStream, player: IPlayer) => {
     console.log("Add player: ", player);
     this.addPlayer(player);
     // this.remoteSocketIds.push(id);
@@ -49,12 +53,25 @@ export class GameComponent {
     // this.remoteSocketIds = this.remoteSocketIds.filter((userId) => userId !== id)
   }
 
-  addPlayer = (newPlayer: IPlayer)=>{
+  handleGameEvent = (event: IGameEvent) => {
+    console.log("handling event: ", event);
+    switch (event.event) {
+      case GameEvent.RandomizePlayerOrder:
+        this.updatePlayers(event.response);
+        this.sortPlayers();
+        break;
+      case GameEvent.ModifyLifeTotal:
+        this.updatePlayers([event.response]);
+        break;
+    }
+  }
+
+  addPlayer = (newPlayer: IPlayer) => {
     let foundPlayer = this.getPlayer(newPlayer.id)
 
-    if(!foundPlayer){
+    if (!foundPlayer) {
       this.room.players.push(newPlayer);
-    }else{
+    } else {
       //update the socketId
       foundPlayer.socketId = newPlayer.socketId;
     }
@@ -66,13 +83,26 @@ export class GameComponent {
     return foundPlayer;
   }
 
-  getPlayer = (id: string)=>{
+  updatePlayers(newPlayers: IPlayer[]): void {
+    newPlayers.forEach(newPlayer => {
+      const existingPlayer = this.room.players.find(p => p.id === newPlayer.id);
+      if (existingPlayer) {
+        Object.assign(existingPlayer, newPlayer); // This updates only the fields that have changed
+      }
+    });
+  }
+
+  getPlayer = (id: string) => {
     return this.room.players.find(p => p.id === id);
   }
 
-  sortPlayers = ()=>{
+  sortPlayers = () => {
     if (this.room && this.room.players) {
       this.sortedPlayers = this.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
+  }
+
+  randomizeTurnOrder = () => {
+    this.webRTC.sendGameEvent({ event: GameEvent.RandomizePlayerOrder });
   }
 }

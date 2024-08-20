@@ -4,5 +4,7 @@ export interface IPlayer{
     id:string;
     socketId:string;
     turnOrder:number;
-
+    lifeTotal:number;
+    admin?:boolean;
+    cameraFlipped:boolean;
 }

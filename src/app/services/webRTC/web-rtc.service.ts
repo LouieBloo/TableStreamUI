@@ -3,7 +3,7 @@ import io, { Socket } from 'socket.io-client';
 import { IMessage } from '../../interfaces/message';
 import { environment } from '../../../environments/environment';
 import { IPlayer } from '../../interfaces/user';
-import { IGameStateUpdate } from '../../interfaces/game';
+import { IGameEvent } from '../../interfaces/game';
 
 @Injectable({
   providedIn: 'root'
@@ -13,16 +13,16 @@ export class WebRTCService {
   localStream: MediaStream | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {};
-  onStreamAdded: ((id: string, stream: MediaStream, player:IPlayer) => void)[] = [];
+  onStreamAdded: ((id: string, stream: MediaStream, player: IPlayer) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
-  onGameStateUpdate: ((update: IGameStateUpdate) => void)[] = [];
+  onGameEvent: ((update: IGameEvent) => void)[] = [];
   onMessage: ((message: IMessage) => void)[] = [];
 
   // roomName: string = "";
   // playerName: string = "";
 
   constructor() {
-    
+
   }
 
   public async initLocalStream(): Promise<MediaStream> {
@@ -37,39 +37,39 @@ export class WebRTCService {
     this.onStreamAdded.push(callback);
   }
 
-  public unSubscribeToStreamAdd(callback: any){
-    this.onStreamAdded = this.onStreamAdded.filter((checkCallback)=>{checkCallback !== callback})
+  public unSubscribeToStreamAdd(callback: any) {
+    this.onStreamAdded = this.onStreamAdded.filter((checkCallback) => { checkCallback !== callback })
   }
 
   public subscribeToStreamRemove(callback: (id: string) => void) {
     this.onStreamRemoved.push(callback);
   }
 
-  public unSubscribeToStreamRemove(callback: any){
-    this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback)=>{checkCallback !== callback})
+  public unSubscribeToStreamRemove(callback: any) {
+    this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
     console.log(this.onStreamRemoved.length)
   }
 
-  
 
-  public joinRoom(playerName: any, roomName: any, callback:any) {
+
+  public joinRoom(playerName: any, roomName: any, callback: any) {
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.socket.on('message', this.handleMessage);
-    this.socket.on('gameStateUpdate', this.gameStateUpdated);
+    this.socket.on('gameEvent', this.handleGameEvent);
 
     if (this.socket) {
-      this.socket.emit('joinRoom', {roomName: roomName, playerName: playerName }, (newPlayer:IPlayer) => {
+      this.socket.emit('joinRoom', { roomName: roomName, playerName: playerName }, (newPlayer: IPlayer) => {
         console.log('Server responded with unique ID:', newPlayer.id);
         callback(newPlayer, roomName)
-    });
+      });
     }
   }
 
-  public disconnect(){
-    if(this.socket){
+  public disconnect() {
+    if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
     }
@@ -197,23 +197,29 @@ export class WebRTCService {
     }
   }
 
-  handleMessage = (message: IMessage)=>{
-    this.onMessage.forEach(callback=>{
-      if(callback != null){
+  handleMessage = (message: IMessage) => {
+    this.onMessage.forEach(callback => {
+      if (callback != null) {
         callback(message);
       }
     })
   }
 
-  gameStateUpdated(update: IGameStateUpdate ){
-    this.onGameStateUpdate.forEach(callback=>{
-      if(callback != null){
-        callback(update)
+  sendGameEvent = (event: IGameEvent) => {
+    if (this.socket) {
+      this.socket.emit('gameEvent', event);
+    }
+  }
+
+  handleGameEvent = (event: IGameEvent) => {
+    this.onGameEvent.forEach(callback => {
+      if (callback != null) {
+        callback(event)
       }
     })
   }
 
-  public subscribeToGameUpdates(callback: (update: IGameStateUpdate) => void) {
-    this.onGameStateUpdate.push(callback);
+  public subscribeToGameEvents = (callback: (update: IGameEvent) => void) => {
+    this.onGameEvent.push(callback);
   }
 }

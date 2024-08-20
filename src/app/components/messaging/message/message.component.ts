@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { IMessage } from '../../../interfaces/message';
 
 @Component({
   selector: 'app-message',
@@ -8,5 +9,7 @@ import { Component } from '@angular/core';
   styleUrl: './message.component.css'
 })
 export class MessageComponent {
+  @Input() message!: IMessage;
 
+  
 }

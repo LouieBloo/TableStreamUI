@@ -1,14 +1,13 @@
 <div class="p-4">
-  <div class="overflow-auto h-60 bg-base-200 rounded-box p-4">
+  <div #messageBox class="overflow-auto h-60 bg-base-200 rounded-box p-4">
     <div *ngFor="let message of messages" class="p-2">
-      <div class="badge badge-secondary">{{message.player.name}}</div>
-      <span class="badge badge-accent ml-2">{{message.text}}</span>
+      <app-message [message]="message"></app-message>
     </div>
   </div>
   <div class="form-control mt-4">
     <label class="input-group">
-      <input type="text" [(ngModel)]="newMessage" placeholder="Type a message..." class="input input-bordered w-full" />
-      <button (click)="sendMessage()" class="btn btn-primary">Send</button>
+      <input type="text" [(ngModel)]="newMessage" placeholder="Enter message..." class="input input-bordered w-full" (keydown.enter)="sendMessage()"/>
+      <!-- <button (click)="sendMessage()" class="btn btn-primary">Send</button> -->
     </label>
   </div>
 </div>

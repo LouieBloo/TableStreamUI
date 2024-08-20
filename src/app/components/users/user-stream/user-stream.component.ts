@@ -3,11 +3,13 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer } from '../../../interfaces/user';
+import { GameEvent, IModifyPlayerLifeTotal } from '../../../interfaces/game';
+import { LifeTotalComponent } from '../../life-total/life-total.component';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent],
+  imports: [NgIconComponent,LifeTotalComponent],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]
@@ -18,8 +20,6 @@ export class UserStreamComponent {
   @Input() localStream: boolean = false;
   
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
-
-  isFlipped: boolean = false;
 
   constructor(private webRTC: WebRTCService) {}
   
@@ -36,6 +36,7 @@ export class UserStreamComponent {
       this.initLocalStream();
     }
     
+    this.setFlip();
   }
 
   initLocalStream() {
@@ -67,8 +68,20 @@ export class UserStreamComponent {
     }
   }
 
+  modifyLifeTotal = (amount:number)=>{
+    let payload:IModifyPlayerLifeTotal = {amountToModify: amount}
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyLifeTotal,
+      payload:payload
+    })
+  }
+
+  setFlip(){
+    this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleY(-1)' : 'scaleY(1)';
+  }
+
   toggleFlip(): void {
-    this.isFlipped = !this.isFlipped;
-    this.video.nativeElement.style.transform = this.isFlipped ? 'scaleY(-1)' : 'scaleY(1)';
+    this.player.cameraFlipped = !this.player.cameraFlipped;
+    this.setFlip();
   }
 }
