@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { UserStreamComponent } from '../users/user-stream/user-stream.component';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { IPlayer } from '../../interfaces/user';
 import { IRoom } from '../../interfaces/room';
 import { MessengerComponent } from '../messaging/messenger/messenger.component';
@@ -10,7 +10,7 @@ import { GameEvent, IGameEvent } from '../../interfaces/game';
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })

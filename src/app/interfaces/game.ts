@@ -9,7 +9,9 @@ export interface IGameEvent {
 
 export enum GameEvent{
     RandomizePlayerOrder,
-    ModifyLifeTotal
+    ModifyLifeTotal,
+    StartGame,
+    EndCurrentTurn
 }
 
 export enum GameType{

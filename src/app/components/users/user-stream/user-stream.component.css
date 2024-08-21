@@ -1,0 +1,21 @@
+.glow::after{
+    box-sizing: border-box;
+    border: 5px solid;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    animation: border-fade 5s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes border-fade {
+    0% {
+      border-color: rgba(255, 217, 0, 0.375); /* Blue */
+    }
+    100% {
+      border-color: gold; /* Red */
+    }
+  }

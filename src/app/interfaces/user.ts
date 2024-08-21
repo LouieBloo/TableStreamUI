@@ -7,4 +7,9 @@ export interface IPlayer{
     lifeTotal:number;
     admin?:boolean;
     cameraFlipped:boolean;
+
+    isTakingTurn?: boolean;
+    totalTurns?: number;
+    currentTurnStartTime?: Date;
+    totalTurnTime?: number;
 }

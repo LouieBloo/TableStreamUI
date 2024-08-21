@@ -5,11 +5,12 @@ import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer } from '../../../interfaces/user';
 import { GameEvent, IModifyPlayerLifeTotal } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent,LifeTotalComponent],
+  imports: [NgIconComponent,LifeTotalComponent,NgClass],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]

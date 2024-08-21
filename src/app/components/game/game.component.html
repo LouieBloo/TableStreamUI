@@ -13,7 +13,7 @@
 
 
             <div class="grid grid-cols-2 flex-grow">
-                <div *ngFor="let player of sortedPlayers" class="bg-green-500">
+                <div *ngFor="let player of sortedPlayers" class="bg-green-500" [ngClass]="sortedPlayers.length <= 2 ? 'full-height' : 'half-height'">
                     <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                 </div>
             </div>
@@ -36,7 +36,7 @@
         <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
             <li><button type="button" (click)="randomizeTurnOrder()">Randomize Turn Order</button></li>
-            <li><a>Sidebar Item 2</a></li>
+            <li><button type="button" (click)="randomizeTurnOrder()">Start Game</button></li>
         </ul>
     </div>
 
