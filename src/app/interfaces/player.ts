@@ -9,7 +9,7 @@ export interface IPlayer{
     cameraFlipped:boolean;
 
     isTakingTurn?: boolean;
-    totalTurns?: number;
+    totalTurns: number;
     currentTurnStartTime?: Date;
-    totalTurnTime?: number;
+    totalTurnTime: number;
 }

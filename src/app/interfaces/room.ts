@@ -1,4 +1,4 @@
-import {IPlayer} from './user';
+import {IPlayer} from './player';
 
 export interface IRoom {
     name:string;

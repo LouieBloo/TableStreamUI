@@ -12,7 +12,7 @@ export class InputService {
   constructor() {
     fromEvent<KeyboardEvent>(window, 'keydown')
       .pipe(
-        filter(event => !this.isInputFocused()) // Ignore if input is focused
+        filter(event => !this.isInputFocused() && !event.repeat) // Ignore if input is focused
       )
       .subscribe(event => this.handleKeyboardEvent(event));
   }

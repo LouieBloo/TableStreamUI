@@ -2,10 +2,12 @@ import { Component } from '@angular/core';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { UserStreamComponent } from '../users/user-stream/user-stream.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { IPlayer } from '../../interfaces/user';
+import { IPlayer } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { MessengerComponent } from '../messaging/messenger/messenger.component';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
+import { InputService } from '../../services/input/input.service';
+import { UserInputAction } from '../../interfaces/inputs';
 
 @Component({
   selector: 'app-game',
@@ -23,7 +25,13 @@ export class GameComponent {
   room!: IRoom;
   sortedPlayers: IPlayer[] = [];
 
-  constructor(private webRTC: WebRTCService) { }
+  constructor(private webRTC: WebRTCService, private inputService: InputService) {
+    inputService.subscribe((userAction: UserInputAction) => {
+      if (userAction == UserInputAction.PassTurn) {
+        this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn })
+      }
+    })
+  }
 
   ngOnInit() {
     this.room = {
@@ -63,6 +71,12 @@ export class GameComponent {
       case GameEvent.ModifyLifeTotal:
         this.updatePlayers([event.response]);
         break;
+      case GameEvent.StartGame:
+        this.updatePlayers(event.response);
+        break;
+      case GameEvent.EndCurrentTurn:
+        this.updatePlayers(event.response);
+        break;
     }
   }
 
@@ -76,14 +90,14 @@ export class GameComponent {
       foundPlayer.socketId = newPlayer.socketId;
     }
 
-    console.log(newPlayer)
-
     this.sortPlayers();
 
     return foundPlayer;
   }
 
   updatePlayers(newPlayers: IPlayer[]): void {
+    if (!newPlayers) { return; }
+
     newPlayers.forEach(newPlayer => {
       const existingPlayer = this.room.players.find(p => p.id === newPlayer.id);
       if (existingPlayer) {
@@ -100,6 +114,10 @@ export class GameComponent {
     if (this.room && this.room.players) {
       this.sortedPlayers = this.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
+  }
+
+  startGame = () => {
+    this.webRTC.sendGameEvent({ event: GameEvent.StartGame });
   }
 
   randomizeTurnOrder = () => {

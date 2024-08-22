@@ -1,19 +1,26 @@
+/* .glow{
+  box-sizing: border-box;
+  border: 5px solid ;
+  animation: border-fade 3s infinite alternate;
+  pointer-events: none;
+} */
+
 .glow::after{
     box-sizing: border-box;
-    border: 5px solid;
+    border: 5px solid ;
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    animation: border-fade 5s infinite alternate;
+    animation: border-fade 3s infinite alternate;
     pointer-events: none;
 }
 
 @keyframes border-fade {
     0% {
-      border-color: rgba(255, 217, 0, 0.375); /* Blue */
+      border-color: rgba(255, 217, 0, 0.62); /* Blue */
     }
     100% {
       border-color: gold; /* Red */

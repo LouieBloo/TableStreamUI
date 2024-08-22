@@ -13,15 +13,15 @@
 
 
             <div class="grid grid-cols-2 flex-grow">
-                <div *ngFor="let player of sortedPlayers" class="bg-green-500" [ngClass]="sortedPlayers.length <= 2 ? 'full-height' : 'half-height'">
+                <div *ngFor="let player of sortedPlayers" class="bg-slate-800" [ngClass]="sortedPlayers.length <= 2 ? 'full-height' : 'half-height'">
                     <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                 </div>
             </div>
 
-            <div class="flex flex-col p-1 bg-yellow-500 min-w-64 max-w-64">
+            <div class="flex flex-col p-1 bg-slate-900 min-w-64 max-w-64">
                 <h3>Room: {{room.name}}</h3>
                 <div class="shrink flex justify-center">
-                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-primary drawer-button w-1/2">Game</label>
+                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-primary drawer-button w-1/2">Admin</label>
                 </div>
                 
                 <app-messenger></app-messenger>
@@ -36,7 +36,7 @@
         <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
             <li><button type="button" (click)="randomizeTurnOrder()">Randomize Turn Order</button></li>
-            <li><button type="button" (click)="randomizeTurnOrder()">Start Game</button></li>
+            <li><button type="button" (click)="startGame()">Start Game</button></li>
         </ul>
     </div>
 

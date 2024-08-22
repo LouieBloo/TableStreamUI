@@ -2,15 +2,16 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
-import { IPlayer } from '../../../interfaces/user';
+import { IPlayer } from '../../../interfaces/player';
 import { GameEvent, IModifyPlayerLifeTotal } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
-import { NgClass } from '@angular/common';
+import { CommonModule, NgClass, TitleCasePipe } from '@angular/common';
+import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent,LifeTotalComponent,NgClass],
+  imports: [NgIconComponent,LifeTotalComponent,NgClass,TimeAgoPipe,CommonModule,TitleCasePipe],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]
