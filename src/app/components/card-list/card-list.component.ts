@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { ScryfallService } from '../../services/scryfall/scryfall.service';
 import { CardComponent } from '../card/card.component';
 import { ScryfallCard } from '../../interfaces/scryfall';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -13,7 +13,7 @@ import { debounceTime, Subject } from 'rxjs';
 @Component({
   selector: 'app-card-list',
   standalone: true,
-  imports: [CardComponent,NgFor,FormsModule,CardListItemComponent, NgIf, LoadingSpinnerComponent , ReactiveFormsModule ],
+  imports: [CardComponent,NgFor,FormsModule,CardListItemComponent, NgIf, LoadingSpinnerComponent , ReactiveFormsModule, NgClass ],
   templateUrl: './card-list.component.html',
   styleUrl: './card-list.component.css'
 })

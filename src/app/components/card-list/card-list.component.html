@@ -4,8 +4,8 @@
         <button class="btn btn-sm btn-outline text-white" (click)="openSearchModal()" id="luke">Search Cards (ctrl + i)</button>
     </div>
 
-    <dialog id="my_modal_1" class="modal modal-top flex justify-center">
-        <div class="modal-box bg-slate-800 text-white " id="modalbox">
+    <dialog id="my_modal_1" class="modal ">
+        <div class="modal-box bg-slate-800 text-white absolute top-2">
             <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
@@ -19,12 +19,17 @@
 
             <div *ngIf="!searching && searchResults && searchResults.length > 0">
                 <div class="flex flex-row">
-                    <div class="grow">
-                        <div  *ngFor="let card of searchResults" (mouseenter)="onCardHover(card)" (mouseleave)="onCardHover(null)">
+                    <div class="grow" [ngClass]="{'overflow-hidden': !searchResults || searchResults.length <= 8, 'overflow-y-scroll': searchResults && searchResults.length > 8}" id="cardResults">
+                        <div  *ngFor="let card of searchResults"
+                                tabindex="0" 
+                                (mouseenter)="onCardHover(card)"
+                                (mouseleave)="onCardHover(null)"
+                                (focus)="onCardHover(card)" 
+                                (blur)="onCardHover(null)" >
                             <app-card-list-item [card]="card"></app-card-list-item>
                         </div>
                     </div>
-                    <div class="max-w-64 mt-16">
+                    <div class="max-w-64  ml-3">
                         <app-card *ngIf="cardBeingHovered" [card]="cardBeingHovered" [showPopup]="false"></app-card>
                     </div>
                 </div>
