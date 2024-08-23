@@ -1,12 +1,13 @@
 <div class="relative group inline-block">
-    <!-- Card content (e.g., card name, image, etc.) -->
-    <div class="cursor-pointer">
-      <div class="">
-        <!-- <h2 class="card-title">{{card?.name}}</h2> -->
-        <img  [src]="card.image_uris?.normal" alt="Card Image" class="w-full rounded-xl">
-      </div>
+  <!-- Card content (e.g., card name, image, etc.) -->
+  <div class="cursor-pointer">
+    <div class="">
+      <!-- <h2 class="card-title">{{card?.name}}</h2> -->
+      <img [src]="card.image_uris?.normal" alt="Card Image" class="w-full rounded-xl">
     </div>
-  
+  </div>
+
+  <div *ngIf="showPopup">
     <!-- Popup content -->
     <div class="cardHover hidden group-hover:block z-10">
       <!-- <h3 class="text-lg font-bold">Card Name</h3>
@@ -15,7 +16,9 @@
       <p class="text-sm">CMC: 1</p>
       <p class="text-sm">Oracle Text: Some card text here...</p> -->
       <div class="">
-        <img  [src]="card.image_uris?.normal" alt="Card Image" class="cardHoverImg w-full rounded-xl">
+        <img [src]="card.image_uris?.normal" alt="Card Image" class="cardHoverImg w-full rounded-xl">
       </div>
     </div>
+  </div>
+
 </div>

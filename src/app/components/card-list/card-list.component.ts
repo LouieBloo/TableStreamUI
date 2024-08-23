@@ -5,13 +5,15 @@ import { ScryfallCard } from '../../interfaces/scryfall';
 import { NgFor, NgIf } from '@angular/common';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardListItemComponent } from './card-list-item/card-list-item.component';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { debounceTime, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-card-list',
   standalone: true,
-  imports: [CardComponent,NgFor,FormsModule,CardListItemComponent, NgIf],
+  imports: [CardComponent,NgFor,FormsModule,CardListItemComponent, NgIf, LoadingSpinnerComponent , ReactiveFormsModule ],
   templateUrl: './card-list.component.html',
   styleUrl: './card-list.component.css'
 })
@@ -22,7 +24,11 @@ export class CardListComponent {
   cards:ScryfallCard[] = []
 
   searchString!:string;
+  searchSubject: Subject<string> = new Subject<string>();
+  sendSearchEvent: Subject<boolean> = new Subject<boolean>();
   searchResults:ScryfallCard[] = []
+
+  cardBeingHovered!:ScryfallCard | null;
 
   hasSearched:boolean = false;
   searching:boolean = false;
@@ -46,6 +52,25 @@ export class CardListComponent {
     // setTimeout(this.adjustHeight);
   }
 
+  ngOnInit(): void {
+    this.searchSubject.pipe(debounceTime(420)).subscribe(value => {
+      // this.searchString = value;
+      this.sendSearch()
+    });
+
+    this.sendSearchEvent.pipe(debounceTime(350)).subscribe(value => {
+      this.search();
+    });
+  }
+
+  sendSearch=()=>{
+    this.sendSearchEvent.next(true);
+  }
+
+  searchStringChanged(value: string): void {
+    this.searchSubject.next(value);
+  }
+
   private adjustHeight(): void {
     const scrollableDiv = this.elRef.nativeElement.querySelector('#scrollableDiv');
     const topOffset = scrollableDiv.getBoundingClientRect().top;
@@ -63,11 +88,16 @@ export class CardListComponent {
         this.hasSearched = true;
         this.searching = false;
         this.adjustHeight();
+
+        if(this.searchResults && this.searchResults.length > 0){
+          this.onCardHover(this.searchResults[0]);
+        }
       },
       (error: any) => {
         console.error('Error fetching cards:', error);
         this.hasSearched = true;
         this.searching = false;
+        this.searchResults = []
       }
     );
   }
@@ -87,5 +117,11 @@ export class CardListComponent {
     if (this.cardInput) {
       this.cardInput.focus();
     }
+  }
+
+
+  onCardHover = (card: ScryfallCard | null)=>{
+    if(!card){return}
+    this.cardBeingHovered = card;
   }
 }

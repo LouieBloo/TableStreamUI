@@ -4,25 +4,37 @@
         <button class="btn btn-sm btn-outline text-white" (click)="openSearchModal()" id="luke">Search Cards (ctrl + i)</button>
     </div>
 
-    <dialog id="my_modal_1" class="modal">
-        <div class="modal-box bg-slate-800 text-white">
+    <dialog id="my_modal_1" class="modal modal-top flex justify-center">
+        <div class="modal-box bg-slate-800 text-white " id="modalbox">
             <form method="dialog">
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
             </form>
 
             <h3 class="text-lg font-bold">Card Search</h3>
-            <p class="text-sm">Click to save</p>
+            <p class="text-sm">Select to share</p>
 
-            <form #searchForm="ngForm" (ngSubmit)="search()" class="mb-2">
-                <input type="text" id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="mt-1 p-2 w-full border rounded-md shadow-sm text-black">
+            <form #searchForm="ngForm" (ngSubmit)="sendSearch()" class="mb-2">
+                <input (ngModelChange)="searchStringChanged($event)" type="text" id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="mt-1 p-2 w-full border rounded-md shadow-sm text-black">
             </form>
 
-            <div *ngFor="let card of searchResults">
-                <app-card-list-item [card]="card"></app-card-list-item>
+            <div *ngIf="!searching && searchResults && searchResults.length > 0">
+                <div class="flex flex-row">
+                    <div class="grow">
+                        <div  *ngFor="let card of searchResults" (mouseenter)="onCardHover(card)" (mouseleave)="onCardHover(null)">
+                            <app-card-list-item [card]="card"></app-card-list-item>
+                        </div>
+                    </div>
+                    <div class="max-w-64 mt-16">
+                        <app-card *ngIf="cardBeingHovered" [card]="cardBeingHovered" [showPopup]="false"></app-card>
+                    </div>
+                </div>
             </div>
 
             <p *ngIf="searchResults.length < 1 && hasSearched && !searching" class="text-white">No cards found</p>
 
+            <div class="flex justify-center pt-3" *ngIf="searching">
+                <app-loading-spinner></app-loading-spinner>
+            </div>
 
         </div>
         <form method="dialog" class="modal-backdrop">
