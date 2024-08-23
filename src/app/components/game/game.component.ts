@@ -8,11 +8,13 @@ import { MessengerComponent } from '../messaging/messenger/messenger.component';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
+import { ScryfallService } from '../../services/scryfall/scryfall.service';
+import { CardListComponent } from '../card-list/card-list.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -123,4 +125,6 @@ export class GameComponent {
   randomizeTurnOrder = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.RandomizePlayerOrder });
   }
+
+  
 }

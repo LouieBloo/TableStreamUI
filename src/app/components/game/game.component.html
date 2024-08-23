@@ -19,12 +19,17 @@
             </div>
 
             <div class="flex flex-col p-1 bg-slate-900 min-w-64 max-w-64">
-                <h3>Room: {{room.name}}</h3>
+                <h3 class="text-white">Room: {{room.name}}</h3>
                 <div class="shrink flex justify-center">
-                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-primary drawer-button w-1/2">Admin</label>
+                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-1/2">Admin</label>
                 </div>
                 
                 <app-messenger></app-messenger>
+
+                <div class="">
+                    <app-card-list></app-card-list>
+                </div>
+                
             </div>
             
         </div>

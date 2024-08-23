@@ -1,0 +1,9 @@
+.cardHover{
+    right:300px;
+    top: 30%;
+    position: fixed;
+}
+
+.cardHoverImg{
+    height: 375px;
+}
