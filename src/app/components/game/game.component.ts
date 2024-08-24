@@ -79,6 +79,9 @@ export class GameComponent {
       case GameEvent.EndCurrentTurn:
         this.updatePlayers(event.response);
         break;
+      case GameEvent.TakeMonarch:
+          this.updatePlayers(event.response);
+          break;
     }
   }
 

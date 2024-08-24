@@ -12,8 +12,7 @@
         <!-- <div>
             <h2>{{player?.name | titlecase }}</h2>
         </div> -->
-        <app-life-total [lifeTotal]="player.lifeTotal" [modifyCallback]="modifyLifeTotal"
-            [editable]="localStream" [playerName]="player.name"></app-life-total>
+        <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"></app-life-total>
     </div>
 
     <div class="absolute top-2 left-2 text-white flex flex-col ">

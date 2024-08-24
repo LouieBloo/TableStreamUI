@@ -1,4 +1,5 @@
 import { IPlayer } from "./player";
+import { ScryfallCard } from "./scryfall";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
@@ -11,7 +12,9 @@ export enum GameEvent{
     RandomizePlayerOrder,
     ModifyLifeTotal,
     StartGame,
-    EndCurrentTurn
+    EndCurrentTurn,
+    ShareCard,
+    TakeMonarch
 }
 
 export enum GameType{
@@ -20,5 +23,10 @@ export enum GameType{
 
 export interface IModifyPlayerLifeTotal{
     amountToModify:number;
+}
+
+export interface Game{
+    startingLifeTotal: string;
+    sharedCards:ScryfallCard[];
 }
 

@@ -1,13 +1,13 @@
 <div>
-    <div class="flex justify-center">
-        <button class="hidden" onclick="my_modal_1.showModal()" id="toggleModal">hidden</button>
+    <div class="flex justify-center mb-2">
+        <button class="hidden" onclick="searchModal.showModal()" id="toggleModal">hidden</button>
         <button class="btn btn-sm btn-outline text-white" (click)="openSearchModal()" id="luke">Search Cards (ctrl + i)</button>
     </div>
 
-    <dialog id="my_modal_1" class="modal ">
+    <dialog id="searchModal" class="modal ">
         <div class="modal-box bg-slate-800 text-white absolute top-2">
             <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeModal" >✕</button>
             </form>
 
             <h3 class="text-lg font-bold">Card Search</h3>
@@ -25,12 +25,14 @@
                                 (mouseenter)="onCardHover(card)"
                                 (mouseleave)="onCardHover(null)"
                                 (focus)="onCardHover(card)" 
-                                (blur)="onCardHover(null)" >
+                                (blur)="onCardHover(null)"
+                                (keydown.enter)="$event.preventDefault();shareCard(false)" 
+                                (click)="shareCard(false)" >
                             <app-card-list-item [card]="card"></app-card-list-item>
                         </div>
                     </div>
                     <div class="max-w-64  ml-3">
-                        <app-card *ngIf="cardBeingHovered" [card]="cardBeingHovered" [showPopup]="false"></app-card>
+                        <app-card *ngIf="cardBeingHovered" [card]="cardBeingHovered" [showPopup]="false" (click)="shareCard(true)"></app-card>
                     </div>
                 </div>
             </div>
@@ -47,9 +49,25 @@
         </form>
     </dialog>
 
-    <div class="relative">
+    <div class="relative mt-2">
         <div class="absolute inset-x-0 bottom-0 top-0 overflow-y-auto" id="scrollableDiv">
-            <app-card *ngFor="let card of cards" [card]="card"></app-card>
+
+            @if(sharedCards && sharedCards.length > 0){
+                <app-card [card]="sharedCards[0]" ></app-card>
+            }
+
+            <div class="flex justify-center" *ngIf="sharedCards != null && sharedCards.length > 1">
+                <hr class="mt-2 mb-3 w-1/2" id="cardSeperator">
+            </div>
+            
+
+            <div class="relative">
+                @for (card of sharedCards | slice:1; track card; let  i = $index) {    
+                    <app-card [card]="card" [ngClass]="{'cascadingCard': i > 0 }" [ngStyle]="{'top.px': (i * 50)}"></app-card>
+                }
+            </div>
+            
+            
         </div>
     </div>
 

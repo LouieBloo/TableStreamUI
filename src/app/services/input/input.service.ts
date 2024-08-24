@@ -38,7 +38,16 @@ export class InputService {
   }
 
   private isInputFocused(): boolean {
+    // Check if the modal is open
+    const modal = document.getElementById('searchModal') as HTMLDialogElement;
+
+    if (modal && modal.open) {
+      // The modal is open, don't process hotkeys
+      return true;
+    }
+
     const activeElement = document.activeElement;
+    console.log(activeElement?.tagName)
     return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') ? true : false;
   }
 

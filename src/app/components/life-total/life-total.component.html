@@ -1,21 +1,26 @@
-<div class="flex flex-row ">
-        <div class="join bg-black bg-opacity-50 text-sm">
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
+<div class="flex justify-center" *ngIf="player.isMonarch">
+    <img src="crown.png" class="w-16">
+</div>
+<div *ngIf="player" class="flex flex-row ">
+    
+    <div class="join bg-black bg-opacity-50 text-sm">
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
 
-            <div class="dropdown join-item button text-white pl-4 pr-4">
-                <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                    <p class="text-center">{{playerName | titlecase}}</p>
-                    <p class="text-center"><ng-icon name="bootstrapSuitHeartFill" [ngClass]="{'text-red-600': lifeTotal > 0, 'text-black': lifeTotal <= 0}"></ng-icon> {{lifeTotal}}</p>
-                </div>
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                    <li (click)="setToZero()"><a>Set to 0</a></li>
-                </ul>
+        <div class="dropdown join-item button text-white pl-4 pr-4">
+            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+                <p class="text-center">{{player.name | titlecase}}</p>
+                <p class="text-center"><ng-icon name="bootstrapSuitHeartFill" [ngClass]="{'text-red-600': player.lifeTotal > 0, 'text-black': player.lifeTotal <= 0}"></ng-icon> {{player.lifeTotal}}</p>
             </div>
-
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
+            <ul *ngIf="editable" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                <li (click)="setToZero()"><a>Set to 0</a></li>
+                <li (click)="becomeMonarch()"><a>Become Monarch</a></li>
+            </ul>
         </div>
+
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
+    </div>
         <!-- <div class="join bg-black bg-opacity-50">
             <p class="text-lg btn button text-white join-item"><ng-icon name="bootstrapSuitHeartFill"  [ngClass]="{'text-red-600': lifeTotal > 0, 'text-black': lifeTotal <= 0}"></ng-icon> {{lifeTotal}}</p>
         </div> -->

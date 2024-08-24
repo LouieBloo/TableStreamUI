@@ -5,6 +5,8 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
+import { IPlayer } from '../../interfaces/player';
+import { GameEvent } from '../../interfaces/game';
 
 @Component({
   selector: 'app-life-total',
@@ -15,16 +17,20 @@ import { WebRTCService } from '../../services/webRTC/web-rtc.service';
   viewProviders: [provideIcons({ bootstrapSuitHeartFill })]
 })
 export class LifeTotalComponent {
-  @Input() lifeTotal!: number;
-  @Input() playerName!:string;
+  // @Input() lifeTotal!: number;
+  // @Input() playerName!:string;
+  @Input() player!:IPlayer;
   @Input() modifyCallback!: (amount:number)=> void;
   @Input() editable!:boolean;
 
   constructor(private inputService: InputService, private webRtc: WebRTCService){
+    
+  }
+
+
+  ngAfterViewInit(){
     if(this.editable){
-      inputService.subscribe((userInputAction: UserInputAction)=>{
-        if(!this.editable){return;}
-  
+      this.inputService.subscribe((userInputAction: UserInputAction)=>{
         if(userInputAction == UserInputAction.ModifyHealth1){
           this.modifyCallback(1);
         }else if(userInputAction == UserInputAction.ModifyHealthMinus1){
@@ -35,6 +41,10 @@ export class LifeTotalComponent {
   }
 
   setToZero = ()=>{
-    this.modifyCallback(-this.lifeTotal);
+    this.modifyCallback(-this.player.lifeTotal);
+  }
+
+  becomeMonarch = ()=>{
+    this.webRtc.sendGameEvent({event: GameEvent.TakeMonarch});
   }
 }

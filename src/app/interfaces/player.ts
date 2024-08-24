@@ -12,4 +12,6 @@ export interface IPlayer{
     totalTurns: number;
     currentTurnStartTime?: Date;
     totalTurnTime: number;
+
+    isMonarch?:boolean;
 }
