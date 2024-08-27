@@ -12,17 +12,3 @@
 .button:active{
     background-color: #3b3b3b; /* Change to your desired color on click */
 }
-
-
-.poisonPanelEditable{
-    right:-136px;
-    top:0px;
-    /* height:42px; */
-}
-
-.poisonPanel{
-    right:-84px;
-    top:2px;
-    /* height:42px; */
-}
-

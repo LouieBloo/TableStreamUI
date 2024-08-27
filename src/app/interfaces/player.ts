@@ -1,3 +1,4 @@
+import { CommanderDamage } from "./game";
 
 export interface IPlayer{
     name:string;
@@ -14,4 +15,9 @@ export interface IPlayer{
     totalTurnTime: number;
 
     isMonarch?:boolean;
+
+    poisonTotal:number;
+
+    commanderDamages: { [playerId: string]: CommanderDamage };
+
 }

@@ -12,7 +12,16 @@
         <!-- <div>
             <h2>{{player?.name | titlecase }}</h2>
         </div> -->
-        <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"></app-life-total>
+        <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"
+            [modifyPoisonCallback]="modifyPoisonTotal"></app-life-total>
+    </div>
+
+    <div class="absolute top-12 left-1 flex flex-col" *ngIf="showCommanderDamage">
+        <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
+            <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name" [total]="player.commanderDamages[playerId].damage"
+                [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-2">
+            </app-property-counter>
+        </ng-container>
     </div>
 
     <div class="absolute top-2 left-2 text-white flex flex-col ">
@@ -21,6 +30,7 @@
         </div> -->
         <div class="text-xs">
             <!-- <p class="">{{ !localStream ? "Remote: " + player.socketId : "Local" }} - {{player.name}}</p> -->
+             <!-- todo this re-renders the whole component every tick -->
             <p>Turn: {{ player.currentTurnStartTime | timeAgo | async }}</p>
             <p>Avg: {{ (player.totalTurnTime/ ( (player.totalTurns) || 1 ) ) | timeAgo | async }}</p>
         </div>
@@ -35,6 +45,7 @@
             <div tabindex="0" role="button" class="btn btn-xs"><ng-icon name="bootstrapGearFill"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
+                <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Toggle Commander Damage</a></li>
             </ul>
         </div>
     </div>

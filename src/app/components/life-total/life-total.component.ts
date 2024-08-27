@@ -21,7 +21,10 @@ export class LifeTotalComponent {
   // @Input() playerName!:string;
   @Input() player!:IPlayer;
   @Input() modifyCallback!: (amount:number)=> void;
+  @Input() modifyPoisonCallback!: (amount:number)=> void;
   @Input() editable!:boolean;
+
+  @Input() showPoisonCounter!:boolean;
 
   constructor(private inputService: InputService, private webRtc: WebRTCService){
     
@@ -44,7 +47,8 @@ export class LifeTotalComponent {
     this.modifyCallback(-this.player.lifeTotal);
   }
 
-  becomeMonarch = ()=>{
-    this.webRtc.sendGameEvent({event: GameEvent.TakeMonarch});
+  toggleMonarch = ()=>{
+    this.webRtc.sendGameEvent({event: GameEvent.ToggleMonarch});
   }
+
 }

@@ -3,15 +3,17 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer } from '../../../interfaces/player';
-import { GameEvent, IModifyPlayerLifeTotal } from '../../../interfaces/game';
+import { GameEvent, IModifyPlayerProperty, PlayerProperties } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
-import { CommonModule, NgClass, TitleCasePipe } from '@angular/common';
+import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
+import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
+import { GameService } from '../../../services/game/game.service';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent,LifeTotalComponent,NgClass,TimeAgoPipe,CommonModule,TitleCasePipe],
+  imports: [NgIconComponent,LifeTotalComponent,NgClass,NgIf,TimeAgoPipe,CommonModule,TitleCasePipe, PropertyCounterComponent],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]
@@ -23,7 +25,9 @@ export class UserStreamComponent {
   
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
 
-  constructor(private webRTC: WebRTCService) {}
+  showCommanderDamage:boolean = true;
+
+  constructor(private webRTC: WebRTCService, public gameService: GameService) {}
   
 
   ngAfterViewInit() {
@@ -71,9 +75,17 @@ export class UserStreamComponent {
   }
 
   modifyLifeTotal = (amount:number)=>{
-    let payload:IModifyPlayerLifeTotal = {amountToModify: amount}
+    let payload:IModifyPlayerProperty = {amountToModify: amount, property: PlayerProperties.lifeTotal}
     this.webRTC.sendGameEvent({
-      event: GameEvent.ModifyLifeTotal,
+      event: GameEvent.ModifyPlayerProperty,
+      payload:payload
+    })
+  }
+
+  modifyPoisonTotal = (amount:number)=>{
+    let payload:IModifyPlayerProperty = {amountToModify: amount, property: PlayerProperties.poisonTotal}
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyPlayerProperty,
       payload:payload
     })
   }
@@ -85,5 +97,20 @@ export class UserStreamComponent {
   toggleFlip(): void {
     this.player.cameraFlipped = !this.player.cameraFlipped;
     this.setFlip();
+  }
+
+  modifyCommanderDamage = (playerId: string, amount: number)=>{
+    this.webRTC.sendGameEvent({event: GameEvent.ModifyPlayerCommanderDamage, payload: { damagingPlayer: this.gameService.getPlayerById(playerId), amount: amount}})
+  }
+
+  getModifyCommanderDamageCallback(playerId: string): (amount: number) => void {
+    return (amount: number) => {
+      this.modifyCommanderDamage(playerId, amount);
+    };
+  }
+
+
+  getCommanderDamageKeys(): string[] {
+    return Object.keys(this.player.commanderDamages);
   }
 }

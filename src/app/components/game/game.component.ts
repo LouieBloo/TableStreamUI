@@ -10,6 +10,7 @@ import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { ScryfallService } from '../../services/scryfall/scryfall.service';
 import { CardListComponent } from '../card-list/card-list.component';
+import { GameService } from '../../services/game/game.service';
 
 @Component({
   selector: 'app-game',
@@ -24,10 +25,10 @@ export class GameComponent {
   localPlayerId: string = ""
   localPlayer!: IPlayer;
 
-  room!: IRoom;
+  // room!: IRoom;
   sortedPlayers: IPlayer[] = [];
 
-  constructor(private webRTC: WebRTCService, private inputService: InputService) {
+  constructor(private webRTC: WebRTCService, private inputService: InputService,public gameService:GameService) {
     inputService.subscribe((userAction: UserInputAction) => {
       if (userAction == UserInputAction.PassTurn) {
         this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn })
@@ -36,7 +37,7 @@ export class GameComponent {
   }
 
   ngOnInit() {
-    this.room = {
+    this.gameService.room = {
       name: "temp",
       players: []
     }
@@ -46,7 +47,7 @@ export class GameComponent {
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
 
     this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), (me: IPlayer, roomName: string) => {
-      this.room.name = roomName;
+      this.gameService.room.name = roomName;
       this.localPlayerId = me.id;
       this.localPlayer = me;
       this.addPlayer(me);
@@ -70,7 +71,7 @@ export class GameComponent {
         this.updatePlayers(event.response);
         this.sortPlayers();
         break;
-      case GameEvent.ModifyLifeTotal:
+      case GameEvent.ModifyPlayerProperty:
         this.updatePlayers([event.response]);
         break;
       case GameEvent.StartGame:
@@ -79,9 +80,12 @@ export class GameComponent {
       case GameEvent.EndCurrentTurn:
         this.updatePlayers(event.response);
         break;
-      case GameEvent.TakeMonarch:
-          this.updatePlayers(event.response);
-          break;
+      case GameEvent.ToggleMonarch:
+        this.updatePlayers(event.response);
+        break;
+      case GameEvent.ModifyPlayerCommanderDamage:
+        this.updatePlayers([event.response]);
+        break;
     }
   }
 
@@ -89,7 +93,7 @@ export class GameComponent {
     let foundPlayer = this.getPlayer(newPlayer.id)
 
     if (!foundPlayer) {
-      this.room.players.push(newPlayer);
+      this.gameService.room.players.push(newPlayer);
     } else {
       //update the socketId
       foundPlayer.socketId = newPlayer.socketId;
@@ -104,7 +108,7 @@ export class GameComponent {
     if (!newPlayers) { return; }
 
     newPlayers.forEach(newPlayer => {
-      const existingPlayer = this.room.players.find(p => p.id === newPlayer.id);
+      const existingPlayer = this.gameService.room.players.find(p => p.id === newPlayer.id);
       if (existingPlayer) {
         Object.assign(existingPlayer, newPlayer); // This updates only the fields that have changed
       }
@@ -112,12 +116,12 @@ export class GameComponent {
   }
 
   getPlayer = (id: string) => {
-    return this.room.players.find(p => p.id === id);
+    return this.gameService.room.players.find(p => p.id === id);
   }
 
   sortPlayers = () => {
-    if (this.room && this.room.players) {
-      this.sortedPlayers = this.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
+    if (this.gameService.room && this.gameService.room.players) {
+      this.sortedPlayers = this.gameService.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
   }
 
@@ -129,5 +133,5 @@ export class GameComponent {
     this.webRTC.sendGameEvent({ event: GameEvent.RandomizePlayerOrder });
   }
 
-  
+
 }
