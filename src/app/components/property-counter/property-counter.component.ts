@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { IPlayer } from '../../interfaces/player';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-property-counter',
   standalone: true,
-  imports: [NgIf,NgClass],
+  imports: [NgIf,NgClass,TitleCasePipe],
   templateUrl: './property-counter.component.html',
   styleUrl: './property-counter.component.css'
 })

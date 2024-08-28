@@ -3,7 +3,8 @@ import io, { Socket } from 'socket.io-client';
 import { IMessage } from '../../interfaces/message';
 import { environment } from '../../../environments/environment';
 import { IPlayer } from '../../interfaces/player';
-import { IGameEvent } from '../../interfaces/game';
+import { IGameError, IGameEvent } from '../../interfaces/game';
+import { AlertsService } from '../alerts/alerts.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class WebRTCService {
   // roomName: string = "";
   // playerName: string = "";
 
-  constructor() {
+  constructor(private alertService:AlertsService) {
 
   }
 
@@ -59,6 +60,7 @@ export class WebRTCService {
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.socket.on('message', this.handleMessage);
     this.socket.on('gameEvent', this.handleGameEvent);
+    this.socket.on('errorResponse',this.handleErrorResponse);
 
     if (this.socket) {
       this.socket.emit('joinRoom', { roomName: roomName, playerName: playerName }, (newPlayer: IPlayer) => {
@@ -217,6 +219,11 @@ export class WebRTCService {
         callback(event)
       }
     })
+  }
+
+  handleErrorResponse = (error: IGameError)=>{
+    console.log(error);
+    this.alertService.addAlert("error",error.message);
   }
 
   public subscribeToGameEvents = (callback: (update: IGameEvent) => void) => {

@@ -1,12 +1,13 @@
-<div class="p-4">
-  <div #messageBox class="overflow-auto h-60 bg-base-200 rounded-box p-4">
-    <div *ngFor="let message of messages" class="p-2">
+<div class="m-2 bg-slate-600 rounded-box">
+  <div #messageBox class="overflow-auto h-60   p-4">
+    <div *ngFor="let message of messages" class="">
       <app-message [message]="message"></app-message>
     </div>
   </div>
+
   <div class="form-control mt-4">
     <label class="input-group">
-      <input type="text" [(ngModel)]="newMessage" placeholder="Enter message..." class="input input-bordered w-full" (keydown.enter)="sendMessage()"/>
+      <input type="text" [(ngModel)]="newMessage" placeholder="Enter message..." class="input input-bordered w-full bg-slate-600 text-white" (keydown.enter)="sendMessage()"/>
       <!-- <button (click)="sendMessage()" class="btn btn-primary">Send</button> -->
     </label>
   </div>

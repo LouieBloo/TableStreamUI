@@ -1,0 +1,10 @@
+<div class="fixed top-0 inset-x-0 m-4 space-y-2 flex flex-col items-center pointer-events-none">
+    <div *ngFor="let alert of alertService.getAlerts()"  [ngClass]="{
+        'alert-success': alert.type === 'success',
+        'alert-error': alert.type === 'error',
+        'alert-info': alert.type === 'info',
+        'alert-warning': alert.type === 'warning'
+      }" class="alert transition-opacity duration-500 ease-out w-1/4 pointer-events-auto" (click)="alertService.removeAlert(alert.id)">
+        <span>{{ alert.message }}</span>
+    </div>
+</div>

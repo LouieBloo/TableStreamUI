@@ -1,4 +1,4 @@
-import { CommanderDamage } from "./game";
+import { ICommanderDamage } from "./game";
 
 export interface IPlayer{
     name:string;
@@ -18,6 +18,6 @@ export interface IPlayer{
 
     poisonTotal:number;
 
-    commanderDamages: { [playerId: string]: CommanderDamage };
+    commanderDamages: { [playerId: string]: ICommanderDamage };
 
 }

@@ -19,12 +19,13 @@
             </div>
 
             <div class="flex flex-col p-1 bg-slate-900 min-w-64 max-w-64">
-                <h3 class="text-white">Room: {{gameService.room.name}}</h3>
-                <div class="shrink flex justify-center">
-                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-1/2">Admin</label>
-                </div>
-                
+                <h3 class="text-white mb-2 text-center">Room: {{gameService.room.name}}</h3>
+
                 <app-messenger></app-messenger>
+
+                <div class="shrink flex justify-center mb-2">
+                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-1/2">Game</label>
+                </div>
 
                 <div class="">
                     <app-card-list></app-card-list>

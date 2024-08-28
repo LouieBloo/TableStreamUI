@@ -22,6 +22,10 @@ export class HomeComponent {
   ngOnInit() {
     this.webRTC.disconnect();
     localStorage.removeItem("roomName");
+
+    if(localStorage.getItem("playerName")){
+      this.player.name = localStorage.getItem("playerName")!;
+    }
   }
 
   onSubmit() {

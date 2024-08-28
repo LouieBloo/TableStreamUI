@@ -5,3 +5,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
+body{
+    background-color: rgb(71 85 105);
+}

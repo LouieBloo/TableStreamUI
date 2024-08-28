@@ -32,12 +32,27 @@ export enum PlayerProperties{
     poisonTotal
 }
 
-export interface Game{
+export interface IGame{
     startingLifeTotal: string;
     sharedCards:ScryfallCard[];
 }
 
-export interface CommanderDamage{
+export interface ICommanderDamage{
     playerId:string;
     damage:number;
+}
+
+export interface IGameError {
+    type: GameErrorType;
+    message:string;
+}
+
+export enum GameErrorType{
+    GameNotStarted
+}
+
+export interface IAlert{
+    type: 'success' | 'error' | 'info' | 'warning';
+    message: string;
+    id: number;
 }

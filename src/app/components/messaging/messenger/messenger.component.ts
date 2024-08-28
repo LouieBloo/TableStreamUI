@@ -20,9 +20,9 @@ export class MessengerComponent {
 
   constructor(private webRtc: WebRTCService){}
 
-  ngAfterViewChecked() {
-    this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;
-  }
+  // ngAfterViewChecked() {
+  //   this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;
+  // }
 
   ngOnInit(){
     this.webRtc.onMessage.push(this.messageReceived)
@@ -38,5 +38,8 @@ export class MessengerComponent {
   messageReceived = (newMessage: IMessage)=>{
     console.log("new message, ", newMessage);
     this.messages.push(newMessage);
+
+    setTimeout(()=>{this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;},100)
+    
   }
 }

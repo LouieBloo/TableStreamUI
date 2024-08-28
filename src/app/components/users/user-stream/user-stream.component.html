@@ -16,7 +16,7 @@
             [modifyPoisonCallback]="modifyPoisonTotal"></app-life-total>
     </div>
 
-    <div class="absolute top-12 left-1 flex flex-col" *ngIf="showCommanderDamage">
+    <div class="absolute top-12 left-2 flex flex-col" *ngIf="showCommanderDamage">
         <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
             <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name" [total]="player.commanderDamages[playerId].damage"
                 [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-2">
@@ -45,7 +45,7 @@
             <div tabindex="0" role="button" class="btn btn-xs"><ng-icon name="bootstrapGearFill"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
-                <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Toggle Commander Damage</a></li>
+                <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Commander Damage</a></li>
             </ul>
         </div>
     </div>

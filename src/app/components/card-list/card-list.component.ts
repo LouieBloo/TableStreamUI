@@ -146,7 +146,7 @@ export class CardListComponent {
     //close modal
     const closeModalButton = document.getElementById('closeModal');
     if (closeModalButton) {
-      //closeModalButton.click();
+      closeModalButton.click();
     }
   }
 }
