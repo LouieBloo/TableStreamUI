@@ -14,7 +14,7 @@
             <p class="text-sm">Select to share</p>
 
             <form #searchForm="ngForm" (ngSubmit)="sendSearch()" class="mb-2">
-                <input (ngModelChange)="searchStringChanged($event)" type="text" id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="mt-1 p-2 w-full border rounded-md shadow-sm text-black">
+                <input (ngModelChange)="searchStringChanged($event)" type="text" id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="popupColors mt-1 p-2 w-full border rounded-md shadow-sm">
             </form>
 
             <div *ngIf="!searching && searchResults && searchResults.length > 0">

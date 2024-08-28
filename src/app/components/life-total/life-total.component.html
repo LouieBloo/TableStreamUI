@@ -13,7 +13,7 @@
                     <p class="text-center">{{player.name | titlecase}}</p>
                     <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
                 </div>
-                <ul *ngIf="editable" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
                     <li (click)="setToZero()"><a>Set to 0</a></li>
                     <li (click)="toggleMonarch()"><a>Become Monarch</a></li>
                     <li (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
@@ -32,7 +32,7 @@
                         <p class="text-center">Poison</p>
                         <p class="text-center">💀 {{player.poisonTotal}}</p>
                     </div>
-                    <ul *ngIf="editable" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                    <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
                         <li (click)="modifyPoisonCallback(-player.poisonTotal)"><a>Set to 0</a></li>
                     </ul>
                 </div>

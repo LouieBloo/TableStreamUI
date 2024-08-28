@@ -5,7 +5,7 @@
             <p class="text-center">{{title | titlecase}}</p>
             <p class="text-center">{{total}}</p>
         </div>
-        <ul *ngIf="editable" tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+        <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow ">
             <li (click)="modifyCallback(-total)"><a>Set to 0</a></li>
         </ul>
     </div>
