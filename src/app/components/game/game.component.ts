@@ -77,6 +77,9 @@ export class GameComponent {
       case GameEvent.StartGame:
         this.updatePlayers(event.response);
         break;
+      case GameEvent.ResetGame:
+        this.updatePlayers(event.response);
+        break;
       case GameEvent.EndCurrentTurn:
         this.updatePlayers(event.response);
         break;
@@ -127,6 +130,10 @@ export class GameComponent {
 
   startGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.StartGame });
+  }
+
+  resetGame = () => {
+    this.webRTC.sendGameEvent({ event: GameEvent.ResetGame });
   }
 
   randomizeTurnOrder = () => {

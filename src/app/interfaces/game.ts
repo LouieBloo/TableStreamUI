@@ -12,6 +12,7 @@ export enum GameEvent{
     RandomizePlayerOrder,
     ModifyPlayerProperty,
     StartGame,
+    ResetGame,
     EndCurrentTurn,
     ShareCard,
     ToggleMonarch,
