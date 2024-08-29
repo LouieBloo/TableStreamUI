@@ -91,7 +91,7 @@ export class UserStreamComponent {
   }
 
   setFlip(){
-    this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleY(-1)' : 'scaleY(1)';
+    this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleX(-1) scaleY(-1)' : 'scaleX(1) scaleY(1)';
   }
 
   toggleFlip(): void {
