@@ -21,6 +21,7 @@ export class InputService {
     console.log(event.key)
     switch (event.key) {
       case ' ':
+        event.preventDefault();
         this.inputEventSubject.next(UserInputAction.PassTurn)
         break;
       case 'ArrowUp':

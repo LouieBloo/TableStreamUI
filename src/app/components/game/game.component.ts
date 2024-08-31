@@ -11,6 +11,7 @@ import { UserInputAction } from '../../interfaces/inputs';
 import { ScryfallService } from '../../services/scryfall/scryfall.service';
 import { CardListComponent } from '../card-list/card-list.component';
 import { GameService } from '../../services/game/game.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-game',
@@ -28,15 +29,18 @@ export class GameComponent {
   // room!: IRoom;
   sortedPlayers: IPlayer[] = [];
 
+  private inputSubscription!: Subscription;
+
   constructor(private webRTC: WebRTCService, private inputService: InputService,public gameService:GameService) {
-    inputService.subscribe((userAction: UserInputAction) => {
+  }
+
+  ngOnInit() {
+    this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction) => {
       if (userAction == UserInputAction.PassTurn) {
         this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn })
       }
     })
-  }
 
-  ngOnInit() {
     this.gameService.room = {
       name: "temp",
       players: []
@@ -52,6 +56,12 @@ export class GameComponent {
       this.localPlayer = me;
       this.addPlayer(me);
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
+    }
   }
 
   streamAdded = (id: string, stream: MediaStream, player: IPlayer) => {
@@ -125,6 +135,13 @@ export class GameComponent {
   sortPlayers = () => {
     if (this.gameService.room && this.gameService.room.players) {
       this.sortedPlayers = this.gameService.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
+    }
+
+
+    if(this.sortedPlayers.length == 4){
+      let temp:IPlayer = this.sortedPlayers[2];
+      this.sortedPlayers[2] = this.sortedPlayers[3];
+      this.sortedPlayers[3] = temp;
     }
   }
 

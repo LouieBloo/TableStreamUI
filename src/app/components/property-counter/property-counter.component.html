@@ -3,7 +3,7 @@
     <div class="dropdown join-item button text-white pl-4 pr-4">
         <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
             <p class="text-center">{{title | titlecase}}</p>
-            <p class="text-center">{{total}}</p>
+            <p class="text-center">{{emoji ? emoji + " " + total : total}}</p>
         </div>
         <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow ">
             <li (click)="modifyCallback(-total)"><a>Set to 0</a></li>

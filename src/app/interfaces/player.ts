@@ -17,6 +17,7 @@ export interface IPlayer{
     isMonarch?:boolean;
 
     poisonTotal:number;
+    energyTotal:number;
 
     commanderDamages: { [playerId: string]: ICommanderDamage };
 

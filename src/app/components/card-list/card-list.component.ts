@@ -8,7 +8,7 @@ import { UserInputAction } from '../../interfaces/inputs';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardListItemComponent } from './card-list-item/card-list-item.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { debounceTime, Subject } from 'rxjs';
+import { debounceTime, Subject, Subscription } from 'rxjs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
 
@@ -37,12 +37,10 @@ export class CardListComponent {
   hasSearched:boolean = false;
   searching:boolean = false;
 
+  private inputSubscription!: Subscription;
+
   constructor(private scryfallService: ScryfallService, private elRef: ElementRef, private inputService: InputService, private webRtc:WebRTCService){
-    inputService.subscribe((userAction: UserInputAction)=>{
-      if(userAction == UserInputAction.JumpToSearch){
-        this.openSearchModal();
-      }
-    })
+    
   }
 
 
@@ -63,6 +61,12 @@ export class CardListComponent {
   }
 
   ngOnInit(): void {
+    this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction)=>{
+      if(userAction == UserInputAction.JumpToSearch){
+        this.openSearchModal();
+      }
+    })
+
     this.searchSubject.pipe(debounceTime(420)).subscribe(value => {
       // this.searchString = value;
       this.sendSearch()
@@ -71,6 +75,12 @@ export class CardListComponent {
     this.sendSearchEvent.pipe(debounceTime(350)).subscribe(value => {
       this.search();
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
+    }
   }
 
   sendSearch=()=>{

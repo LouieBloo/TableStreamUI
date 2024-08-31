@@ -7,11 +7,13 @@ import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { IPlayer } from '../../interfaces/player';
 import { GameEvent } from '../../interfaces/game';
+import { PropertyCounterComponent } from '../property-counter/property-counter.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgIconComponent,NgClass,NgIf,TitleCasePipe],
+  imports: [NgIconComponent,NgClass,NgIf,TitleCasePipe,PropertyCounterComponent],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
   viewProviders: [provideIcons({ bootstrapSuitHeartFill })]
@@ -22,9 +24,13 @@ export class LifeTotalComponent {
   @Input() player!:IPlayer;
   @Input() modifyCallback!: (amount:number)=> void;
   @Input() modifyPoisonCallback!: (amount:number)=> void;
+  @Input() modifyEnergyCallback!: (amount:number)=> void;
   @Input() editable!:boolean;
 
-  @Input() showPoisonCounter!:boolean;
+  showPoisonCounter!:boolean;
+  showEnergyCounter!:boolean;
+
+  private inputSubscription!: Subscription;
 
   constructor(private inputService: InputService, private webRtc: WebRTCService){
     
@@ -33,13 +39,19 @@ export class LifeTotalComponent {
 
   ngAfterViewInit(){
     if(this.editable){
-      this.inputService.subscribe((userInputAction: UserInputAction)=>{
+      this.inputSubscription = this.inputService.subscribe((userInputAction: UserInputAction)=>{
         if(userInputAction == UserInputAction.ModifyHealth1){
           this.modifyCallback(1);
         }else if(userInputAction == UserInputAction.ModifyHealthMinus1){
           this.modifyCallback(-1);
         }
       })
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.inputSubscription) {
+      this.inputSubscription.unsubscribe();
     }
   }
 

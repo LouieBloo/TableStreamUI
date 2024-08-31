@@ -4,6 +4,14 @@
 <div *ngIf="player" class="flex flex-row ">
     
     <div class="relative">
+
+        <div *ngIf="showEnergyCounter || player.energyTotal > 0" class="absolute " [ngClass]="{'energyPanelEditable': editable, 'energyPanel' : !editable}">
+            <app-property-counter [editable]="editable" [title]="'Energy'" [emoji]="'⚡'" [total]="player.energyTotal"
+                [modifyCallback]="modifyEnergyCallback" class="mb-2">
+            </app-property-counter>
+        </div>
+
+
         <div class="join bg-black bg-opacity-50 text-sm">
             <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
             <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
@@ -17,6 +25,7 @@
                     <li (click)="setToZero()"><a>Set to 0</a></li>
                     <li (click)="toggleMonarch()"><a>Become Monarch</a></li>
                     <li (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
+                    <li (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
                 </ul>
             </div>
     

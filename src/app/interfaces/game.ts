@@ -30,7 +30,8 @@ export interface IModifyPlayerProperty{
 
 export enum PlayerProperties{
     lifeTotal,
-    poisonTotal
+    poisonTotal,
+    energyTotal
 }
 
 export interface IGame{

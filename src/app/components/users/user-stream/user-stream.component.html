@@ -13,7 +13,7 @@
             <h2>{{player?.name | titlecase }}</h2>
         </div> -->
         <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"
-            [modifyPoisonCallback]="modifyPoisonTotal"></app-life-total>
+            [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal"></app-life-total>
     </div>
 
     <div class="absolute top-12 left-2 flex flex-col" *ngIf="showCommanderDamage">

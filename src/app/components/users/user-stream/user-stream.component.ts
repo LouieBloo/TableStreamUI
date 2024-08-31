@@ -90,6 +90,14 @@ export class UserStreamComponent {
     })
   }
 
+  modifyEnergyTotal = (amount:number)=>{
+    let payload:IModifyPlayerProperty = {amountToModify: amount, property: PlayerProperties.energyTotal}
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyPlayerProperty,
+      payload:payload
+    })
+  }
+
   setFlip(){
     this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleX(-1) scaleY(-1)' : 'scaleX(1) scaleY(1)';
   }

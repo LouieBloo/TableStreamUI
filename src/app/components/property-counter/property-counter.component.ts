@@ -15,4 +15,6 @@ export class PropertyCounterComponent {
   @Input() total!:number;
 
   @Input() modifyCallback:any;
+
+  @Input() emoji!:string;
 }
