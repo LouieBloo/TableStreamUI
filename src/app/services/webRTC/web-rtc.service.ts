@@ -92,6 +92,7 @@ export class WebRTCService {
     console.log("Handle signal: ", data.from, data.signal)
 
     const { from, signal } = data;
+    console.log(this.peerConnections, " ", from)
     if (!this.peerConnections[from]) {
       this.createPeerConnection(from, data.user);
     }
@@ -147,6 +148,7 @@ export class WebRTCService {
     this.peerConnections[socketId] = peerConnection;
 
     peerConnection.onicecandidate = (event) => {
+      console.log("on ice candidate: ", event)
       if (event.candidate) {
         this.socket?.emit('signal', { to: socketId, signal: event.candidate });
       }
@@ -159,6 +161,7 @@ export class WebRTCService {
       // event.streams[0].getTracks().forEach(track => {
       //   this.remoteStreams[socketId].addTrack(track);
       // });
+      console.log("on track: ", event)
       this.remoteStreams[socketId] = event.streams[0];
       this.onStreamAdded.forEach(callback => {
         callback(socketId, this.remoteStreams[socketId], user)
@@ -173,10 +176,14 @@ export class WebRTCService {
 
     // Listen for negotiation needed event to handle offer/answer exchange
     peerConnection.onnegotiationneeded = async () => {
+      console.log("on negation: ", socketId, peerConnection.signalingState)
       try {
+        
         if (peerConnection.signalingState === 'stable') {
+
+          
           const offer = await peerConnection.createOffer({
-            offerToReceiveVideo: true,
+            offerToReceiveVideo: user.type == UserType.Player,
             offerToReceiveAudio: false
           });
 
@@ -200,10 +207,20 @@ export class WebRTCService {
 
 
     if(!this.amISpectator){
+      console.log("setting local stream:   ")
       let localS = await this.initLocalStream()
       localS.getTracks().forEach((track) => {
+        console.log("adding tracks for: ", socketId)
         peerConnection.addTrack(track, this.localStream!);
       });
+    }else{
+      const offer = await peerConnection.createOffer({
+        offerToReceiveVideo: true,
+        offerToReceiveAudio: false
+      });
+
+      await peerConnection.setLocalDescription(offer);
+      this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
     }
   }
 
