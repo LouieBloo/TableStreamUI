@@ -1,9 +1,13 @@
 import { ICommanderDamage } from "./game";
 
-export interface IPlayer{
+export interface IUser{
     name:string;
     id:string;
     socketId:string;
+    type:UserType;
+}
+
+export interface IPlayer extends IUser{
     turnOrder:number;
     lifeTotal:number;
     admin?:boolean;
@@ -20,5 +24,13 @@ export interface IPlayer{
     energyTotal:number;
 
     commanderDamages: { [playerId: string]: ICommanderDamage };
+}
 
+export interface ISpectator extends IUser{
+
+}
+
+export enum UserType{
+    Player,
+    Spectator
 }

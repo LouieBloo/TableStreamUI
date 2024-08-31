@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import io, { Socket } from 'socket.io-client';
 import { IMessage } from '../../interfaces/message';
 import { environment } from '../../../environments/environment';
-import { IPlayer } from '../../interfaces/player';
+import { IPlayer, IUser, UserType } from '../../interfaces/player';
 import { IGameError, IGameEvent } from '../../interfaces/game';
 import { AlertsService } from '../alerts/alerts.service';
 
@@ -14,11 +14,12 @@ export class WebRTCService {
   localStream: MediaStream | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {};
-  onStreamAdded: ((id: string, stream: MediaStream, player: IPlayer) => void)[] = [];
+  onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
   onGameEvent: ((update: IGameEvent) => void)[] = [];
   onMessage: ((message: IMessage) => void)[] = [];
 
+  amISpectator:boolean = false;
   // roomName: string = "";
   // playerName: string = "";
 
@@ -34,7 +35,7 @@ export class WebRTCService {
     return this.localStream;
   }
 
-  public subscribeToStreamAdd(callback: (id: string, stream: MediaStream, player: IPlayer) => void) {
+  public subscribeToStreamAdd(callback: (id: string, stream: MediaStream, user: IUser) => void) {
     this.onStreamAdded.push(callback);
   }
 
@@ -53,7 +54,7 @@ export class WebRTCService {
 
 
 
-  public joinRoom(playerName: any, roomName: any, callback: any) {
+  public joinRoom(playerName: any, roomName: any, userType: UserType, callback: any) {
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -62,8 +63,10 @@ export class WebRTCService {
     this.socket.on('gameEvent', this.handleGameEvent);
     this.socket.on('errorResponse',this.handleErrorResponse);
 
+    this.amISpectator = userType == UserType.Spectator;
+
     if (this.socket) {
-      this.socket.emit('joinRoom', { roomName: roomName, playerName: playerName }, (newPlayer: IPlayer) => {
+      this.socket.emit('joinRoom', { roomName: roomName, playerName: playerName, userType: userType }, (newPlayer: IUser) => {
         console.log('Server responded with unique ID:', newPlayer.id);
         callback(newPlayer, roomName)
       });
@@ -84,13 +87,13 @@ export class WebRTCService {
     return null;
   }
 
-  private handleSignal = async (data: { from: string; signal: any, player: IPlayer }) => {
+  private handleSignal = async (data: { from: string; signal: any, user: IUser }) => {
 
     console.log("Handle signal: ", data.from, data.signal)
 
     const { from, signal } = data;
     if (!this.peerConnections[from]) {
-      this.createPeerConnection(from, data.player);
+      this.createPeerConnection(from, data.user);
     }
     const peerConnection = this.peerConnections[from];
 
@@ -106,9 +109,9 @@ export class WebRTCService {
     }
   };
 
-  private handleNewPeer = (data: { socketId: string, player: IPlayer }) => {
+  private handleNewPeer = (data: { socketId: string, user: IUser }) => {
     const { socketId } = data;
-    this.createPeerConnection(socketId, data.player);
+    this.createPeerConnection(socketId, data.user);
   };
 
   private handlePeerDisconnected = (data: { socketId: string }) => {
@@ -129,8 +132,14 @@ export class WebRTCService {
     });
   };
 
-  private async createPeerConnection(socketId: string, player: IPlayer) {
-    console.log("Creating peer connection: ", socketId)
+  private async createPeerConnection(socketId: string, user: IUser) {
+    console.log("Creating peer connection: ", socketId, user)
+    //if we are a spectator and a spectator is coming in we dont create a connection
+    if(this.amISpectator && user.type == UserType.Spectator){
+      console.log("not adding connection as its spectator");
+      return;
+    }
+
     const configuration = {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Add Google STUN server
     };
@@ -152,7 +161,7 @@ export class WebRTCService {
       // });
       this.remoteStreams[socketId] = event.streams[0];
       this.onStreamAdded.forEach(callback => {
-        callback(socketId, this.remoteStreams[socketId], player)
+        callback(socketId, this.remoteStreams[socketId], user)
       });
     };
 
@@ -175,7 +184,13 @@ export class WebRTCService {
           // localS.getTracks().forEach((track) => {
           //   peerConnection.addTrack(track  , this.localStream!);
           // });
+
+          // if(!this.amISpectator){
+          //   await peerConnection.setLocalDescription(offer);
+          // }
+
           await peerConnection.setLocalDescription(offer);
+          
           this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
         }
       } catch (error) {
@@ -184,11 +199,12 @@ export class WebRTCService {
     };
 
 
-    let localS = await this.initLocalStream()
-    localS.getTracks().forEach((track) => {
-      peerConnection.addTrack(track, this.localStream!);
-    });
-
+    if(!this.amISpectator){
+      let localS = await this.initLocalStream()
+      localS.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, this.localStream!);
+      });
+    }
   }
 
   public sendMessage(message: string) {

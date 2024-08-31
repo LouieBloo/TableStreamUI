@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
-import { IPlayer } from '../../../interfaces/player';
+import { IPlayer, IUser } from '../../../interfaces/player';
 import { GameEvent, IModifyPlayerProperty, PlayerProperties } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
@@ -53,9 +53,9 @@ export class UserStreamComponent {
     });
   }
 
-  streamAdded = (id: string, stream: MediaStream, player: IPlayer) => {
-    console.log("stream added: ", player)
-    if (player.id === this.player.id) {
+  streamAdded = (id: string, stream: MediaStream, user: IUser) => {
+    console.log("stream added: ", user)
+    if (user.id === this.player.id) {
       //this.setStream(stream);
       this.setStream(this.webRTC.getStream(this.player.socketId))
     }

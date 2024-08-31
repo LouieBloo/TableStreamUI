@@ -6,7 +6,7 @@
         <h1 class="text-xl font-semibold mb-6">Join Room</h1>
         <form #playerForm="ngForm" (ngSubmit)="onSubmit()">
             <div class="mb-4">
-                <label for="playerName" class="block text-sm font-medium text-white">Player Name:</label>
+                <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
                 <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
@@ -15,6 +15,18 @@
                 <input type="text" id="roomName" name="roomName" [(ngModel)]="player.roomName" required
                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
+
+            <div class="mb-6 flex">
+                <label for="isSpectator" class="text-sm font-medium text-white">Join as Spectator:</label>
+                <input
+                  type="checkbox"
+                  id="isSpectator"
+                  name="isSpectator"
+                  [(ngModel)]="player.isSpectator"
+                  class="mt-1 ml-2"
+                />
+              </div>
+            
             <button type="submit" id="submitButton" class="w-full btn btn-outline text-white py-2 px-4 rounded"
                 [disabled]="!playerForm.valid">Join</button>
         </form>

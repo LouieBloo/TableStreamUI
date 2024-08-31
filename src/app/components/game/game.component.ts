@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { UserStreamComponent } from '../users/user-stream/user-stream.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { IPlayer } from '../../interfaces/player';
+import { IPlayer, IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { MessengerComponent } from '../messaging/messenger/messenger.component';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
@@ -50,11 +50,16 @@ export class GameComponent {
     this.webRTC.subscribeToStreamRemove(this.streamRemoved);
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), (me: IPlayer, roomName: string) => {
+    const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
+
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string) => {
       this.gameService.room.name = roomName;
       this.localPlayerId = me.id;
-      this.localPlayer = me;
-      this.addPlayer(me);
+
+      if(me.type == UserType.Player){
+        this.localPlayer = me as IPlayer;
+        this.addPlayer(me as IPlayer);
+      }
     });
   }
 
@@ -64,9 +69,11 @@ export class GameComponent {
     }
   }
 
-  streamAdded = (id: string, stream: MediaStream, player: IPlayer) => {
-    console.log("Add player: ", player);
-    this.addPlayer(player);
+  streamAdded = (id: string, stream: MediaStream, user: IUser) => {
+    console.log("Add user: ", user);
+    if(user.type == UserType.Player){
+      this.addPlayer(user as IPlayer);
+    }
     // this.remoteSocketIds.push(id);
   }
 

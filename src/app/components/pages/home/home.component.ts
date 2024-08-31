@@ -14,7 +14,8 @@ export class HomeComponent {
   
   player = {
     name: '',
-    roomName: ''
+    roomName: '',
+    isSpectator: false
   };
 
   constructor(private router: Router, private webRTC: WebRTCService){}
@@ -31,6 +32,7 @@ export class HomeComponent {
   onSubmit() {
     localStorage.setItem("playerName", this.player.name);
     localStorage.setItem("roomName", this.player.roomName);
+    localStorage.setItem("isSpectator", this.player.isSpectator + "");
 
     this.router.navigate(['/game']);
   }
