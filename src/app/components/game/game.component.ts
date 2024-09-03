@@ -67,6 +67,8 @@ export class GameComponent {
     if (this.inputSubscription) {
       this.inputSubscription.unsubscribe();
     }
+
+    this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
   }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
@@ -104,6 +106,9 @@ export class GameComponent {
         this.updatePlayers(event.response);
         break;
       case GameEvent.ModifyPlayerCommanderDamage:
+        this.updatePlayers([event.response]);
+        break;
+      case GameEvent.SetCommander:
         this.updatePlayers([event.response]);
         break;
     }

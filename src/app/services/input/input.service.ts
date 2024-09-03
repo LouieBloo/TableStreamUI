@@ -52,6 +52,23 @@ export class InputService {
     return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') ? true : false;
   }
 
+  public triggerInput(input:string){
+    switch (input) {
+      case ' ':
+        this.inputEventSubject.next(UserInputAction.PassTurn)
+        break;
+      case 'ArrowUp':
+        this.inputEventSubject.next(UserInputAction.ModifyHealth1)
+        break;
+      case 'ArrowDown':
+        this.inputEventSubject.next(UserInputAction.ModifyHealthMinus1)
+        break;
+      case 'ctrl-i':
+          this.inputEventSubject.next(UserInputAction.JumpToSearch)
+        break;
+    }
+  }
+
   subscribe(callback: (userInputAction: UserInputAction) => void) {
     return this.inputEventSubject.asObservable().subscribe(event => {
       callback(event);

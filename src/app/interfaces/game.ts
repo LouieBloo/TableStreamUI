@@ -16,7 +16,8 @@ export enum GameEvent{
     EndCurrentTurn,
     ShareCard,
     ToggleMonarch,
-    ModifyPlayerCommanderDamage
+    ModifyPlayerCommanderDamage,
+    SetCommander
 }
 
 export enum GameType{
@@ -50,7 +51,8 @@ export interface IGameError {
 }
 
 export enum GameErrorType{
-    GameNotStarted
+    GameNotStarted,
+    InvalidAction
 }
 
 export interface IAlert{

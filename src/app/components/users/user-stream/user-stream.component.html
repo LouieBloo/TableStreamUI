@@ -25,16 +25,16 @@
     </div>
 
     <div class="absolute top-2 left-2 text-white flex flex-col ">
-        <!-- <div>
-            <h2>{{player?.name | titlecase}}</h2>
-        </div> -->
+        <div *ngIf="player">
+            <app-set-commander [player]="player" [editable]="localStream"></app-set-commander>
+        </div>
+
         <div class="text-xs">
             <!-- <p class="">{{ !localStream ? "Remote: " + player.socketId : "Local" }} - {{player.name}}</p> -->
              <!-- todo this re-renders the whole component every tick -->
             <p>Turn: {{ player.currentTurnStartTime | timeAgo | async }}</p>
             <p>Avg: {{ (player.totalTurnTime/ ( (player.totalTurns) || 1 ) ) | timeAgo | async }}</p>
         </div>
-
     </div>
 
 

@@ -9,11 +9,12 @@ import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 import { GameService } from '../../../services/game/game.service';
+import { SetCommanderComponent } from '../../commander/set-commander/set-commander.component';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent,LifeTotalComponent,NgClass,NgIf,TimeAgoPipe,CommonModule,TitleCasePipe, PropertyCounterComponent],
+  imports: [NgIconComponent,LifeTotalComponent,NgClass,NgIf,TimeAgoPipe,CommonModule,TitleCasePipe, PropertyCounterComponent, SetCommanderComponent],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]
@@ -36,8 +37,8 @@ export class UserStreamComponent {
     if(!this.localStream){
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
       // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
-  
-      this.setStream(this.webRTC.getStream(this.player.socketId))
+      this.setStream(this.webRTC.getStream(this.player.socketId))  
+      
     }else{
       this.initLocalStream();
     }

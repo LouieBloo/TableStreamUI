@@ -63,6 +63,9 @@ export class WebRTCService {
     this.socket.on('gameEvent', this.handleGameEvent);
     this.socket.on('errorResponse',this.handleErrorResponse);
 
+    this.remoteStreams = {};
+    this.peerConnections = {};
+
     this.amISpectator = userType == UserType.Spectator;
 
     if (this.socket) {
@@ -112,7 +115,7 @@ export class WebRTCService {
 
   private handleNewPeer = (data: { socketId: string, user: IUser }) => {
     const { socketId } = data;
-    this.createPeerConnection(socketId, data.user);
+    this.createPeerConnection(socketId, data.user, true);
   };
 
   private handlePeerDisconnected = (data: { socketId: string }) => {
@@ -133,7 +136,7 @@ export class WebRTCService {
     });
   };
 
-  private async createPeerConnection(socketId: string, user: IUser) {
+  private async createPeerConnection(socketId: string, user: IUser, newPeer:boolean = false) {
     console.log("Creating peer connection: ", socketId, user)
     //if we are a spectator and a spectator is coming in we dont create a connection
     if(this.amISpectator && user.type == UserType.Spectator){
@@ -183,7 +186,7 @@ export class WebRTCService {
 
           
           const offer = await peerConnection.createOffer({
-            offerToReceiveVideo: user.type == UserType.Player,
+            offerToReceiveVideo: true,
             offerToReceiveAudio: false
           });
 
@@ -213,7 +216,9 @@ export class WebRTCService {
         console.log("adding tracks for: ", socketId)
         peerConnection.addTrack(track, this.localStream!);
       });
-    }else{
+    }else if(newPeer){
+
+      console.log("signal state: ", peerConnection.signalingState)
       const offer = await peerConnection.createOffer({
         offerToReceiveVideo: true,
         offerToReceiveAudio: false
@@ -254,6 +259,8 @@ export class WebRTCService {
     })
   }
 
+  
+
   handleErrorResponse = (error: IGameError)=>{
     console.log(error);
     this.alertService.addAlert("error",error.message);
@@ -261,5 +268,9 @@ export class WebRTCService {
 
   public subscribeToGameEvents = (callback: (update: IGameEvent) => void) => {
     this.onGameEvent.push(callback);
+  }
+
+  public unsubscribeToGameEvent = (callback: (update: IGameEvent) => void) => {
+    this.onGameEvent = this.onGameEvent.filter((checkCallback) => { checkCallback !== callback })
   }
 }

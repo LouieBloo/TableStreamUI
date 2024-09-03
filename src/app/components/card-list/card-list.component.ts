@@ -11,6 +11,7 @@ import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.comp
 import { debounceTime, Subject, Subscription } from 'rxjs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
+import { ModalServiceService, ModalType } from '../../services/modal/modal-service.service';
 
 @Component({
   selector: 'app-card-list',
@@ -39,7 +40,7 @@ export class CardListComponent {
 
   private inputSubscription!: Subscription;
 
-  constructor(private scryfallService: ScryfallService, private elRef: ElementRef, private inputService: InputService, private webRtc:WebRTCService){
+  constructor(private scryfallService: ScryfallService, private elRef: ElementRef, private inputService: InputService, private webRtc:WebRTCService, private modalService: ModalServiceService){
     
   }
 
@@ -146,12 +147,19 @@ export class CardListComponent {
   }
 
   shareCard = (imageClicked:boolean)=>{
+    console.log("sharing")
     //valid card
     if(!this.cardBeingHovered){return;}
     //since cards can have multipe faces if the user clicks on a double sided one we dont trigger the share
     if(imageClicked &&  (this.cardBeingHovered.card_faces && this.cardBeingHovered.card_faces.length > 1)){return;}
 
     this.webRtc.sendGameEvent({event:GameEvent.ShareCard, payload: this.cardBeingHovered});
+
+    //any callbacks
+    let callback = this.modalService.consumeCallback(ModalType.SearchCards);
+    if(callback != null){
+      callback(this.cardBeingHovered);
+    }
 
     //close modal
     const closeModalButton = document.getElementById('closeModal');

@@ -1,4 +1,5 @@
 import { ICommanderDamage } from "./game";
+import { ScryfallCard } from "./scryfall";
 
 export interface IUser{
     name:string;
@@ -24,6 +25,8 @@ export interface IPlayer extends IUser{
     energyTotal:number;
 
     commanderDamages: { [playerId: string]: ICommanderDamage };
+
+    commander: ScryfallCard;
 }
 
 export interface ISpectator extends IUser{
