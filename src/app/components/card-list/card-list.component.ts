@@ -38,6 +38,8 @@ export class CardListComponent {
   hasSearched:boolean = false;
   searching:boolean = false;
 
+  currentCallback: any;
+
   private inputSubscription!: Subscription;
 
   constructor(private scryfallService: ScryfallService, private elRef: ElementRef, private inputService: InputService, private webRtc:WebRTCService, private modalService: ModalServiceService){
@@ -126,6 +128,10 @@ export class CardListComponent {
   openSearchModal = ()=>{
     this.searchString = "";
     this.searchResults = [];
+
+    //do this on startup so we always wipe it from the service
+    this.currentCallback = this.modalService.consumeCallback(ModalType.SearchCards);
+
     const dialogCheckbox = document.getElementById('toggleModal');
     if (dialogCheckbox) {
       dialogCheckbox.click();
@@ -155,10 +161,8 @@ export class CardListComponent {
 
     this.webRtc.sendGameEvent({event:GameEvent.ShareCard, payload: this.cardBeingHovered});
 
-    //any callbacks
-    let callback = this.modalService.consumeCallback(ModalType.SearchCards);
-    if(callback != null){
-      callback(this.cardBeingHovered);
+    if(this.currentCallback != null){
+      this.currentCallback(this.cardBeingHovered);
     }
 
     //close modal
