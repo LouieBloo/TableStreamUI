@@ -20,8 +20,12 @@ export enum GameEvent{
     SetCommander
 }
 
+
 export enum GameType{
-    MTGCommander
+    Game,
+    MTGCommander,
+    MTGStandard,
+    MTGModern
 }
 
 export interface IModifyPlayerProperty{

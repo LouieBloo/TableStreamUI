@@ -3,8 +3,9 @@ import io, { Socket } from 'socket.io-client';
 import { IMessage } from '../../interfaces/message';
 import { environment } from '../../../environments/environment';
 import { IPlayer, IUser, UserType } from '../../interfaces/player';
-import { IGameError, IGameEvent } from '../../interfaces/game';
+import { GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
 import { AlertsService } from '../alerts/alerts.service';
+import { IRoom } from '../../interfaces/room';
 
 @Injectable({
   providedIn: 'root'
@@ -69,9 +70,20 @@ export class WebRTCService {
     this.amISpectator = userType == UserType.Spectator;
 
     if (this.socket) {
-      this.socket.emit('joinRoom', { roomName: roomName, playerName: playerName, userType: userType }, (newPlayer: IUser) => {
-        console.log('Server responded with unique ID:', newPlayer.id);
-        callback(newPlayer, roomName)
+      this.socket.emit('joinRoom', {playerId: localStorage.getItem("playerId"), roomName: roomName, playerName: playerName, userType: userType }, (newPlayer: IUser, room:IRoom) => {
+        //set all our gamestate
+        if(room.messages){
+          room.messages.forEach(m=> this.handleMessage(m))
+        }
+        if(room.game && room.game.sharedCards){
+          room.game.sharedCards.forEach(card => {
+            this.handleGameEvent({
+              event: GameEvent.ShareCard,
+              response: card
+            })
+          })
+        }
+        callback(newPlayer, roomName, room)
       });
     }
   }

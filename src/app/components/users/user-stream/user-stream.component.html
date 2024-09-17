@@ -16,7 +16,7 @@
             [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal"></app-life-total>
     </div>
 
-    <div class="absolute top-12 left-2 flex flex-col" *ngIf="showCommanderDamage">
+    <div class="absolute top-16 left-2 flex flex-col" *ngIf="showCommanderDamage">
         <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
             <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name" [total]="player.commanderDamages[playerId].damage"
                 [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-2">

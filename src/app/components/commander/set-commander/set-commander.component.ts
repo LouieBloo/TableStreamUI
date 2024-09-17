@@ -29,6 +29,7 @@ export class SetCommanderComponent {
   }
 
   openSearch = ()=>{
+    if(!this.editable){return;}
     this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
   }
 

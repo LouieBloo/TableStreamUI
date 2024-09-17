@@ -43,7 +43,8 @@ export class GameComponent {
 
     this.gameService.room = {
       name: "temp",
-      players: []
+      players: [],
+      messages: []
     }
 
     this.webRTC.subscribeToStreamAdd(this.streamAdded);
@@ -52,14 +53,22 @@ export class GameComponent {
 
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string) => {
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
       this.gameService.room.name = roomName;
       this.localPlayerId = me.id;
+
+      localStorage.setItem("playerId", me.id);
 
       if(me.type == UserType.Player){
         this.localPlayer = me as IPlayer;
         this.addPlayer(me as IPlayer);
       }
+
+      room.players.forEach((p:IPlayer)=>{
+        if(p.id != me.id){
+          this.addPlayer(p)
+        }
+      })
     });
   }
 

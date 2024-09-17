@@ -1,8 +1,13 @@
 <div class="h-screen flex flex-col items-center ">
 
-    <h1 class="text-white text-6xl mb-16 mt-16">Table Stream</h1>
+    <div class="text-center max-w-xl  w-full">
+        <h1 class="text-white text-6xl mb-4 mt-4">Table Stream<span class="absolute text-lg">Alpha</span></h1>
+        <p class="text-white text-base"><strong>Welcome to Table Stream!</strong> A platform that lets you connect, share your webcam, and enjoy games like Magic: The Gathering with friends online.</p>
+        
+    </div>
+    
 
-    <div class="w-1/4 mx-auto  p-6 shadow-md bg-slate-800 text-white">
+    <div class="max-w-lg mt-6 w-full mx-auto  p-6 shadow-md bg-slate-800 text-white">
         <h1 class="text-xl font-semibold mb-6">Join Room</h1>
         <form #playerForm="ngForm" (ngSubmit)="onSubmit()">
             <div class="mb-4">
@@ -30,6 +35,8 @@
             <button type="submit" id="submitButton" class="w-full btn btn-outline text-white py-2 px-4 rounded"
                 [disabled]="!playerForm.valid">Join</button>
         </form>
+
+        <p class="text-white text-base mt-4"><strong>Note:</strong> Table Stream is currently in alpha. You may encounter bugs or missing features as we work hard to improve the platform. Your feedback and patience are greatly appreciated as we build this experience together!</p>
     </div>
 </div>
 

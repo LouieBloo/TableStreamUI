@@ -153,7 +153,6 @@ export class CardListComponent {
   }
 
   shareCard = (imageClicked:boolean)=>{
-    console.log("sharing")
     //valid card
     if(!this.cardBeingHovered){return;}
     //since cards can have multipe faces if the user clicks on a double sided one we dont trigger the share
