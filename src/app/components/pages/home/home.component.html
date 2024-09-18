@@ -7,36 +7,57 @@
     </div>
     
 
-    <div class="max-w-lg mt-6 w-full mx-auto  p-6 shadow-md bg-slate-800 text-white">
-        <h1 class="text-xl font-semibold mb-6">Join Room</h1>
-        <form #playerForm="ngForm" (ngSubmit)="onSubmit()">
+    <div class="max-w-lg mt-6 w-full mx-auto p-6 shadow-md bg-slate-800 text-white tabs tabs-lifted">
+        <!-- Tab navigation -->
+        <div class="tabs mb-6">
+            <a class="tab tab-bordered text-white rounded" [ngClass]="{ 'tab-active': activeTab === 'join' }" (click)="setTab('join')">Join Game</a>
+            <a class="tab tab-bordered text-white rounded" [ngClass]="{ 'tab-active': activeTab === 'create' }" (click)="setTab('create')">Create Game</a>
+        </div>
+      
+        <!-- Create Game Form -->
+        <div *ngIf="activeTab === 'create'">
+          <form #createForm="ngForm" (ngSubmit)="onCreateGame()">
             <div class="mb-4">
-                <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
-                <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
-                    class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+              <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
+              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
+                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-6">
-                <label for="roomName" class="block text-sm font-medium text-white">Room Name:</label>
-                <input type="text" id="roomName" name="roomName" [(ngModel)]="player.roomName" required
-                    class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+              <label for="gameName" class="block text-sm font-medium text-white">Room Name:</label>
+              <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required
+                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
-
+            <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed" [disabled]="!createForm.valid">
+              Create Game
+            </button>
+          </form>
+        </div>
+      
+        <!-- Join Game Form -->
+        <div *ngIf="activeTab === 'join'">
+          <form #joinForm="ngForm" (ngSubmit)="onJoinGame()">
+            <div class="mb-4">
+              <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
+              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
+                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+            </div>
+            <div class="mb-6">
+              <label for="roomId" class="block text-sm font-medium text-white">Room ID:</label>
+              <input type="text" id="roomId" name="roomId" [(ngModel)]="player.roomId" required
+                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+            </div>
             <div class="mb-6 flex">
-                <label for="isSpectator" class="text-sm font-medium text-white">Join as Spectator:</label>
-                <input
-                  type="checkbox"
-                  id="isSpectator"
-                  name="isSpectator"
-                  [(ngModel)]="player.isSpectator"
-                  class="mt-1 ml-2"
-                />
-              </div>
-            
-            <button type="submit" id="submitButton" class="w-full btn btn-outline text-white py-2 px-4 rounded"
-                [disabled]="!playerForm.valid">Join</button>
-        </form>
-
+              <label for="isSpectator" class="text-sm font-medium text-white">Join as Spectator:</label>
+              <input type="checkbox" id="isSpectator" name="isSpectator" [(ngModel)]="player.isSpectator"
+                     class="mt-1 ml-2">
+            </div>
+            <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed" [disabled]="!joinForm.valid">
+              Join Game
+            </button>
+          </form>
+        </div>
+      
         <p class="text-white text-base mt-4"><strong>Note:</strong> Table Stream is currently in alpha. You may encounter bugs or missing features as we work hard to improve the platform. Your feedback and patience are greatly appreciated as we build this experience together!</p>
-    </div>
+      </div>
 </div>
 

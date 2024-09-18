@@ -1,3 +1,8 @@
 #submitButton:disabled{
     color:rgba(255, 255, 255, 0.264)
 }
+
+.tab-active{
+    background-color: white;
+    color: rgb(30,41,59) ;
+}

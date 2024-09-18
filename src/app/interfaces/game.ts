@@ -56,7 +56,8 @@ export interface IGameError {
 
 export enum GameErrorType{
     GameNotStarted,
-    InvalidAction
+    InvalidAction,
+    NoRoomName
 }
 
 export interface IAlert{

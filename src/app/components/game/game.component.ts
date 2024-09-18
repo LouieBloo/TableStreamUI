@@ -12,6 +12,7 @@ import { ScryfallService } from '../../services/scryfall/scryfall.service';
 import { CardListComponent } from '../card-list/card-list.component';
 import { GameService } from '../../services/game/game.service';
 import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -31,10 +32,23 @@ export class GameComponent {
 
   private inputSubscription!: Subscription;
 
-  constructor(private webRTC: WebRTCService, private inputService: InputService,public gameService:GameService) {
+  constructor(private webRTC: WebRTCService, private inputService: InputService,public gameService:GameService, private router: Router, private route: ActivatedRoute) {
   }
 
   ngOnInit() {
+    let roomId = this.route.snapshot.queryParamMap.get('id')!;
+
+    if(!localStorage.getItem('playerName')){
+      if(roomId){
+        this.router.navigate(['/'], {
+          queryParams: { id: roomId}, 
+          queryParamsHandling: 'merge',
+        });
+      }else{
+        this.router.navigate(['/']);
+      }
+    }
+
     this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction) => {
       if (userAction == UserInputAction.PassTurn) {
         this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn })
@@ -53,11 +67,17 @@ export class GameComponent {
 
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
-      this.gameService.room.name = roomName;
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), roomId, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
+      this.gameService.room = room;
       this.localPlayerId = me.id;
 
       localStorage.setItem("playerId", me.id);
+      this.router.navigate([], {
+        queryParams: { id: room.id}, 
+        queryParamsHandling: 'merge', // This merges with any existing query params
+        replaceUrl: true // Replace the current URL in history
+      });
+      //localStorage.setItem("roomId", room.id + "");
 
       if(me.type == UserType.Player){
         this.localPlayer = me as IPlayer;
@@ -178,5 +198,13 @@ export class GameComponent {
     this.webRTC.sendGameEvent({ event: GameEvent.RandomizePlayerOrder });
   }
 
+  copyUrl() {
+    const currentUrl = window.location.href; // Get the current URL
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      alert('URL copied to clipboard!');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  }
 
 }
