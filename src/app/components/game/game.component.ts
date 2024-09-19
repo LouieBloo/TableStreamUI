@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { UserStreamComponent } from '../users/user-stream/user-stream.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -13,24 +13,26 @@ import { CardListComponent } from '../card-list/card-list.component';
 import { GameService } from '../../services/game/game.service';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ReportModalComponent } from '../report-modal/report-modal.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
 export class GameComponent {
 
-  // players: IPlayer[] = []
   localPlayerId: string = ""
   localPlayer!: IPlayer;
 
-  // room!: IRoom;
   sortedPlayers: IPlayer[] = [];
 
   private inputSubscription!: Subscription;
+
+  @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
 
   constructor(private webRTC: WebRTCService, private inputService: InputService,public gameService:GameService, private router: Router, private route: ActivatedRoute) {
   }

@@ -1,0 +1,47 @@
+<button class="hidden" onclick="reportModal.showModal()" id="toggleReportModal">toggle</button>
+<!-- report modal -->
+<dialog id="reportModal" class="modal">
+    <div class="modal-box bg-slate-800 text-white absolute top-2">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeReportModal" >✕</button>
+        </form>
+
+        <h3 class="text-lg font-bold">Report Issue</h3>
+        <p class="text-sm">Please be as detailed as possible and include any reproduction steps.</p>
+
+        <form #reportForm="ngForm" (ngSubmit)="submitIssue()" class="mt-4">
+            <div class="mb-4">
+              <label for="issueTitle" class="block text-sm font-medium text-white">Issue Title:</label>
+              <input
+                type="text"
+                id="issueTitle"
+                name="title"
+                [(ngModel)]="report.title"
+                required
+                class="mt-1 p-2 w-full border rounded-md shadow-sm bg-gray-200 text-black"
+              />
+            </div>
+            <div class="mb-6">
+              <label for="issueBody" class="block text-sm font-medium text-white">Describe the problem:</label>
+              <textarea
+                id="issueBody"
+                name="body"
+                [(ngModel)]="report.body"
+                rows="5"
+                required
+                class="mt-1 p-2 w-full border rounded-md shadow-sm bg-gray-200 text-black"
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              class="w-full btn btn-outline text-white py-2 px-4 rounded"
+              [disabled]="!reportForm.valid || loading"
+            >
+              Submit Issue
+            </button>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

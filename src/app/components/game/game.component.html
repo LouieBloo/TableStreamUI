@@ -1,4 +1,4 @@
-<div class="drawer">
+<div class="drawer drawer-end">
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
 
     <div class="w-screen h-screen flex flex-col drawer-content ">
@@ -20,13 +20,14 @@
 
             <div class="flex flex-col p-1 bg-slate-900 min-w-64 max-w-64">
                 <h3 class="text-white mb-2 text-center">Room Name: {{gameService.room.name}}</h3>
-                <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-1/2">copy</button>
+                
+                <div class="justify-center mb-2 grid grid-cols-2 gap-y-2">
+                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full">Game</label>
+                    <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full">Share Link</button>
+                    <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full">Report Issue</button>
+                </div>
 
                 <app-messenger></app-messenger>
-
-                <div class="shrink flex justify-center mb-2">
-                    <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-1/2">Game</label>
-                </div>
 
                 <div class="">
                     <app-card-list></app-card-list>
@@ -39,7 +40,7 @@
         
     </div>
 
-    <div class="drawer-side">
+    <div class="drawer-side ">
         <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <ul class="menu popupColors min-h-full w-80 p-4">
             <li><button type="button" (click)="randomizeTurnOrder()">Randomize Turn Order</button></li>
@@ -48,5 +49,5 @@
         </ul>
     </div>
 
-    
+    <app-report-modal></app-report-modal>
 </div>
