@@ -1,20 +1,21 @@
 import { Component, ViewChild } from '@angular/core';
-import { WebRTCService } from '../../services/webRTC/web-rtc.service';
-import { UserStreamComponent } from '../users/user-stream/user-stream.component';
+import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
+import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { IPlayer, IUser, UserType } from '../../interfaces/player';
-import { IRoom } from '../../interfaces/room';
-import { MessengerComponent } from '../messaging/messenger/messenger.component';
-import { GameEvent, IGameEvent } from '../../interfaces/game';
-import { InputService } from '../../services/input/input.service';
-import { UserInputAction } from '../../interfaces/inputs';
-import { ScryfallService } from '../../services/scryfall/scryfall.service';
-import { CardListComponent } from '../card-list/card-list.component';
-import { GameService } from '../../services/game/game.service';
+import { IPlayer, IUser, UserType } from '../../../interfaces/player';
+import { IRoom } from '../../../interfaces/room';
+import { MessengerComponent } from '../../messaging/messenger/messenger.component';
+import { GameEvent, GameType, IGameEvent } from '../../../interfaces/game';
+import { InputService } from '../../../services/input/input.service';
+import { UserInputAction } from '../../../interfaces/inputs';
+import { ScryfallService } from '../../../services/scryfall/scryfall.service';
+import { CardListComponent } from '../../card-list/card-list.component';
+import { GameService } from '../../../services/game/game.service';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ReportModalComponent } from '../report-modal/report-modal.component';
+import { ReportModalComponent } from '../../report-modal/report-modal.component';
+import { AlertsService } from '../../../services/alerts/alerts.service';
 
 @Component({
   selector: 'app-game',
@@ -34,7 +35,13 @@ export class GameComponent {
 
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
 
-  constructor(private webRTC: WebRTCService, private inputService: InputService,public gameService:GameService, private router: Router, private route: ActivatedRoute) {
+  constructor(
+    private webRTC: WebRTCService, 
+    private inputService: InputService,
+    public gameService:GameService,
+    private router: Router, 
+    private route: ActivatedRoute,
+    private alertService: AlertsService) {
   }
 
   ngOnInit() {
@@ -68,9 +75,11 @@ export class GameComponent {
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
 
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
+    const gameType = localStorage.getItem("gameType");
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), roomId, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
-      this.gameService.room = room;
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), roomId,gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
+      this.gameService.setRoom(room);
+      console.log(room);
       this.localPlayerId = me.id;
 
       localStorage.setItem("playerId", me.id);
@@ -203,7 +212,7 @@ export class GameComponent {
   copyUrl() {
     const currentUrl = window.location.href; // Get the current URL
     navigator.clipboard.writeText(currentUrl).then(() => {
-      alert('URL copied to clipboard!');
+      this.alertService.addAlert('success','URL copied to clipboard!');
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });

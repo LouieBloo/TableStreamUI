@@ -1,7 +1,7 @@
 <div>
     <div class="flex justify-center mb-2">
         <button class="hidden" onclick="searchModal.showModal()" id="toggleModal">hidden</button>
-        <button class="btn btn-sm btn-outline text-white" (click)="openSearchModal()" id="luke">Search Cards (ctrl + i)</button>
+        <button class="btn btn-sm w-full btn-outline text-white" (click)="openSearchModal()" id="luke">Search Cards (ctrl + i)</button>
     </div>
 
     <dialog id="searchModal" class="modal ">
@@ -10,7 +10,7 @@
                 <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeModal" >✕</button>
             </form>
 
-            <h3 class="text-lg font-bold">Card Search</h3>
+            <h3 class="text-lg font-bold">Card Search <span class="text-sm">({{this.gameService.room.game?.searchTag}})</span></h3>
             <p class="text-sm">Select to share</p>
 
             <form #searchForm="ngForm" (ngSubmit)="sendSearch()" class="mb-2">

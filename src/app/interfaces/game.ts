@@ -39,10 +39,10 @@ export enum PlayerProperties{
     energyTotal
 }
 
-export interface IGame{
-    startingLifeTotal: string;
-    sharedCards:ScryfallCard[];
-}
+// export interface IGame{
+//     startingLifeTotal: string;
+//     sharedCards:ScryfallCard[];
+// }
 
 export interface ICommanderDamage{
     playerId:string;

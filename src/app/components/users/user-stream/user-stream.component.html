@@ -25,7 +25,7 @@
     </div>
 
     <div class="absolute top-2 left-2 text-white flex flex-col ">
-        <div *ngIf="player">
+        <div *ngIf="player && gameService.isCommanderGame()">
             <app-set-commander [player]="player" [editable]="localStream"></app-set-commander>
         </div>
 

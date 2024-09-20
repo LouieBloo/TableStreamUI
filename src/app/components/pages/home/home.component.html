@@ -22,10 +22,22 @@
               <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
                      class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
-            <div class="mb-6">
+            <div class="mb-4">
               <label for="gameName" class="block text-sm font-medium text-white">Room Name:</label>
               <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required
                      class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+            </div>
+            <div class="mb-6">
+              <label for="gameType" class="block text-sm font-medium text-white">Game Type:</label>
+              <select
+                id="gameType"
+                name="gameType"
+                [(ngModel)]="player.gameType"
+                class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black"
+                required
+              >
+                <option *ngFor="let type of gameTypes()" [value]="type.value">{{ type.label }}</option>
+              </select>
             </div>
             <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed" [disabled]="!createForm.valid">
               Create Game
@@ -38,7 +50,7 @@
           <form #joinForm="ngForm" (ngSubmit)="onJoinGame()">
             <div class="mb-4">
               <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
-              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
+              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" autofocus required
                      class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-6">

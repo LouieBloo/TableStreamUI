@@ -1,10 +1,10 @@
 <div>
     <div *ngIf="editable && !player.commander" class="">
-        <button type="button" class="text-sm flex items-center" (click)="openSearch()">Commander <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon></button>
+        <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch()">Commander <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon></button>
     </div>
     
     <div *ngIf="player.commander" class="relative group " (mouseover)="onMouseOver($event)" >
-        <p class="text-sm flex items-center cursor-pointer" (click)="openSearch()">{{player.commander.name}} <ng-icon *ngIf="editable" class="ml-1" name="bootstrapPencilSquare"></ng-icon></p>
+        <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch()">{{player.commander.name}} <ng-icon *ngIf="editable" class="ml-1" name="bootstrapPencilSquare"></ng-icon></p>
         <!-- Popup content -->
         <div class="fixed hidden group-hover:block z-10">
             <div class="">

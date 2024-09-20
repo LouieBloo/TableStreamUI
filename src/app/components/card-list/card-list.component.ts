@@ -12,6 +12,7 @@ import { debounceTime, Subject, Subscription } from 'rxjs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
 import { ModalServiceService, ModalType } from '../../services/modal/modal-service.service';
+import { GameService } from '../../services/game/game.service';
 
 @Component({
   selector: 'app-card-list',
@@ -42,7 +43,13 @@ export class CardListComponent {
 
   private inputSubscription!: Subscription;
 
-  constructor(private scryfallService: ScryfallService, private elRef: ElementRef, private inputService: InputService, private webRtc:WebRTCService, private modalService: ModalServiceService){
+  constructor(
+    private scryfallService: ScryfallService,
+    private elRef: ElementRef,
+    private inputService: InputService,
+    private webRtc:WebRTCService,
+    private modalService: ModalServiceService,
+    public gameService:GameService){
     
   }
 
@@ -104,7 +111,8 @@ export class CardListComponent {
   search= ()=>{
     if(!this.searchString){return;}
     this.searching = true;
-    this.scryfallService.searchCards(this.searchString).subscribe(
+    console.log(this.gameService.room)
+    this.scryfallService.searchCards(this.searchString,true,this.gameService.room.game?.searchTag).subscribe(
       (response: any) => {
         console.log(response)
         this.searchResults = response.data;

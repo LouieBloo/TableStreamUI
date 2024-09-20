@@ -3,7 +3,7 @@ import io, { Socket } from 'socket.io-client';
 import { IMessage } from '../../interfaces/message';
 import { environment } from '../../../environments/environment';
 import { IPlayer, IUser, UserType } from '../../interfaces/player';
-import { GameErrorType, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
+import { GameErrorType, GameEvent, GameType, IGameError, IGameEvent } from '../../interfaces/game';
 import { AlertsService } from '../alerts/alerts.service';
 import { IRoom } from '../../interfaces/room';
 
@@ -55,7 +55,7 @@ export class WebRTCService {
 
 
 
-  public joinRoom(playerName: any, roomId:any, roomName: any, userType: UserType, callback: any) {
+  public joinRoom(playerName: any, roomId:any,gameType: any, roomName: any, userType: UserType, callback: any) {
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -70,7 +70,7 @@ export class WebRTCService {
     this.amISpectator = userType == UserType.Spectator;
 
     if (this.socket) {
-      this.socket.emit('joinRoom', {playerId: localStorage.getItem("playerId"), roomId: roomId, roomName: roomName, playerName: playerName, userType: userType }, (newPlayer: IUser, room:IRoom, error:any) => {
+      this.socket.emit('joinRoom', {playerId: localStorage.getItem("playerId"), roomId: roomId, gameType: gameType, roomName: roomName, playerName: playerName, userType: userType }, (newPlayer: IUser, room:IRoom, error:any) => {
         if(error){
           console.log(error)
           this.alertService.addAlert("error",error.message);

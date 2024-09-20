@@ -17,7 +17,10 @@ export class ScryfallService {
     if (fuzzy) {
       searchQuery = `${query}`;
     }
+    console.log(format)
     const params = new HttpParams().set('q', `${searchQuery} format=${format}`);
     return this.http.get<any>(this.apiUrl, { params });
   }
+
+
 }

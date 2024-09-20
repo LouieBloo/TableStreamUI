@@ -2,12 +2,14 @@ import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { GameType } from '../../../interfaces/game';
+import { GameService } from '../../../services/game/game.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, NgClass, NgIf],
+  imports: [FormsModule, NgClass, NgIf, NgFor],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -19,10 +21,11 @@ export class HomeComponent {
     name: '',
     roomName: '',
     isSpectator: false,
-    roomId:''
+    roomId:'',
+    gameType: GameType.MTGCommander
   };
 
-  constructor(private router: Router, private webRTC: WebRTCService, private route: ActivatedRoute){}
+  constructor(private router: Router, private webRTC: WebRTCService, private route: ActivatedRoute, private gameService: GameService){}
 
   ngOnInit() {
     let joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
@@ -33,6 +36,7 @@ export class HomeComponent {
 
     this.webRTC.disconnect();
     localStorage.removeItem("roomName");
+    localStorage.removeItem("gameType");
 
     if(localStorage.getItem("playerName")){
       this.player.name = localStorage.getItem("playerName")!;
@@ -47,6 +51,7 @@ export class HomeComponent {
   onCreateGame() {
     localStorage.setItem("playerName", this.player.name);
     localStorage.setItem("roomName", this.player.roomName);
+    localStorage.setItem("gameType", this.player.gameType.toString());
     this.router.navigate(['/game']);
   }
 
@@ -58,5 +63,18 @@ export class HomeComponent {
       queryParams: { id: this.player.roomId}, 
       queryParamsHandling: 'merge', 
     });
+  }
+
+  gameTypes = ()=>{
+    return [{
+      value: GameType.MTGCommander,
+      label: "MTG Commander"
+    },{
+      value: GameType.MTGModern,
+      label: "MTG Modern"
+    },{
+      value: GameType.MTGStandard,
+      label: "MTG Standard"
+    }]
   }
 }
