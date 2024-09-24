@@ -14,13 +14,16 @@ import { GameService } from '../../../services/game/game.service';
 import { Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ReportModalComponent } from '../../report-modal/report-modal.component';
+import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
 import { AlertsService } from '../../../services/alerts/alerts.service';
+import { PasswordModalComponent } from '../../modals/password-modal/password-modal.component';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -30,10 +33,12 @@ export class GameComponent {
   localPlayer!: IPlayer;
 
   sortedPlayers: IPlayer[] = [];
+  roomId!: string;
 
   private inputSubscription!: Subscription;
 
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
+  @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
 
   constructor(
     private webRTC: WebRTCService, 
@@ -41,21 +46,31 @@ export class GameComponent {
     public gameService:GameService,
     private router: Router, 
     private route: ActivatedRoute,
-    private alertService: AlertsService) {
+    private alertService: AlertsService,
+    private http:HttpClient) {
+      this.gameService.room = {
+        name: "temp",
+        players: [],
+        messages: []
+      }
   }
 
-  ngOnInit() {
-    let roomId = this.route.snapshot.queryParamMap.get('id')!;
 
-    if(!localStorage.getItem('playerName')){
-      if(roomId){
+  ngOnInit() {
+    this.roomId = this.route.snapshot.queryParamMap.get('id')!;
+    let hasSetSpectator = localStorage.getItem("isSpectator") == 'false' || localStorage.getItem("isSpectator") == 'true';
+
+    if(!localStorage.getItem('playerName') || !hasSetSpectator){
+      if(this.roomId){
         this.router.navigate(['/'], {
-          queryParams: { id: roomId}, 
+          queryParams: { id: this.roomId}, 
           queryParamsHandling: 'merge',
         });
       }else{
         this.router.navigate(['/']);
       }
+
+      return;
     }
 
     this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction) => {
@@ -64,20 +79,43 @@ export class GameComponent {
       }
     })
 
-    this.gameService.room = {
-      name: "temp",
-      players: [],
-      messages: []
-    }
+    
 
     this.webRTC.subscribeToStreamAdd(this.streamAdded);
     this.webRTC.subscribeToStreamRemove(this.streamRemoved);
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
 
+    this.checkPasswordProtection(this.roomId);
+  }
+
+  checkPasswordProtection = async(roomId:string)=>{
+    if(localStorage.getItem("password")){
+      this.loadIntoGame(localStorage.getItem("password"));
+      return;
+    }
+
+    this.http.post(environment.socketUrl + '/password-check',{roomId: roomId}).subscribe(
+      (response:any) => {
+        if(response.result == true){
+          this.passwordModal.open(this.loadIntoGame)
+        }else{
+          this.loadIntoGame(null);
+        }
+      },
+      (error) => {
+        console.error('Error joining game:', error);
+        alert('Error joining game:' + error);
+      }
+    );
+  }
+
+  loadIntoGame = (password:string | null)=>{
+    localStorage.setItem("password",password + "");
+
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
     const gameType = localStorage.getItem("gameType");
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), roomId,gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
       this.gameService.setRoom(room);
       console.log(room);
       this.localPlayerId = me.id;

@@ -55,7 +55,7 @@ export class WebRTCService {
 
 
 
-  public joinRoom(playerName: any, roomId:any,gameType: any, roomName: any, userType: UserType, callback: any) {
+  public joinRoom(playerName: any, roomId:any,password: any, gameType: any, roomName: any, userType: UserType, callback: any) {
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -70,26 +70,36 @@ export class WebRTCService {
     this.amISpectator = userType == UserType.Spectator;
 
     if (this.socket) {
-      this.socket.emit('joinRoom', {playerId: localStorage.getItem("playerId"), roomId: roomId, gameType: gameType, roomName: roomName, playerName: playerName, userType: userType }, (newPlayer: IUser, room:IRoom, error:any) => {
-        if(error){
-          console.log(error)
-          this.alertService.addAlert("error",error.message);
-          return;
-        }
-        //set all our gamestate
-        if(room.messages){
-          room.messages.forEach(m=> this.handleMessage(m))
-        }
-        if(room.game && room.game.sharedCards){
-          room.game.sharedCards.forEach(card => {
-            this.handleGameEvent({
-              event: GameEvent.ShareCard,
-              response: card
+      this.socket.emit('joinRoom', {
+          playerId: localStorage.getItem("playerId"),
+          roomId: roomId, 
+          gameType: gameType,
+          roomName: roomName,
+          playerName: playerName,
+          password: password,
+          userType: userType
+        },
+        
+        (newPlayer: IUser, room:IRoom, error:any) => {
+          if(error){
+            console.log(error)
+            this.alertService.addAlert("error",error.message);
+            return;
+          }
+          //set all our gamestate
+          if(room.messages){
+            room.messages.forEach(m=> this.handleMessage(m))
+          }
+          if(room.game && room.game.sharedCards){
+            room.game.sharedCards.forEach(card => {
+              this.handleGameEvent({
+                event: GameEvent.ShareCard,
+                response: card
+              })
             })
-          })
-        }
-        callback(newPlayer, roomName, room)
-      });
+          }
+          callback(newPlayer, roomName, room)
+        });
     }
   }
 

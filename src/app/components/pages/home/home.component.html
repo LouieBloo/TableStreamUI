@@ -27,6 +27,11 @@
               <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required
                      class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
+            <div class="mb-4">
+              <label for="password" class="block text-sm font-medium text-white">Password (optional):</label>
+              <input type="text" id="password" name="password" [(ngModel)]="player.password" 
+                     class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+            </div>
             <div class="mb-6">
               <label for="gameType" class="block text-sm font-medium text-white">Game Type:</label>
               <select

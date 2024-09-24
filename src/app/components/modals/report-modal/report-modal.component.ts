@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../environments/environment';
-import { AlertsService } from '../../services/alerts/alerts.service';
+import { environment } from '../../../../environments/environment';
+import { AlertsService } from '../../../services/alerts/alerts.service';
 
 @Component({
   selector: 'app-report-modal',

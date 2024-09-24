@@ -22,6 +22,7 @@ export class HomeComponent {
     roomName: '',
     isSpectator: false,
     roomId:'',
+    password: null,
     gameType: GameType.MTGCommander
   };
 
@@ -37,6 +38,8 @@ export class HomeComponent {
     this.webRTC.disconnect();
     localStorage.removeItem("roomName");
     localStorage.removeItem("gameType");
+    localStorage.removeItem("isSpectator");
+    localStorage.removeItem("password");
 
     if(localStorage.getItem("playerName")){
       this.player.name = localStorage.getItem("playerName")!;
@@ -52,6 +55,10 @@ export class HomeComponent {
     localStorage.setItem("playerName", this.player.name);
     localStorage.setItem("roomName", this.player.roomName);
     localStorage.setItem("gameType", this.player.gameType.toString());
+    localStorage.setItem("isSpectator", 'false');
+    if(this.player.password){
+      localStorage.setItem("password", this.player.password);
+    }
     this.router.navigate(['/game']);
   }
 
@@ -70,11 +77,17 @@ export class HomeComponent {
       value: GameType.MTGCommander,
       label: "MTG Commander"
     },{
+      value: GameType.MTGLegacy,
+      label: "MTG Legacy"
+    },{
       value: GameType.MTGModern,
       label: "MTG Modern"
     },{
       value: GameType.MTGStandard,
       label: "MTG Standard"
+    },{
+      value: GameType.MTGVintage,
+      label: "MTG Vintage"
     }]
   }
 }

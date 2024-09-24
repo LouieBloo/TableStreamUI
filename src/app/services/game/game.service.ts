@@ -6,6 +6,8 @@ import { MTGCommander } from '../../classes/game/MTGCommander';
 import { MTGStandard } from '../../classes/game/MTGStandard';
 import { MTGModern } from '../../classes/game/MTGModern';
 import { Game } from '../../classes/game/game';
+import { MTGLegacy } from '../../classes/game/MTGLegacy';
+import { MTGVintage } from '../../classes/game/MTGVintage';
 
 @Injectable({
   providedIn: 'root'
@@ -50,6 +52,12 @@ export class GameService {
         break;
       case GameType.MTGModern:
         return new MTGModern();
+        break;
+      case GameType.MTGLegacy:
+        return new MTGLegacy();
+        break;
+      case GameType.MTGVintage:
+        return new MTGVintage();
         break;
     }
 

@@ -25,7 +25,9 @@ export enum GameType{
     Game,
     MTGCommander,
     MTGStandard,
-    MTGModern
+    MTGModern,
+    MTGLegacy,
+    MTGVintage
 }
 
 export interface IModifyPlayerProperty{
