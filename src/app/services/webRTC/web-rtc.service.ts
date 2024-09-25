@@ -20,20 +20,61 @@ export class WebRTCService {
   onGameEvent: ((update: IGameEvent) => void)[] = [];
   onMessage: ((message: IMessage) => void)[] = [];
 
-  amISpectator:boolean = false;
-  // roomName: string = "";
-  // playerName: string = "";
+  amISpectator: boolean = false;
 
-  constructor(private alertService:AlertsService) {
+  constructor(private alertService: AlertsService) {}
 
-  }
-
-  public async initLocalStream(): Promise<MediaStream> {
+  public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string): Promise<MediaStream> {
     if (this.localStream) { return this.localStream }
 
-    this.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    const constraints: MediaStreamConstraints = {
+      video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
+      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true
+    };
+
+    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
     console.log("init local stream: ", this.localStream)
     return this.localStream;
+  }
+
+  public async changeDevice(videoDeviceId?: string, audioDeviceId?: string): Promise<void> {
+    // Stop existing tracks
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Reinitialize local stream with new device(s)
+    const constraints: MediaStreamConstraints = {
+      video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
+      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true
+    };
+
+    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    // Replace tracks in peer connections
+    for (const socketId in this.peerConnections) {
+      const pc = this.peerConnections[socketId];
+
+      // Remove existing senders
+      const senders = pc.getSenders();
+      senders.forEach(sender => {
+        pc.removeTrack(sender);
+      });
+
+      // Add new tracks
+      this.localStream.getTracks().forEach(track => {
+        pc.addTrack(track, this.localStream!);
+      });
+
+      // Renegotiate the connection
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
+    }
+  }
+
+  public async getMediaDevices(): Promise<MediaDeviceInfo[]> {
+    return await navigator.mediaDevices.enumerateDevices();
   }
 
   public subscribeToStreamAdd(callback: (id: string, stream: MediaStream, user: IUser) => void) {
@@ -53,16 +94,14 @@ export class WebRTCService {
     console.log(this.onStreamRemoved.length)
   }
 
-
-
-  public joinRoom(playerName: any, roomId:any,password: any, gameType: any, roomName: any, userType: UserType, callback: any) {
+  public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, callback: any) {
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.socket.on('message', this.handleMessage);
     this.socket.on('gameEvent', this.handleGameEvent);
-    this.socket.on('errorResponse',this.handleErrorResponse);
+    this.socket.on('errorResponse', this.handleErrorResponse);
 
     this.remoteStreams = {};
     this.peerConnections = {};
@@ -71,26 +110,26 @@ export class WebRTCService {
 
     if (this.socket) {
       this.socket.emit('joinRoom', {
-          playerId: localStorage.getItem("playerId"),
-          roomId: roomId, 
-          gameType: gameType,
-          roomName: roomName,
-          playerName: playerName,
-          password: password,
-          userType: userType
-        },
-        
-        (newPlayer: IUser, room:IRoom, error:any) => {
-          if(error){
+        playerId: localStorage.getItem("playerId"),
+        roomId: roomId,
+        gameType: gameType,
+        roomName: roomName,
+        playerName: playerName,
+        password: password,
+        userType: userType
+      },
+
+        (newPlayer: IUser, room: IRoom, error: any) => {
+          if (error) {
             console.log(error)
-            this.alertService.addAlert("error",error.message);
+            this.alertService.addAlert("error", error.message);
             return;
           }
-          //set all our gamestate
-          if(room.messages){
-            room.messages.forEach(m=> this.handleMessage(m))
+          // Set all our game state
+          if (room.messages) {
+            room.messages.forEach(m => this.handleMessage(m))
           }
-          if(room.game && room.game.sharedCards){
+          if (room.game && room.game.sharedCards) {
             room.game.sharedCards.forEach(card => {
               this.handleGameEvent({
                 event: GameEvent.ShareCard,
@@ -163,11 +202,11 @@ export class WebRTCService {
     });
   };
 
-  private async createPeerConnection(socketId: string, user: IUser, newPeer:boolean = false) {
+  private async createPeerConnection(socketId: string, user: IUser, newPeer: boolean = false) {
     console.log("Creating peer connection: ", socketId, user)
-    //if we are a spectator and a spectator is coming in we dont create a connection
-    if(this.amISpectator && user.type == UserType.Spectator){
-      console.log("not adding connection as its spectator");
+    // If we are a spectator and a spectator is coming in, we don't create a connection
+    if (this.amISpectator && user.type == UserType.Spectator) {
+      console.log("Not adding connection as it's spectator");
       return;
     }
 
@@ -185,12 +224,6 @@ export class WebRTCService {
     };
 
     peerConnection.ontrack = (event) => {
-      // if (!this.remoteStreams[socketId]) {
-      //   this.remoteStreams[socketId] = new MediaStream();
-      // }
-      // event.streams[0].getTracks().forEach(track => {
-      //   this.remoteStreams[socketId].addTrack(track);
-      // });
       console.log("on track: ", event)
       this.remoteStreams[socketId] = event.streams[0];
       this.onStreamAdded.forEach(callback => {
@@ -198,36 +231,20 @@ export class WebRTCService {
       });
     };
 
-    // if (this.localStream) {
-    //   this.localStream.getTracks().forEach((track) => {
-    //     peerConnection.addTrack(track, this.localStream!);
-    //   });
-    // }
-
     // Listen for negotiation needed event to handle offer/answer exchange
     peerConnection.onnegotiationneeded = async () => {
-      console.log("on negation: ", socketId, peerConnection.signalingState)
+      console.log("on negotiation: ", socketId, peerConnection.signalingState)
       try {
-        
+
         if (peerConnection.signalingState === 'stable') {
 
-          
           const offer = await peerConnection.createOffer({
             offerToReceiveVideo: true,
-            offerToReceiveAudio: false
+            offerToReceiveAudio: true
           });
 
-          // let localS = await this.initLocalStream()
-          // localS.getTracks().forEach((track) => {
-          //   peerConnection.addTrack(track  , this.localStream!);
-          // });
-
-          // if(!this.amISpectator){
-          //   await peerConnection.setLocalDescription(offer);
-          // }
-
           await peerConnection.setLocalDescription(offer);
-          
+
           this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
         }
       } catch (error) {
@@ -235,20 +252,19 @@ export class WebRTCService {
       }
     };
 
-
-    if(!this.amISpectator){
+    if (!this.amISpectator) {
       console.log("setting local stream:   ")
       let localS = await this.initLocalStream()
       localS.getTracks().forEach((track) => {
         console.log("adding tracks for: ", socketId)
         peerConnection.addTrack(track, this.localStream!);
       });
-    }else if(newPeer){
+    } else if (newPeer) {
 
       console.log("signal state: ", peerConnection.signalingState)
       const offer = await peerConnection.createOffer({
         offerToReceiveVideo: true,
-        offerToReceiveAudio: false
+        offerToReceiveAudio: true
       });
 
       await peerConnection.setLocalDescription(offer);
@@ -286,11 +302,9 @@ export class WebRTCService {
     })
   }
 
-  
-
-  handleErrorResponse = (error: IGameError)=>{
+  handleErrorResponse = (error: IGameError) => {
     console.log(error);
-    this.alertService.addAlert("error",error.message);
+    this.alertService.addAlert("error", error.message);
   }
 
   public subscribeToGameEvents = (callback: (update: IGameEvent) => void) => {
@@ -300,4 +314,34 @@ export class WebRTCService {
   public unsubscribeToGameEvent = (callback: (update: IGameEvent) => void) => {
     this.onGameEvent = this.onGameEvent.filter((checkCallback) => { checkCallback !== callback })
   }
+
+  // Mute/Unmute methods
+  public muteSelf(): void {
+    if (this.localStream) {
+      this.localStream.getAudioTracks().forEach(track => track.enabled = false);
+    }
+  }
+
+  public unmuteSelf(): void {
+    if (this.localStream) {
+      this.localStream.getAudioTracks().forEach(track => track.enabled = true);
+    }
+  }
+
+  public turnOffVideo(): void {
+    if (this.localStream) {
+      this.localStream.getVideoTracks().forEach(track => track.enabled = false);
+    }
+  }
+
+  public turnOnVideo(): void {
+    if (this.localStream) {
+      this.localStream.getVideoTracks().forEach(track => track.enabled = true);
+    }
+  }
+
+  public getRemoteStream(socketId: string): MediaStream | null {
+    return this.remoteStreams[socketId] || null;
+  }
+
 }
