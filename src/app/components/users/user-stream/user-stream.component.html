@@ -3,7 +3,8 @@
     <!-- <div class="absolute w-full h-full glow top-0 left-0"></div> -->
 
     <div class="flex justify-center h-full">
-        <video #videoElement autoplay style="max-width: fit-content;" class="w-full "></video>
+        <video #videoElement autoplay style="max-width: fit-content;" class="w-full "
+            [muted]="localStream || muted"></video>
         <!-- <img class="w-full" style="max-width: fit-content;" src="https://as1.ftcdn.net/v2/jpg/01/63/11/70/1000_F_163117064_syJkTuCddASYjvl4WqyRmnuy8cDXpoQY.jpg"> -->
     </div>
 
@@ -18,7 +19,8 @@
 
     <div class="absolute top-16 left-2 flex flex-col" *ngIf="showCommanderDamage">
         <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
-            <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name" [total]="player.commanderDamages[playerId].damage"
+            <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
+                [total]="player.commanderDamages[playerId].damage"
                 [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-2">
             </app-property-counter>
         </ng-container>
@@ -31,7 +33,7 @@
 
         <div class="text-xs">
             <!-- <p class="">{{ !localStream ? "Remote: " + player.socketId : "Local" }} - {{player.name}}</p> -->
-             <!-- todo this re-renders the whole component every tick -->
+            <!-- todo this re-renders the whole component every tick -->
             <p>Turn: {{ player.currentTurnStartTime | timeAgo | async }}</p>
             <p>Avg: {{ (player.totalTurnTime/ ( (player.totalTurns) || 1 ) ) | timeAgo | async }}</p>
         </div>
@@ -46,6 +48,56 @@
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
                 <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Commander Damage</a></li>
+                <!-- Local Stream Controls -->
+                <ng-container *ngIf="localStream">
+                    <li (click)="toggleMuteSelf()" class="text-slate-800">
+                        <a>{{ isMutedSelf ? 'Unmute Self' : 'Mute Self' }}</a>
+                    </li>
+                    <li (click)="toggleVideo()" class="text-slate-800">
+                        <a>{{ isVideoOff ? 'Turn On Video' : 'Turn Off Video' }}</a>
+                    </li>
+                    <li class="text-slate-800">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Video Device:</label>
+                            <select (change)="onVideoDeviceChange($event)"
+                                class="select select-bordered w-full max-w-xs">
+                                <option *ngFor="let device of videoInputDevices" [value]="device.deviceId"
+                                    [selected]="device.deviceId === selectedVideoDeviceId">
+                                    {{ device.label || 'Camera ' + device.deviceId }}
+                                </option>
+                            </select>
+                        </div>
+                    </li>
+                    <li class="text-slate-800">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Audio Device:</label>
+                            <select (change)="onAudioDeviceChange($event)"
+                                class="select select-bordered w-full max-w-xs">
+                                <option *ngFor="let device of audioInputDevices" [value]="device.deviceId"
+                                    [selected]="device.deviceId === selectedAudioDeviceId">
+                                    {{ device.label || 'Microphone ' + device.deviceId }}
+                                </option>
+                            </select>
+                        </div>
+                    </li>
+                </ng-container>
+
+                <!-- Remote Stream Controls -->
+                <ng-container *ngIf="!localStream">
+                    <li *ngIf="!muted" (click)="muteRemoteUser()" class="text-slate-800">
+                        <a>Mute Player</a>
+                    </li>
+                    <li *ngIf="muted" (click)="unmuteRemoteUser()" class="text-slate-800">
+                        <a>Unmute Player</a>
+                    </li>
+                    <li class="text-slate-800">
+                        <div class="flex items-center">
+                            <label class="block text-sm font-medium mb-1 mr-2">Volume:</label>
+                            <input type="range" min="0" max="1" step="0.01" [value]="volume"
+                                (input)="onVolumeChange($event)" class="range range-primary flex-grow" />
+                        </div>
+                    </li>
+                </ng-container>
             </ul>
         </div>
     </div>

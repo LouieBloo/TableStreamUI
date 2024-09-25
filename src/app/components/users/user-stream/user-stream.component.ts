@@ -28,6 +28,17 @@ export class UserStreamComponent {
 
   showCommanderDamage:boolean = true;
 
+  muted:boolean = false;
+  volume: number = 1;
+
+  // Device selection properties
+  audioInputDevices: MediaDeviceInfo[] = [];
+  videoInputDevices: MediaDeviceInfo[] = [];
+  selectedAudioDeviceId: string = '';
+  selectedVideoDeviceId: string = '';
+  isMutedSelf: boolean = false;
+  isVideoOff: boolean = false;
+
   constructor(private webRTC: WebRTCService, public gameService: GameService) {}
   
 
@@ -39,17 +50,34 @@ export class UserStreamComponent {
       // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
       this.setStream(this.webRTC.getStream(this.player.socketId))  
       
-    }else{
-      this.initLocalStream();
+    }else {
+      // Local stream
+      // Initialize device lists
+      navigator.mediaDevices.enumerateDevices().then((devices) => {
+        this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
+        this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
+
+        // Set default selected devices
+        if (this.videoInputDevices.length > 0) {
+          this.selectedVideoDeviceId = this.videoInputDevices[0].deviceId;
+        }
+        if (this.audioInputDevices.length > 0) {
+          this.selectedAudioDeviceId = this.audioInputDevices[0].deviceId;
+        }
+
+        // Initialize local stream with selected devices
+        this.initLocalStream();
+      });
     }
     
     this.setFlip();
   }
 
   initLocalStream() {
-    this.webRTC.initLocalStream().then(stream => {
+    this.webRTC.initLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId).then(stream => {
       if (this.video.nativeElement) {
         this.video.nativeElement.srcObject = stream;
+        this.video.nativeElement.muted = true; // Mute local video to prevent echo
       }
     });
   }
@@ -70,8 +98,71 @@ export class UserStreamComponent {
 
   setStream = (stream: MediaStream | null) => {
     if (this.video.nativeElement && stream) {
-      console.log("remote setting steram!");
+      console.log('remote setting stream!');
       this.video.nativeElement.srcObject = stream;
+      this.video.nativeElement.volume = this.volume;
+      this.video.nativeElement.muted = this.muted;
+    }
+  }
+
+  // Methods for device selection
+  onAudioDeviceChange(event: any) {
+    this.selectedAudioDeviceId = event.target.value;
+    this.changeDevice();
+  }
+
+  onVideoDeviceChange(event: any) {
+    this.selectedVideoDeviceId = event.target.value;
+    this.changeDevice();
+  }
+
+  changeDevice() {
+    this.webRTC
+      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
+      .then(() => {
+        this.initLocalStream();
+      });
+  }
+
+  toggleMuteSelf() {
+    this.isMutedSelf = !this.isMutedSelf;
+    if (this.isMutedSelf) {
+      this.webRTC.muteSelf();
+    } else {
+      this.webRTC.unmuteSelf();
+    }
+  }
+
+  toggleVideo() {
+    this.isVideoOff = !this.isVideoOff;
+    if (this.isVideoOff) {
+      this.webRTC.turnOffVideo();
+    } else {
+      this.webRTC.turnOnVideo();
+    }
+  }
+
+  // Volume control for remote streams
+  onVolumeChange(event: any) {
+    this.volume = event.target.value;
+    if (this.video.nativeElement) {
+      this.video.nativeElement.volume = this.volume;
+    }
+  }
+
+  muteRemoteUser(): void {
+    const remoteStream = this.webRTC.getRemoteStream(this.player.socketId);
+    if (remoteStream) {
+      remoteStream.getAudioTracks().forEach(track => track.enabled = false);
+      this.muted=true;
+    }
+  }
+  
+  unmuteRemoteUser(): void {
+    const remoteStream = this.webRTC.getRemoteStream(this.player.socketId);
+    if (remoteStream) {
+      remoteStream.getAudioTracks().forEach(track => track.enabled = true);
+      this.muted=false;
     }
   }
 
