@@ -25,15 +25,42 @@ export class WebRTCService {
   constructor(private alertService: AlertsService) {}
 
   public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string): Promise<MediaStream> {
-    if (this.localStream) { return this.localStream }
-
+    if (this.localStream) { return this.localStream; }
+  
     const constraints: MediaStreamConstraints = {
       video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
       audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true
     };
-
-    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-    console.log("init local stream: ", this.localStream)
+  
+    try {
+      this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log("init local stream: ", this.localStream);
+    } catch (err:any) {
+      console.error("Error getting media stream:", err);
+  
+      // If audio permission is denied, try again without audio
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        if (constraints.audio) {
+          console.log("Audio permission denied, trying again without audio");
+          constraints.audio = false;
+          try {
+            this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            console.log("init local stream without audio: ", this.localStream);
+          } catch (err2) {
+            console.error("Error getting media stream without audio:", err2);
+            // Handle error (perhaps video is also denied)
+            throw err2;
+          }
+        } else {
+          // Audio is not requested, the error must be with video
+          throw err;
+        }
+      } else {
+        // Other errors
+        throw err;
+      }
+    }
+  
     return this.localStream;
   }
 
