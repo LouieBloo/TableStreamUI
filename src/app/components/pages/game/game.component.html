@@ -18,9 +18,20 @@
                     <h3 class="text-white mb-2 ">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.searchTag}}</span></h3>
                     
                     <div class="justify-center mb-2 grid grid-cols-2 gap-y-2">
-                        <label *ngIf="localPlayer?.admin" for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full">Game</label>
+                        <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full" >Game</label></div>
+                        
                         <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full">Share Link</button>
                         <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full">Report Issue</button>
+                        <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
+                    </div>
+
+                    <div *ngIf="showingHotkeys" class="mb-4">
+                        <ul class="text-white ">
+                            <li>(Space Bar) - pass turn</li>
+                            <li>(Ctrl + i) - search cards</li>
+                            <li>(Up Arrow) - add health</li>
+                            <li>(Down Arrow) - remove health</li>
+                        </ul>
                     </div>
                 </div>
 

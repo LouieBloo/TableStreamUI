@@ -40,6 +40,7 @@ export class HomeComponent {
     localStorage.removeItem("gameType");
     localStorage.removeItem("isSpectator");
     localStorage.removeItem("password");
+    localStorage.removeItem('roomId')
 
     if(localStorage.getItem("playerName")){
       this.player.name = localStorage.getItem("playerName")!;

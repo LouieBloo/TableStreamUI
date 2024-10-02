@@ -19,11 +19,12 @@ import { AlertsService } from '../../../services/alerts/alerts.service';
 import { PasswordModalComponent } from '../../modals/password-modal/password-modal.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { TooltipDirective } from '../../../directives/tooltip.directive';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -34,6 +35,8 @@ export class GameComponent {
 
   sortedPlayers: IPlayer[] = [];
   roomId!: string;
+
+  showingHotkeys:boolean = false;
 
   private inputSubscription!: Subscription;
 
@@ -58,16 +61,23 @@ export class GameComponent {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
+    let previousRoomId = localStorage.getItem('roomId');
     let hasSetSpectator = localStorage.getItem("isSpectator") == 'false' || localStorage.getItem("isSpectator") == 'true';
+    
+    if(!localStorage.getItem('hasPlayedBefore')){
+      this.showingHotkeys = true;
+      localStorage.setItem('hasPlayedBefore', 'true');
+      setTimeout(()=>{this.showingHotkeys = false},1000 *60 * 5)
+    }
 
-    if(!localStorage.getItem('playerName') || !hasSetSpectator){
+    if(!localStorage.getItem('playerName') || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)){
       if(this.roomId){
-        this.router.navigate(['/'], {
+        this.router.navigate(['/join'], {
           queryParams: { id: this.roomId}, 
           queryParamsHandling: 'merge',
         });
       }else{
-        this.router.navigate(['/']);
+        this.router.navigate(['/join']);
       }
 
       return;
@@ -86,6 +96,8 @@ export class GameComponent {
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
 
     this.checkPasswordProtection(this.roomId);
+
+    
   }
 
   checkPasswordProtection = async(roomId:string)=>{
@@ -120,13 +132,14 @@ export class GameComponent {
       console.log(room);
       this.localPlayerId = me.id;
 
+      localStorage.setItem('roomId',room.id + "")
       localStorage.setItem("playerId", me.id);
+
       this.router.navigate([], {
         queryParams: { id: room.id}, 
         queryParamsHandling: 'merge', // This merges with any existing query params
         replaceUrl: true // Replace the current URL in history
       });
-      //localStorage.setItem("roomId", room.id + "");
 
       if(me.type == UserType.Player){
         this.localPlayer = me as IPlayer;

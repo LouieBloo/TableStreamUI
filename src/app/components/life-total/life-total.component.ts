@@ -9,11 +9,12 @@ import { IPlayer } from '../../interfaces/player';
 import { GameEvent } from '../../interfaces/game';
 import { PropertyCounterComponent } from '../property-counter/property-counter.component';
 import { Subscription } from 'rxjs';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgIconComponent,NgClass,NgIf,TitleCasePipe,PropertyCounterComponent],
+  imports: [NgIconComponent,NgClass,NgIf,TitleCasePipe,PropertyCounterComponent,TooltipDirective],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
   viewProviders: [provideIcons({ bootstrapSuitHeartFill })]
