@@ -44,8 +44,8 @@
 
     <div class="absolute right-2 top-2 ">
         <div class="dropdown">
-            <div tabindex="0" role="button" class="btn btn-xs"><ng-icon name="bootstrapGearFill"></ng-icon></div>
-            <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow ">
+            <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
+            <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
                 <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Commander Damage</a></li>
                 <!-- Local Stream Controls -->
@@ -60,7 +60,7 @@
                         <div>
                             <label class="block text-sm font-medium mb-1">Video Device:</label>
                             <select (change)="onVideoDeviceChange($event)"
-                                class="select select-bordered w-full max-w-xs">
+                                class="select select-bordered w-full max-w-xs bg-white">
                                 <option *ngFor="let device of videoInputDevices" [value]="device.deviceId"
                                     [selected]="device.deviceId === selectedVideoDeviceId">
                                     {{ device.label || 'Camera ' + device.deviceId }}
@@ -68,11 +68,11 @@
                             </select>
                         </div>
                     </li>
-                    <li class="text-slate-800">
+                    <li class="text-slate-800 text-red-600">
                         <div>
                             <label class="block text-sm font-medium mb-1">Audio Device:</label>
                             <select (change)="onAudioDeviceChange($event)"
-                                class="select select-bordered w-full max-w-xs">
+                                class="select select-bordered w-full max-w-xs bg-white">
                                 <option *ngFor="let device of audioInputDevices" [value]="device.deviceId"
                                     [selected]="device.deviceId === selectedAudioDeviceId">
                                     {{ device.label || 'Microphone ' + device.deviceId }}
