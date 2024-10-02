@@ -142,7 +142,7 @@ export class WebRTCService {
         gameType: gameType,
         roomName: roomName,
         playerName: playerName,
-        password: password,
+        password: password && password != "null" ? password : null,
         userType: userType
       },
 

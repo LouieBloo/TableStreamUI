@@ -16,7 +16,7 @@
             <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
             <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
     
-            <div class="dropdown join-item button text-white pl-4 pr-4">
+            <div class="dropdown join-item button text-white pl-4 pr-4" appTooltip="Click to see more options" [tooltipDirection]="'bottom'" [tooltipStartOpen]="editable">
                 <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
                     <p class="text-center">{{player.name | titlecase}}</p>
                     <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
