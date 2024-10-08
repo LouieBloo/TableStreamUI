@@ -2,19 +2,20 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
-import { IPlayer, IUser } from '../../../interfaces/player';
-import { GameEvent, IModifyPlayerProperty, PlayerProperties } from '../../../interfaces/game';
+import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/player';
+import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 import { GameService } from '../../../services/game/game.service';
 import { SetCommanderComponent } from '../../commander/set-commander/set-commander.component';
+import { TooltipDirective } from '../../../directives/tooltip.directive';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent,LifeTotalComponent,NgClass,NgIf,TimeAgoPipe,CommonModule,TitleCasePipe, PropertyCounterComponent, SetCommanderComponent],
+  imports: [NgIconComponent,LifeTotalComponent,NgClass,NgIf,TimeAgoPipe,CommonModule,TitleCasePipe, PropertyCounterComponent, SetCommanderComponent,TooltipDirective],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]

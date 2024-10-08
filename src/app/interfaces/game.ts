@@ -1,4 +1,4 @@
-import { IPlayer } from "./player";
+import { IPlayer, PlayerProperties } from "./player";
 import { ScryfallCard } from "./scryfall";
 
 export interface IGameEvent {
@@ -35,11 +35,7 @@ export interface IModifyPlayerProperty{
     amountToModify:number;
 }
 
-export enum PlayerProperties{
-    lifeTotal,
-    poisonTotal,
-    energyTotal
-}
+
 
 // export interface IGame{
 //     startingLifeTotal: string;

@@ -3,18 +3,17 @@
   <div class="cursor-pointer" (click)="flipImage()">
     <div class="">
       <!-- <h2 class="card-title">{{card?.name}}</h2> -->
-      <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl">
+      <div *ngIf="loadingCard" class="cardLoad">
+        <p class="text-center">Loading image...</p>
+      </div>
+      <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl" (load)="onImageLoad()" [ngClass]="{'hidden': loadingCard}">
+      <!-- <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl"> -->
     </div>
   </div>
 
   <div *ngIf="showPopup">
     <!-- Popup content -->
     <div class="cardHover hidden group-hover:block z-10">
-      <!-- <h3 class="text-lg font-bold">Card Name</h3>
-      <p class="text-sm">Type Line: Creature - Elf Druid</p>
-      <p class="text-sm">Mana Cost: G</p>
-      <p class="text-sm">CMC: 1</p>
-      <p class="text-sm">Oracle Text: Some card text here...</p> -->
       <div class="">
         <img [src]="imageUrl()" alt="Card Image" class="cardHoverImg w-full rounded-xl">
       </div>

@@ -8,7 +8,7 @@ import { UserInputAction } from '../../interfaces/inputs';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardListItemComponent } from './card-list-item/card-list-item.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { debounceTime, Subject, Subscription } from 'rxjs';
+import { debounceTime, Observable, Subject, Subscription } from 'rxjs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
 import { ModalServiceService, ModalType } from '../../services/modal/modal-service.service';
@@ -30,6 +30,7 @@ export class CardListComponent {
   searchString!:string;
   searchSubject: Subject<string> = new Subject<string>();
   sendSearchEvent: Subject<boolean> = new Subject<boolean>();
+  searchSubscription!: Subscription;
   searchResults:ScryfallCard[] = []
 
   sharedCards:ScryfallCard[] = [];
@@ -111,8 +112,12 @@ export class CardListComponent {
   search= ()=>{
     if(!this.searchString){return;}
     this.searching = true;
-    console.log(this.gameService.room)
-    this.scryfallService.searchCards(this.searchString,true,this.gameService.room.game?.searchTag).subscribe(
+
+    if(this.searchSubscription){
+      this.searchSubscription.unsubscribe();
+    }
+
+    this.searchSubscription = this.scryfallService.searchCards(this.searchString,true,this.gameService.room.game?.searchTag).subscribe(
       (response: any) => {
         console.log(response)
         this.searchResults = response.data;

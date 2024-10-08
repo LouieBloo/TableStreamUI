@@ -5,8 +5,8 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
-import { IPlayer } from '../../interfaces/player';
-import { GameEvent } from '../../interfaces/game';
+import { IPlayer, PlayerProperties } from '../../interfaces/player';
+import { GameEvent, IModifyPlayerProperty } from '../../interfaces/game';
 import { PropertyCounterComponent } from '../property-counter/property-counter.component';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../directives/tooltip.directive';
@@ -62,6 +62,14 @@ export class LifeTotalComponent {
 
   toggleMonarch = ()=>{
     this.webRtc.sendGameEvent({event: GameEvent.ToggleMonarch});
+  }
+
+  toggleCitiesBlessing = ()=>{
+    let payload: IModifyPlayerProperty = {
+      property: PlayerProperties.citiesBlessing,
+      amountToModify: 1
+    }
+    this.webRtc.sendGameEvent({event: GameEvent.ModifyPlayerProperty, payload: payload });
   }
 
 }

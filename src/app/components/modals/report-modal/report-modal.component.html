@@ -7,7 +7,8 @@
         </form>
 
         <h3 class="text-lg font-bold">Report Issue</h3>
-        <p class="text-sm">Please be as detailed as possible and include any reproduction steps.</p>
+        
+        <p class="text-sm">Alternatively you can email <strong>admin&#64;table-stream.com</strong> with any issues or feedback.</p>
 
         <form #reportForm="ngForm" (ngSubmit)="submitIssue()" class="mt-4">
             <div class="mb-4">
@@ -23,6 +24,7 @@
             </div>
             <div class="mb-6">
               <label for="issueBody" class="block text-sm font-medium text-white">Describe the problem:</label>
+              <p class="text-sm">Please be as detailed as possible and include any reproduction steps.</p>
               <textarea
                 id="issueBody"
                 name="body"

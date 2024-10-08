@@ -20,6 +20,7 @@ export interface IPlayer extends IUser{
     totalTurnTime: number;
 
     isMonarch?:boolean;
+    hasCitiesBlessing?:boolean;
 
     poisonTotal:number;
     energyTotal:number;
@@ -36,4 +37,12 @@ export interface ISpectator extends IUser{
 export enum UserType{
     Player,
     Spectator
+}
+
+export enum PlayerProperties{
+    lifeTotal,
+    poisonTotal,
+    energyTotal,
+    monarch,
+    citiesBlessing
 }

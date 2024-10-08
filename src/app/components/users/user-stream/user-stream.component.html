@@ -9,6 +9,9 @@
     </div>
 
 
+    
+
+
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <!-- <div>
             <h2>{{player?.name | titlecase }}</h2>
@@ -39,8 +42,15 @@
         </div>
     </div>
 
-
-
+    <!-- Status bar -->
+    <div class="flex flex-row absolute" id="statusBar">
+        <div *ngIf="player.hasCitiesBlessing">
+            <p class="text-center text-4xl relative"  appTooltip="This player has the Cities Blessing" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">⛪</p>
+        </div>
+        <div *ngIf="player.lifeTotal <= 0">
+            <p class="text-center text-4xl"  appTooltip="This player is dead" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">💀</p>
+        </div>
+    </div>
 
     <div class="absolute right-2 top-2 ">
         <div class="dropdown">

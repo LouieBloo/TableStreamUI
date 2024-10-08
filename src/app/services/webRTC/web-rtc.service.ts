@@ -231,71 +231,76 @@ export class WebRTCService {
 
   private async createPeerConnection(socketId: string, user: IUser, newPeer: boolean = false) {
     console.log("Creating peer connection: ", socketId, user)
-    // If we are a spectator and a spectator is coming in, we don't create a connection
-    if (this.amISpectator && user.type == UserType.Spectator) {
-      console.log("Not adding connection as it's spectator");
-      return;
-    }
-
-    const configuration = {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Add Google STUN server
-    };
-    const peerConnection = new RTCPeerConnection(configuration);
-    this.peerConnections[socketId] = peerConnection;
-
-    peerConnection.onicecandidate = (event) => {
-      console.log("on ice candidate: ", event)
-      if (event.candidate) {
-        this.socket?.emit('signal', { to: socketId, signal: event.candidate });
+    try{
+      // If we are a spectator and a spectator is coming in, we don't create a connection
+      if (this.amISpectator && user.type == UserType.Spectator) {
+        console.log("Not adding connection as it's spectator");
+        return;
       }
-    };
 
-    peerConnection.ontrack = (event) => {
-      console.log("on track: ", event)
-      this.remoteStreams[socketId] = event.streams[0];
-      this.onStreamAdded.forEach(callback => {
-        callback(socketId, this.remoteStreams[socketId], user)
-      });
-    };
+      const configuration = {
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Add Google STUN server
+      };
+      const peerConnection = new RTCPeerConnection(configuration);
+      this.peerConnections[socketId] = peerConnection;
 
-    // Listen for negotiation needed event to handle offer/answer exchange
-    peerConnection.onnegotiationneeded = async () => {
-      console.log("on negotiation: ", socketId, peerConnection.signalingState)
-      try {
-
-        if (peerConnection.signalingState === 'stable') {
-
-          const offer = await peerConnection.createOffer({
-            offerToReceiveVideo: true,
-            offerToReceiveAudio: true
-          });
-
-          await peerConnection.setLocalDescription(offer);
-
-          this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
+      peerConnection.onicecandidate = (event) => {
+        console.log("on ice candidate: ", event)
+        if (event.candidate) {
+          this.socket?.emit('signal', { to: socketId, signal: event.candidate });
         }
-      } catch (error) {
-        console.error('Error during negotiation', error);
+      };
+
+      peerConnection.ontrack = (event) => {
+        console.log("on track: ", event)
+        this.remoteStreams[socketId] = event.streams[0];
+        this.onStreamAdded.forEach(callback => {
+          callback(socketId, this.remoteStreams[socketId], user)
+        });
+      };
+
+      // Listen for negotiation needed event to handle offer/answer exchange
+      peerConnection.onnegotiationneeded = async () => {
+        console.log("on negotiation: ", socketId, peerConnection.signalingState)
+        try {
+
+          if (peerConnection.signalingState === 'stable') {
+
+            const offer = await peerConnection.createOffer({
+              offerToReceiveVideo: true,
+              offerToReceiveAudio: true
+            });
+
+            await peerConnection.setLocalDescription(offer);
+
+            this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
+          }
+        } catch (error) {
+          console.error('Error during negotiation', error);
+        }
+      };
+
+      if (!this.amISpectator) {
+        console.log("setting local stream:   ")
+        let localS = await this.initLocalStream()
+        localS.getTracks().forEach((track) => {
+          console.log("adding tracks for: ", socketId)
+          peerConnection.addTrack(track, this.localStream!);
+        });
+      } else if (newPeer) {
+
+        console.log("signal state: ", peerConnection.signalingState)
+        const offer = await peerConnection.createOffer({
+          offerToReceiveVideo: true,
+          offerToReceiveAudio: true
+        });
+
+        await peerConnection.setLocalDescription(offer);
+        this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
       }
-    };
-
-    if (!this.amISpectator) {
-      console.log("setting local stream:   ")
-      let localS = await this.initLocalStream()
-      localS.getTracks().forEach((track) => {
-        console.log("adding tracks for: ", socketId)
-        peerConnection.addTrack(track, this.localStream!);
-      });
-    } else if (newPeer) {
-
-      console.log("signal state: ", peerConnection.signalingState)
-      const offer = await peerConnection.createOffer({
-        offerToReceiveVideo: true,
-        offerToReceiveAudio: true
-      });
-
-      await peerConnection.setLocalDescription(offer);
-      this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
+    }catch(error){
+      console.error("createPeerConnection error: ", error)
+      this.alertService.addAlert("error", "There may be an error connecting to a player. Refreshing can help fix this issue");
     }
   }
 

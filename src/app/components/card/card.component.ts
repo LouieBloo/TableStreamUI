@@ -1,20 +1,21 @@
 import { Component, Input } from '@angular/core';
 import { ScryfallCard } from '../../interfaces/scryfall';
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [NgIf],
+  imports: [NgIf, NgClass],
   templateUrl: './card.component.html',
   styleUrl: './card.component.css'
 })
 export class CardComponent {
-  @Input() card!:ScryfallCard;
+  @Input() card!:ScryfallCard | null;
 
   @Input() showPopup:boolean = true;
 
   flipped:boolean = false;
+  loadingCard:boolean = true;
 
   imageUrl = ()=>{
     if(!this.card){return "";}
@@ -36,5 +37,10 @@ export class CardComponent {
 
   flipImage = ()=>{
     this.flipped = !this.flipped;
+  }
+
+  onImageLoad(): void {
+    console.log("loaded...");
+    this.loadingCard = false;
   }
 }
