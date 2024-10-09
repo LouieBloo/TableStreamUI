@@ -89,6 +89,16 @@ export class HomeComponent {
     },{
       value: GameType.MTGVintage,
       label: "MTG Vintage"
+    },{
+      value: GameType.PokemonStandard,
+      label: "Pokémon (coming soon)"
+    },{
+      value: GameType.PokemonStandard,
+      label: "Yu-Gi-Oh! (coming soon)"
     }]
+  }
+
+  isValidGameType = ():boolean=>{
+    return this.player.gameType != GameType.PokemonStandard;
   }
 }
