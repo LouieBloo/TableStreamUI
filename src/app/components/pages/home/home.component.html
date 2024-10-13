@@ -36,11 +36,24 @@
                 id="gameType"
                 name="gameType"
                 [(ngModel)]="player.gameType"
+                (ngModelChange)="onGameTypeChange($event)"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black"
                 required
               >
                 <option *ngFor="let type of gameTypes()" [value]="type.value">{{ type.label }}</option>
               </select>
+            </div>
+            <div class="mb-6">
+              <label for="gameType" class="block text-sm font-medium text-white">Max Players:</label>
+              <input
+                id="maxPlayers"
+                name="maxPlayers"
+                type="number"
+                min="2" step="1" max="6"
+                [(ngModel)]="player.maxPlayers"
+                class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black"
+                required
+              >
             </div>
             <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed" [disabled]="!createForm.valid || !isValidGameType()">
               Create Game

@@ -126,8 +126,9 @@ export class GameComponent {
 
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
     const gameType = localStorage.getItem("gameType");
+    const maxPlayers:number = parseInt(localStorage.getItem("maxPlayers") || "4");
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, (me: IUser, roomName: string, room:IRoom) => {
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player,maxPlayers, (me: IUser, roomName: string, room:IRoom) => {
       this.gameService.setRoom(room);
       console.log(room);
       this.localPlayerId = me.id;
@@ -153,6 +154,12 @@ export class GameComponent {
       })
     });
   }
+
+  // test123():void{
+  //   this.gameService.room.players.push(
+  //     {...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length+1});
+  //   this.sortPlayers();
+  // }
 
   ngOnDestroy(): void {
     if (this.inputSubscription) {
@@ -239,13 +246,50 @@ export class GameComponent {
     if (this.gameService.room && this.gameService.room.players) {
       this.sortedPlayers = this.gameService.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
+    // if(this.sortedPlayers.length == 4){
+    //   let temp:IPlayer = this.sortedPlayers[2];
+    //   this.sortedPlayers[2] = this.sortedPlayers[3];
+    //   this.sortedPlayers[3] = temp;
+    // }
+  }
 
-
-    if(this.sortedPlayers.length == 4){
-      let temp:IPlayer = this.sortedPlayers[2];
-      this.sortedPlayers[2] = this.sortedPlayers[3];
-      this.sortedPlayers[3] = temp;
+  get topRowPlayers() {
+    switch(this.sortedPlayers.length){
+      case 1:
+        return this.sortedPlayers;
+      case 2:
+        return this.sortedPlayers;
+      case 3:
+        return this.sortedPlayers.slice(0,2);
+      case 4:
+        return this.sortedPlayers.slice(0,2);
+      case 5:
+        return this.sortedPlayers.slice(0,3);
+      case 6:
+        return this.sortedPlayers.slice(0,3);
     }
+
+    return []
+  }
+
+  get bottomRowPlayers() {
+    switch(this.sortedPlayers.length){
+      case 1:
+        return [];
+      case 2:
+        return [];
+      case 3:
+        return [this.sortedPlayers[2]];
+      case 4:
+        //notice the change in order, always clockwise rotation
+        return [this.sortedPlayers[3],this.sortedPlayers[2]];
+      case 5:
+        return [this.sortedPlayers[4],this.sortedPlayers[3]];
+      case 6:
+        return [this.sortedPlayers[5],this.sortedPlayers[4],this.sortedPlayers[3]];
+    }
+
+    return []
   }
 
   startGame = () => {

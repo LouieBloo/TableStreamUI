@@ -8,4 +8,5 @@ export interface IRoom {
     players: IPlayer[];
     messages: IMessage[];
     game?: Game;
+    maxPlayers?:number;
 }

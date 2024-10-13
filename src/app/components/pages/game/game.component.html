@@ -5,9 +5,24 @@
 
         <div class="flex flex-row flex-grow">
 
-            <div class="grid grid-cols-2 flex-grow">
+            <!-- <div class="grid grid-cols-2 flex-grow" [ngClass]="{'grid-cols-2': sortedPlayers.length <= 4, 'grid-cols-3': sortedPlayers.length > 4  }">
                 <div *ngFor="let player of sortedPlayers" class="bg-slate-800" [ngClass]="sortedPlayers.length <= 2 ? 'full-height' : 'half-height'">
                     <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+                </div>
+            </div> -->
+            <div class="flex-grow">
+                <!-- Top row -->
+                <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
+                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800" [ngClass]="bottomRowPlayers.length < 1 ? 'full-height' : 'half-height'">
+                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+                    </div>
+                </div>
+            
+                <!-- Bottom row -->
+                <div class="grid" [ngClass]="{'grid-cols-1': bottomRowPlayers.length === 1,'grid-cols-2': bottomRowPlayers.length === 2, 'grid-cols-3': bottomRowPlayers.length > 2}">
+                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height">
+                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+                    </div>
                 </div>
             </div>
 
@@ -16,7 +31,7 @@
                 <div class="">
                     <h3 class="text-white">Room Name: <span class="text-pop">{{gameService.room.name}}</span></h3>
                     <h3 class="text-white mb-2 ">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.searchTag}}</span></h3>
-                    
+
                     <div class="justify-center mb-2 grid grid-cols-2 gap-y-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full" >Game</label></div>
                         
