@@ -40,7 +40,6 @@ export class CardComponent {
   }
 
   onImageLoad(): void {
-    console.log("loaded...");
     this.loadingCard = false;
   }
 }

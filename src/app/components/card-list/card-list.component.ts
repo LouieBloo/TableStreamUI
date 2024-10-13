@@ -119,7 +119,6 @@ export class CardListComponent {
 
     this.searchSubscription = this.scryfallService.searchCards(this.searchString,true,this.gameService.room.game?.searchTag).subscribe(
       (response: any) => {
-        console.log(response)
         this.searchResults = response.data;
         this.hasSearched = true;
         this.searching = false;

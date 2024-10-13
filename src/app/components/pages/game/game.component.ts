@@ -130,7 +130,6 @@ export class GameComponent {
 
     this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player,maxPlayers, (me: IUser, roomName: string, room:IRoom) => {
       this.gameService.setRoom(room);
-      console.log(room);
       this.localPlayerId = me.id;
 
       localStorage.setItem('roomId',room.id + "")
@@ -155,11 +154,11 @@ export class GameComponent {
     });
   }
 
-  // test123():void{
-  //   this.gameService.room.players.push(
-  //     {...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length+1});
-  //   this.sortPlayers();
-  // }
+  test123():void{
+    this.gameService.room.players.push(
+      {...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length+1});
+    this.sortPlayers();
+  }
 
   ngOnDestroy(): void {
     if (this.inputSubscription) {
@@ -170,7 +169,6 @@ export class GameComponent {
   }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
-    console.log("Add user: ", user);
     if(user.type == UserType.Player){
       this.addPlayer(user as IPlayer);
     }

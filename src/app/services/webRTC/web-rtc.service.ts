@@ -34,7 +34,6 @@ export class WebRTCService {
   
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("init local stream: ", this.localStream);
     } catch (err:any) {
       console.error("Error getting media stream:", err);
   
@@ -45,7 +44,6 @@ export class WebRTCService {
           constraints.audio = false;
           try {
             this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-            console.log("init local stream without audio: ", this.localStream);
           } catch (err2) {
             console.error("Error getting media stream without audio:", err2);
             // Handle error (perhaps video is also denied)
@@ -118,7 +116,6 @@ export class WebRTCService {
 
   public unSubscribeToStreamRemove(callback: any) {
     this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
-    console.log(this.onStreamRemoved.length)
   }
 
   public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, maxPlayers:number, callback: any) {
@@ -149,7 +146,6 @@ export class WebRTCService {
 
         (newPlayer: IUser, room: IRoom, error: any) => {
           if (error) {
-            console.log(error)
             this.alertService.addAlert("error", error.message);
             return;
           }
@@ -189,7 +185,6 @@ export class WebRTCService {
     console.log("Handle signal: ", data.from, data.signal)
 
     const { from, signal } = data;
-    console.log(this.peerConnections, " ", from)
     if (!this.peerConnections[from]) {
       this.createPeerConnection(from, data.user);
     }
@@ -215,16 +210,13 @@ export class WebRTCService {
   private handlePeerDisconnected = (data: { socketId: string }) => {
     const { socketId } = data;
     if (this.peerConnections[socketId]) {
-      console.log("handle delete peer: ", socketId)
       this.peerConnections[socketId].close();
       delete this.peerConnections[socketId];
     }
     if (this.remoteStreams[socketId]) {
-      console.log("handle delete stream: ", socketId)
       delete this.remoteStreams[socketId];
     }
 
-    console.log("handling peer callbacks: ", this.onStreamRemoved.length)
     this.onStreamRemoved.forEach((callback) => {
       callback(socketId)
     });
@@ -282,7 +274,6 @@ export class WebRTCService {
       };
 
       if (!this.amISpectator) {
-        console.log("setting local stream:   ")
         let localS = await this.initLocalStream()
         localS.getTracks().forEach((track) => {
           console.log("adding tracks for: ", socketId)
@@ -336,7 +327,6 @@ export class WebRTCService {
   }
 
   handleErrorResponse = (error: IGameError) => {
-    console.log(error);
     this.alertService.addAlert("error", error.message);
   }
 

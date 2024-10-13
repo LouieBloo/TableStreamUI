@@ -44,8 +44,6 @@ export class UserStreamComponent {
   
 
   ngAfterViewInit() {
-    console.log("Creation init user stream")
-
     if(!this.localStream){
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
       // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
@@ -84,7 +82,6 @@ export class UserStreamComponent {
   }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
-    console.log("stream added: ", user)
     if (user.id === this.player.id) {
       //this.setStream(stream);
       this.setStream(this.webRTC.getStream(this.player.socketId))
@@ -99,7 +96,6 @@ export class UserStreamComponent {
 
   setStream = (stream: MediaStream | null) => {
     if (this.video.nativeElement && stream) {
-      console.log('remote setting stream!');
       this.video.nativeElement.srcObject = stream;
       this.video.nativeElement.volume = this.volume;
       this.video.nativeElement.muted = this.muted;
