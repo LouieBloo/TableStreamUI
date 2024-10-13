@@ -42,6 +42,7 @@ export interface ScryfallCard {
     scryfall_uri: string;               // A link to the card's page on Scryfall
     collector_number: string;           // The collector number of the card within its set
     digital: boolean;                   // Whether the card is available digitally (MTGO)
+    classificationConfidence: number;
 
     card_faces?:ScryfallCard[]
   }

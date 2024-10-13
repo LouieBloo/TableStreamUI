@@ -11,6 +11,10 @@ import { PropertyCounterComponent } from '../../property-counter/property-counte
 import { GameService } from '../../../services/game/game.service';
 import { SetCommanderComponent } from '../../commander/set-commander/set-commander.component';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
+import { CardIdentifierService } from '../../../services/card-identifier/card-identifier.service';
+import { LoggerService } from '../../../services/logger/logger.service';
+import { AlertsService } from '../../../services/alerts/alerts.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-user-stream',
@@ -39,17 +43,19 @@ export class UserStreamComponent {
   selectedVideoDeviceId: string = '';
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
+  loadingCardIdentification:boolean = false;
 
-  constructor(private webRTC: WebRTCService, public gameService: GameService) {}
+  constructor(private webRTC: WebRTCService, public gameService: GameService, private cardIdentifierService:CardIdentifierService, private logger:LoggerService, private alertService: AlertsService) {}
   
 
-  ngAfterViewInit() {
+  ngAfterViewInit(){
     if(!this.localStream){
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
       // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
       this.setStream(this.webRTC.getStream(this.player.socketId))  
       
     }else {
+      
       // Local stream
       // Initialize device lists
       navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -72,12 +78,17 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
-  initLocalStream() {
+  initLocalStream(){
     this.webRTC.initLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId).then(stream => {
       if (this.video.nativeElement) {
         this.video.nativeElement.srcObject = stream;
         this.video.nativeElement.muted = true; // Mute local video to prevent echo
       }
+
+      navigator.mediaDevices.enumerateDevices().then((devices) => {
+        this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
+        this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
+      });
     });
   }
 
@@ -206,8 +217,65 @@ export class UserStreamComponent {
     };
   }
 
-
   getCommanderDamageKeys(): string[] {
     return Object.keys(this.player.commanderDamages);
   }
+
+  onVideoClick(event: MouseEvent) {
+    if(this.loadingCardIdentification){
+      this.alertService.addAlert("error", "Only 1 image can be classified at once");
+      return;
+    }
+
+    if(!environment.cardIdentifierActive){return;}
+
+    this.loadingCardIdentification = true;
+
+    // Get the click position relative to the video
+    const videoElement = this.video.nativeElement; // Access the video element from ElementRef
+    const rect = videoElement.getBoundingClientRect();
+
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    // Normalize the click position based on the video size
+    const normalizedX = clickX / rect.width;
+    const normalizedY = clickY / rect.height;
+
+    // Create a canvas to capture the current frame from the video
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    const context = canvas.getContext('2d');
+
+    if (context) {
+        // Draw the current frame of the video onto the canvas
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas content to a Blob (image file)
+        canvas.toBlob((blob) => {
+            if (blob) {
+                // Create a file from the Blob to send to the service
+                const photoFile = new File([blob], 'current_frame.jpg', { type: 'image/jpeg' });
+
+                // Send the file and normalized click position to the classification service
+                this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY).subscribe(
+                    (response:any) => {
+                        if(response && response.scryfall_data){
+                          this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence}});
+                        }
+                        this.loadingCardIdentification = false;
+                    },
+                    (error:any) => {
+                        this.logger.error('Error classifying image:', error);
+                        this.loadingCardIdentification = false;
+                    }
+                );
+            }
+
+            canvas.remove();
+        }, 'image/jpeg',1.0);
+    }
+  }
+
 }
