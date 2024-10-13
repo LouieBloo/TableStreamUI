@@ -15,23 +15,23 @@
 
 
 .poisonPanelEditable{
-    right:-134px;
+    right:-128px;
     top:0px;
     /* height:42px; */
 }
 
 .poisonPanel{
-    right:-84px;
+    right:-78px;
     top:2px;
     /* height:42px; */
 }
 
 .energyPanel{
-    left:-84px;
+    left:-78px;
     top:0px;
 }
 
 .energyPanelEditable{
-    left:-136px;
+    left:-128px;
     top:0px;
 }

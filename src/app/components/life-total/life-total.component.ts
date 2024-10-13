@@ -20,8 +20,6 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
   viewProviders: [provideIcons({ bootstrapSuitHeartFill })]
 })
 export class LifeTotalComponent {
-  // @Input() lifeTotal!: number;
-  // @Input() playerName!:string;
   @Input() player!:IPlayer;
   @Input() modifyCallback!: (amount:number)=> void;
   @Input() modifyPoisonCallback!: (amount:number)=> void;
