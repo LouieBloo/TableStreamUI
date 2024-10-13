@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -23,7 +23,8 @@ export class HomeComponent {
     isSpectator: false,
     roomId:'',
     password: null,
-    gameType: GameType.MTGCommander
+    gameType: GameType.MTGCommander,
+    maxPlayers: 4
   };
 
   constructor(private router: Router, private webRTC: WebRTCService, private route: ActivatedRoute, private gameService: GameService){}
@@ -38,6 +39,7 @@ export class HomeComponent {
     this.webRTC.disconnect();
     localStorage.removeItem("roomName");
     localStorage.removeItem("gameType");
+    localStorage.removeItem("maxPlayers");
     localStorage.removeItem("isSpectator");
     localStorage.removeItem("password");
     localStorage.removeItem('roomId')
@@ -56,6 +58,7 @@ export class HomeComponent {
     localStorage.setItem("playerName", this.player.name);
     localStorage.setItem("roomName", this.player.roomName);
     localStorage.setItem("gameType", this.player.gameType.toString());
+    localStorage.setItem("maxPlayers", this.player.maxPlayers.toString());
     localStorage.setItem("isSpectator", 'false');
     if(this.player.password){
       localStorage.setItem("password", this.player.password);
@@ -76,26 +79,43 @@ export class HomeComponent {
   gameTypes = ()=>{
     return [{
       value: GameType.MTGCommander,
-      label: "MTG Commander"
+      label: "MTG Commander",
+      defaultMaxPlayers: 4
     },{
       value: GameType.MTGLegacy,
-      label: "MTG Legacy"
+      label: "MTG Legacy",
+      defaultMaxPlayers: 2
     },{
       value: GameType.MTGModern,
-      label: "MTG Modern"
+      label: "MTG Modern",
+      defaultMaxPlayers: 2
     },{
       value: GameType.MTGStandard,
-      label: "MTG Standard"
+      label: "MTG Standard",
+      defaultMaxPlayers: 2
     },{
       value: GameType.MTGVintage,
-      label: "MTG Vintage"
+      label: "MTG Vintage",
+      defaultMaxPlayers: 2
     },{
       value: GameType.PokemonStandard,
-      label: "Pokémon (coming soon)"
+      label: "Pokémon (coming soon)",
+      defaultMaxPlayers: 2
     },{
       value: GameType.PokemonStandard,
-      label: "Yu-Gi-Oh! (coming soon)"
+      label: "Yu-Gi-Oh! (coming soon)",
+      defaultMaxPlayers: 2
     }]
+  }
+
+  onGameTypeChange(selectedValue: string) {
+    // Find the selected game type based on the selected value
+    const selectedGameTypeValue = Number(selectedValue);
+    const selectedGameType = this.gameTypes().find((gameType:any) => gameType.value === selectedGameTypeValue);
+  
+    if (selectedGameType) {
+      this.player.maxPlayers = selectedGameType.defaultMaxPlayers;
+    } 
   }
 
   isValidGameType = ():boolean=>{

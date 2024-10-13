@@ -121,7 +121,7 @@ export class WebRTCService {
     console.log(this.onStreamRemoved.length)
   }
 
-  public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, callback: any) {
+  public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, maxPlayers:number, callback: any) {
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -143,7 +143,8 @@ export class WebRTCService {
         roomName: roomName,
         playerName: playerName,
         password: password && password != "null" ? password : null,
-        userType: userType
+        userType: userType,
+        maxPlayers: maxPlayers || 4
       },
 
         (newPlayer: IUser, room: IRoom, error: any) => {
