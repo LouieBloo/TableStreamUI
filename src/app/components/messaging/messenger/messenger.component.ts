@@ -36,7 +36,6 @@ export class MessengerComponent {
   }
 
   messageReceived = (newMessage: IMessage)=>{
-    console.log("new message, ", newMessage);
     this.messages.push(newMessage);
 
     setTimeout(()=>{this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;},100)

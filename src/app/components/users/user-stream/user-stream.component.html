@@ -8,10 +8,6 @@
         <!-- <img class="w-full" style="max-width: fit-content;" src="https://as1.ftcdn.net/v2/jpg/01/63/11/70/1000_F_163117064_syJkTuCddASYjvl4WqyRmnuy8cDXpoQY.jpg"> -->
     </div>
 
-
-    
-
-
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <!-- <div>
             <h2>{{player?.name | titlecase }}</h2>
@@ -20,30 +16,30 @@
             [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal"></app-life-total>
     </div>
 
-    <div class="absolute top-16 left-2 flex flex-col" *ngIf="showCommanderDamage">
+    <div class="absolute top-20 left-2 flex flex-col" *ngIf="showCommanderDamage">
         <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
             <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
                 [total]="player.commanderDamages[playerId].damage"
-                [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-2">
+                [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-1">
             </app-property-counter>
         </ng-container>
     </div>
 
-    <div class="absolute top-2 left-2 text-white flex flex-col ">
-        <div *ngIf="player && gameService.isCommanderGame()">
-            <app-set-commander [player]="player" [editable]="localStream"></app-set-commander>
-        </div>
-
+    <div class="absolute left-2 text-white flex flex-col leftPanel">
         <div class="text-xs">
             <!-- <p class="">{{ !localStream ? "Remote: " + player.socketId : "Local" }} - {{player.name}}</p> -->
             <!-- todo this re-renders the whole component every tick -->
             <p>Turn: {{ player.currentTurnStartTime | timeAgo | async }}</p>
             <p>Avg: {{ (player.totalTurnTime/ ( (player.totalTurns) || 1 ) ) | timeAgo | async }}</p>
         </div>
+
+        <div *ngIf="player && gameService.isCommanderGame()">
+            <app-set-commander [player]="player" [editable]="localStream"></app-set-commander>
+        </div>
     </div>
 
     <!-- Status bar -->
-    <div class="flex flex-row absolute" id="statusBar">
+    <div class="flex flex-col absolute" id="statusBar">
         <div *ngIf="player.hasCitiesBlessing">
             <p class="text-center text-4xl relative"  appTooltip="This player has the Cities Blessing" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">⛪</p>
         </div>

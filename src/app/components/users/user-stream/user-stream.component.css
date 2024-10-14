@@ -27,8 +27,15 @@
     }
   }
 
+.leftPanel{
+  top: 1rem;
+}
+
+.leftPanelMoved{
+  top:3rem;
+}
 
 #statusBar{
-  top:0px;
-  right:52px;
+  top:36px;
+  right:0px;
 }

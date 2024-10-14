@@ -18,7 +18,7 @@ export class InputService {
   }
 
   private handleKeyboardEvent(event: KeyboardEvent) {
-    console.log(event.key)
+    //console.log(event.key)
     switch (event.key) {
       case ' ':
         event.preventDefault();
@@ -48,7 +48,6 @@ export class InputService {
     }
 
     const activeElement = document.activeElement;
-    console.log(activeElement?.tagName)
     return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') ? true : false;
   }
 
