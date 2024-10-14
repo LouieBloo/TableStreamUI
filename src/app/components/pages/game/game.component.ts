@@ -1,25 +1,24 @@
-import { Component, ViewChild } from '@angular/core';
-import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { IPlayer, IUser, UserType } from '../../../interfaces/player';
-import { IRoom } from '../../../interfaces/room';
-import { MessengerComponent } from '../../messaging/messenger/messenger.component';
-import { GameEvent, GameType, IGameEvent } from '../../../interfaces/game';
-import { InputService } from '../../../services/input/input.service';
-import { UserInputAction } from '../../../interfaces/inputs';
-import { ScryfallService } from '../../../services/scryfall/scryfall.service';
-import { CardListComponent } from '../../card-list/card-list.component';
-import { GameService } from '../../../services/game/game.service';
-import { Subscription } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
-import { AlertsService } from '../../../services/alerts/alerts.service';
-import { PasswordModalComponent } from '../../modals/password-modal/password-modal.component';
 import { HttpClient } from '@angular/common/http';
+import { Component, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
+import { GameEvent, IGameEvent } from '../../../interfaces/game';
+import { UserInputAction } from '../../../interfaces/inputs';
+import { IPlayer, IUser, UserType } from '../../../interfaces/player';
+import { IRoom } from '../../../interfaces/room';
+import { AlertsService } from '../../../services/alerts/alerts.service';
+import { GameService } from '../../../services/game/game.service';
+import { InputService } from '../../../services/input/input.service';
+import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
+import { CardListComponent } from '../../card-list/card-list.component';
+import { MessengerComponent } from '../../messaging/messenger/messenger.component';
+import { PasswordModalComponent } from '../../modals/password-modal/password-modal.component';
+import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
+import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
+import { LoggerService } from '../../../services/logger/logger.service';
 
 @Component({
   selector: 'app-game',
@@ -36,7 +35,7 @@ export class GameComponent {
   sortedPlayers: IPlayer[] = [];
   roomId!: string;
 
-  showingHotkeys:boolean = false;
+  showingHotkeys: boolean = false;
 
   private inputSubscription!: Subscription;
 
@@ -44,18 +43,19 @@ export class GameComponent {
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
 
   constructor(
-    private webRTC: WebRTCService, 
+    private webRTC: WebRTCService,
     private inputService: InputService,
-    public gameService:GameService,
-    private router: Router, 
+    public gameService: GameService,
+    private router: Router,
     private route: ActivatedRoute,
     private alertService: AlertsService,
-    private http:HttpClient) {
-      this.gameService.room = {
-        name: "temp",
-        players: [],
-        messages: []
-      }
+    private http: HttpClient,
+    private logger: LoggerService) {
+    this.gameService.room = {
+      name: "temp",
+      players: [],
+      messages: []
+    }
   }
 
 
@@ -63,20 +63,20 @@ export class GameComponent {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
     let previousRoomId = localStorage.getItem('roomId');
     let hasSetSpectator = localStorage.getItem("isSpectator") == 'false' || localStorage.getItem("isSpectator") == 'true';
-    
-    if(!localStorage.getItem('hasPlayedBefore')){
+
+    if (!localStorage.getItem('hasPlayedBefore')) {
       this.showingHotkeys = true;
       localStorage.setItem('hasPlayedBefore', 'true');
-      setTimeout(()=>{this.showingHotkeys = false},1000 *60 * 5)
+      setTimeout(() => { this.showingHotkeys = false }, 1000 * 60 * 5)
     }
 
-    if(!localStorage.getItem('playerName') || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)){
-      if(this.roomId){
+    if (!localStorage.getItem('playerName') || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)) {
+      if (this.roomId) {
         this.router.navigate(['/join'], {
-          queryParams: { id: this.roomId}, 
+          queryParams: { id: this.roomId },
           queryParamsHandling: 'merge',
         });
-      }else{
+      } else {
         this.router.navigate(['/join']);
       }
 
@@ -89,7 +89,7 @@ export class GameComponent {
       }
     })
 
-    
+
 
     this.webRTC.subscribeToStreamAdd(this.streamAdded);
     this.webRTC.subscribeToStreamRemove(this.streamRemoved);
@@ -97,66 +97,66 @@ export class GameComponent {
 
     this.checkPasswordProtection(this.roomId);
 
-    
+
   }
 
-  checkPasswordProtection = async(roomId:string)=>{
-    if(localStorage.getItem("password")){
+  checkPasswordProtection = async (roomId: string) => {
+    if (localStorage.getItem("password")) {
       this.loadIntoGame(localStorage.getItem("password"));
       return;
     }
 
-    this.http.post(environment.socketUrl + '/password-check',{roomId: roomId}).subscribe(
-      (response:any) => {
-        if(response.result == true){
+    this.http.post(environment.socketUrl + '/password-check', { roomId: roomId }).subscribe(
+      (response: any) => {
+        if (response.result == true) {
           this.passwordModal.open(this.loadIntoGame)
-        }else{
+        } else {
           this.loadIntoGame(null);
         }
       },
       (error) => {
-        console.error('Error joining game:', error);
+        this.logger.error("Error joining game: ", error)
         alert('Error joining game:' + error);
       }
     );
   }
 
-  loadIntoGame = (password:string | null)=>{
-    localStorage.setItem("password",password + "");
+  loadIntoGame = (password: string | null) => {
+    localStorage.setItem("password", password + "");
 
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
     const gameType = localStorage.getItem("gameType");
-    const maxPlayers:number = parseInt(localStorage.getItem("maxPlayers") || "4");
+    const maxPlayers: number = parseInt(localStorage.getItem("maxPlayers") || "4");
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player,maxPlayers, (me: IUser, roomName: string, room:IRoom) => {
+    this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, maxPlayers, (me: IUser, roomName: string, room: IRoom) => {
       this.gameService.setRoom(room);
       this.localPlayerId = me.id;
 
-      localStorage.setItem('roomId',room.id + "")
+      localStorage.setItem('roomId', room.id + "")
       localStorage.setItem("playerId", me.id);
 
       this.router.navigate([], {
-        queryParams: { id: room.id}, 
+        queryParams: { id: room.id },
         queryParamsHandling: 'merge', // This merges with any existing query params
         replaceUrl: true // Replace the current URL in history
       });
 
-      if(me.type == UserType.Player){
+      if (me.type == UserType.Player) {
         this.localPlayer = me as IPlayer;
         this.addPlayer(me as IPlayer);
       }
 
-      room.players.forEach((p:IPlayer)=>{
-        if(p.id != me.id){
+      room.players.forEach((p: IPlayer) => {
+        if (p.id != me.id) {
           this.addPlayer(p)
         }
       })
     });
   }
 
-  test123():void{
+  test123(): void {
     this.gameService.room.players.push(
-      {...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length+1});
+      { ...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length + 1 });
     this.sortPlayers();
   }
 
@@ -169,7 +169,7 @@ export class GameComponent {
   }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
-    if(user.type == UserType.Player){
+    if (user.type == UserType.Player) {
       this.addPlayer(user as IPlayer);
     }
     // this.remoteSocketIds.push(id);
@@ -180,7 +180,7 @@ export class GameComponent {
   }
 
   handleGameEvent = (event: IGameEvent) => {
-    console.log("handling event: ", event);
+    this.logger.log("handling event: ", event)
     switch (event.event) {
       case GameEvent.RandomizePlayerOrder:
         this.updatePlayers(event.response);
@@ -252,26 +252,26 @@ export class GameComponent {
   }
 
   get topRowPlayers() {
-    switch(this.sortedPlayers.length){
+    switch (this.sortedPlayers.length) {
       case 1:
         return this.sortedPlayers;
       case 2:
         return this.sortedPlayers;
       case 3:
-        return this.sortedPlayers.slice(0,2);
+        return this.sortedPlayers.slice(0, 2);
       case 4:
-        return this.sortedPlayers.slice(0,2);
+        return this.sortedPlayers.slice(0, 2);
       case 5:
-        return this.sortedPlayers.slice(0,3);
+        return this.sortedPlayers.slice(0, 3);
       case 6:
-        return this.sortedPlayers.slice(0,3);
+        return this.sortedPlayers.slice(0, 3);
     }
 
     return []
   }
 
   get bottomRowPlayers() {
-    switch(this.sortedPlayers.length){
+    switch (this.sortedPlayers.length) {
       case 1:
         return [];
       case 2:
@@ -280,11 +280,11 @@ export class GameComponent {
         return [this.sortedPlayers[2]];
       case 4:
         //notice the change in order, always clockwise rotation
-        return [this.sortedPlayers[3],this.sortedPlayers[2]];
+        return [this.sortedPlayers[3], this.sortedPlayers[2]];
       case 5:
-        return [this.sortedPlayers[4],this.sortedPlayers[3]];
+        return [this.sortedPlayers[4], this.sortedPlayers[3]];
       case 6:
-        return [this.sortedPlayers[5],this.sortedPlayers[4],this.sortedPlayers[3]];
+        return [this.sortedPlayers[5], this.sortedPlayers[4], this.sortedPlayers[3]];
     }
 
     return []
@@ -305,9 +305,9 @@ export class GameComponent {
   copyUrl() {
     const currentUrl = window.location.href; // Get the current URL
     navigator.clipboard.writeText(currentUrl).then(() => {
-      this.alertService.addAlert('success','URL copied to clipboard!');
+      this.alertService.addAlert('success', 'URL copied to clipboard!');
     }).catch(err => {
-      console.error('Failed to copy: ', err);
+      this.logger.error("Failed to copy", err)
     });
   }
 

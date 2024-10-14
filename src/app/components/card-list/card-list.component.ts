@@ -1,18 +1,19 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { ScryfallService } from '../../services/scryfall/scryfall.service';
-import { CardComponent } from '../card/card.component';
-import { ScryfallCard } from '../../interfaces/scryfall';
 import { NgClass, NgFor, NgIf, NgStyle, SlicePipe } from '@angular/common';
-import { InputService } from '../../services/input/input.service';
-import { UserInputAction } from '../../interfaces/inputs';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CardListItemComponent } from './card-list-item/card-list-item.component';
-import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
-import { debounceTime, Observable, Subject, Subscription } from 'rxjs';
-import { WebRTCService } from '../../services/webRTC/web-rtc.service';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, Subject, Subscription } from 'rxjs';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
-import { ModalServiceService, ModalType } from '../../services/modal/modal-service.service';
+import { UserInputAction } from '../../interfaces/inputs';
+import { ScryfallCard } from '../../interfaces/scryfall';
 import { GameService } from '../../services/game/game.service';
+import { InputService } from '../../services/input/input.service';
+import { LoggerService } from '../../services/logger/logger.service';
+import { ModalServiceService, ModalType } from '../../services/modal/modal-service.service';
+import { ScryfallService } from '../../services/scryfall/scryfall.service';
+import { WebRTCService } from '../../services/webRTC/web-rtc.service';
+import { CardComponent } from '../card/card.component';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
+import { CardListItemComponent } from './card-list-item/card-list-item.component';
 
 @Component({
   selector: 'app-card-list',
@@ -50,7 +51,8 @@ export class CardListComponent {
     private inputService: InputService,
     private webRtc:WebRTCService,
     private modalService: ModalServiceService,
-    public gameService:GameService){
+    public gameService:GameService,
+    private logger: LoggerService){
     
   }
 
@@ -129,7 +131,7 @@ export class CardListComponent {
         }
       },
       (error: any) => {
-        console.error('Error fetching cards:', error);
+        this.logger.error(`Error fetching cards: `, error)
         this.hasSearched = true;
         this.searching = false;
         this.searchResults = []

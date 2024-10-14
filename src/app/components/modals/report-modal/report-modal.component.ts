@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { AlertsService } from '../../../services/alerts/alerts.service';
+import { LoggerService } from '../../../services/logger/logger.service';
 
 @Component({
   selector: 'app-report-modal',
@@ -20,7 +21,7 @@ export class ReportModalComponent {
 
   loading:boolean = false;
 
-  constructor(private http:HttpClient, private alertService:AlertsService){}
+  constructor(private http:HttpClient, private alertService:AlertsService, private logger: LoggerService){}
 
   open = ()=>{
     const dialogCheckbox = document.getElementById('toggleReportModal');
@@ -43,7 +44,7 @@ export class ReportModalComponent {
         this.loading=false;
       },
       (error) => {
-        console.error('Error submitting issue:', error);
+        this.logger.error('Error submitting issue:', error)
         alert('Failed to submit issue.');
         this.loading=false;
       }
