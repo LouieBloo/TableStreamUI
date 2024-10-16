@@ -69,7 +69,7 @@ export class GameComponent {
       localStorage.setItem('hasPlayedBefore', 'true');
       setTimeout(() => { this.showingHotkeys = false }, 1000 * 60 * 5)
     }
-
+    
     if (!localStorage.getItem('playerName') || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)) {
       if (this.roomId) {
         this.router.navigate(['/join'], {
