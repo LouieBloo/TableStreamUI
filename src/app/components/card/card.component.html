@@ -7,6 +7,9 @@
         <p class="text-center">Loading image...</p>
       </div>
       <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl" (load)="onImageLoad()" [ngClass]="{'hidden': loadingCard}">
+      <div *ngIf="card && card.classificationConfidence > 0" id="classificationMatch" class="absolute text-white bg-black bg-opacity-50">
+        {{ card.classificationConfidence * 100.0 | number : '1.2-2'}}% Match
+      </div>
       <!-- <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl"> -->
     </div>
   </div>

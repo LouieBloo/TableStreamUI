@@ -50,13 +50,20 @@ export interface ICommanderDamage{
 
 export interface IGameError {
     type: GameErrorType;
+    severity: GameErrorSeverity;
     message:string;
+}
+
+export enum GameErrorSeverity{
+    Warning,
+    Error,
 }
 
 export enum GameErrorType{
     GameNotStarted,
     InvalidAction,
-    NoRoomName
+    NoRoomName,
+    GenericWarning
 }
 
 export interface IAlert{

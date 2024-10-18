@@ -8,6 +8,8 @@ export class AlertsService {
   alerts: IAlert[] = [];
   private nextId = 0;
 
+  private alertLifeTimeInSeconds = 3;
+
   getAlerts(): IAlert[] {
     return this.alerts;
   }
@@ -19,7 +21,7 @@ export class AlertsService {
     // Automatically remove the alert after 5 seconds
     setTimeout(() => {
       this.removeAlert(alert.id);
-    }, 3000);
+    }, this.alertLifeTimeInSeconds * 1000);
   }
 
   removeAlert(id: number) {

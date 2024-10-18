@@ -3,7 +3,7 @@
     <!-- <div class="absolute w-full h-full glow top-0 left-0"></div> -->
 
     <div class="flex justify-center h-full">
-        <video #videoElement autoplay style="max-width: fit-content;" class="w-full "
+        <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 
             [muted]="localStream || muted"></video>
         <!-- <img class="w-full" style="max-width: fit-content;" src="https://as1.ftcdn.net/v2/jpg/01/63/11/70/1000_F_163117064_syJkTuCddASYjvl4WqyRmnuy8cDXpoQY.jpg"> -->
     </div>
