@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IRoom } from '../../interfaces/room';
+import { IRoom, PasswordCheckResponse } from '../../interfaces/room';
 import { IPlayer } from '../../interfaces/player';
 import { GameType } from '../../interfaces/game';
 import { MTGCommander } from '../../classes/game/MTGCommander';
@@ -8,6 +8,9 @@ import { MTGModern } from '../../classes/game/MTGModern';
 import { Game } from '../../classes/game/game';
 import { MTGLegacy } from '../../classes/game/MTGLegacy';
 import { MTGVintage } from '../../classes/game/MTGVintage';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +18,7 @@ import { MTGVintage } from '../../classes/game/MTGVintage';
 export class GameService {
   public room!: IRoom;
   
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   public setRoom(room:IRoom){
     if(room.game?.gameType){
@@ -38,10 +41,6 @@ export class GameService {
     return this.room.game?.gameType == GameType.MTGCommander;
   }
 
-  // public getGameType = ():GameType | undefined=>{
-  //   return this.room.game?.gameType;
-  // }
-
   static createGame(gameType: GameType) : Game {
     switch (gameType) {
       case GameType.MTGCommander:
@@ -62,5 +61,9 @@ export class GameService {
     }
 
     return new MTGCommander();
+  }
+  
+  public checkPasswordProtection(roomId: string): Observable<PasswordCheckResponse>{
+    return this.http.post<PasswordCheckResponse>(environment.socketUrl + '/password-check', { roomId: roomId })
   }
 }

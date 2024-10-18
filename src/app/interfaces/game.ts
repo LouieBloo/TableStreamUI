@@ -63,6 +63,7 @@ export enum GameErrorType{
     GameNotStarted,
     InvalidAction,
     NoRoomName,
+    InvalidPassword,
     GenericWarning
 }
 

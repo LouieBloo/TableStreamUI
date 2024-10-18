@@ -1,14 +1,12 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { environment } from '../../../../environments/environment';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { GameEvent, IGameEvent } from '../../../interfaces/game';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/player';
-import { IRoom } from '../../../interfaces/room';
+import { IRoom, PasswordCheckResponse } from '../../../interfaces/room';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
@@ -49,7 +47,6 @@ export class GameComponent {
     private router: Router,
     private route: ActivatedRoute,
     private alertService: AlertsService,
-    private http: HttpClient,
     private logger: LoggerService) {
     this.gameService.room = {
       name: "temp",
@@ -89,52 +86,59 @@ export class GameComponent {
       }
     })
 
-
-
     this.webRTC.subscribeToStreamAdd(this.streamAdded);
     this.webRTC.subscribeToStreamRemove(this.streamRemoved);
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
-
     this.checkPasswordProtection(this.roomId);
-
-
   }
 
   checkPasswordProtection = async (roomId: string) => {
-    if (localStorage.getItem("password")) {
-      this.loadIntoGame(localStorage.getItem("password"));
+    const storedPassword = localStorage.getItem("password");
+
+    if (storedPassword) {
+      this.loadIntoGame(storedPassword);
       return;
     }
 
-    this.http.post(environment.socketUrl + '/password-check', { roomId: roomId }).subscribe(
-      (response: any) => {
-        if (response.result == true) {
-          this.passwordModal.open(this.loadIntoGame)
+    this.gameService.checkPasswordProtection(roomId).subscribe({
+      next: (response: PasswordCheckResponse) => {
+        if (response.result === true) {
+          this.passwordModal.open();
         } else {
           this.loadIntoGame(null);
         }
       },
-      (error) => {
-        this.logger.error("Error joining game: ", error)
-        alert('Error joining game:' + error);
-      }
-    );
+      error: (error: any) => {
+        this.logger.error("Error joining game: ", error);
+        alert('Error joining game: ' + error);
+      },
+    });
+
   }
 
-  loadIntoGame = (password: string | null) => {
+  loadIntoGame(password: string|null) {
     localStorage.setItem("password", password + "");
-
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
     const gameType = localStorage.getItem("gameType");
+    const playerName = localStorage.getItem('playerName');
+    const roomName = localStorage.getItem('roomName');
     const maxPlayers: number = parseInt(localStorage.getItem("maxPlayers") || "4");
 
-    this.webRTC.joinRoom(localStorage.getItem('playerName'), this.roomId, password, gameType, localStorage.getItem('roomName'), amISpectator ? UserType.Spectator : UserType.Player, maxPlayers, (me: IUser, roomName: string, room: IRoom) => {
+    this.webRTC.joinRoom(
+      playerName,
+      this.roomId,
+      password,
+      gameType,
+      roomName,
+      amISpectator ? UserType.Spectator : UserType.Player,
+      maxPlayers,
+      (me: IUser, roomName: string, room: IRoom) => {
       this.gameService.setRoom(room);
+      this.passwordModal.close();
       this.localPlayerId = me.id;
 
       localStorage.setItem('roomId', room.id + "")
       localStorage.setItem("playerId", me.id);
-
       this.router.navigate([], {
         queryParams: { id: room.id },
         queryParamsHandling: 'merge', // This merges with any existing query params
@@ -153,6 +157,8 @@ export class GameComponent {
       })
     });
   }
+
+
 
   test123(): void {
     this.gameService.room.players.push(
@@ -309,6 +315,10 @@ export class GameComponent {
     }).catch(err => {
       this.logger.error("Failed to copy", err)
     });
+  }
+
+  goBack(){
+    this.router.navigate(['/join']);
   }
 
 }
