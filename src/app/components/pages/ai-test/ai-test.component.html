@@ -1,0 +1,28 @@
+<div class="flex flex-row items-center justify-center">
+
+    
+    <form class="w-full p-4 bg-white rounded-lg shadow-lg">
+        <div class="form-control mb-4">
+            <label class="label">
+              <span class="label-text">Upload Photo</span>
+            </label>
+            <input type="file" class="file-input file-input-bordered w-full" (change)="onPhotoSelected($event)" />
+          </div>
+          
+      <!-- Display Photo Preview -->
+      <div *ngIf="photoPreview" class="my-4">
+        <img
+          [src]="photoPreview"
+          alt="Uploaded Photo"
+          (click)="onImageClick($event)"
+          (load)="onImageLoad($event)"
+          class=" cursor-crosshair"
+        />
+        <p class="text-sm text-center mt-2">Click on the image to select a position</p>
+      </div>
+
+      <!-- Photo Upload -->
+      
+    </form>
+</div>
+  

@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { ScryfallCard } from '../../interfaces/scryfall';
-import { NgClass, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [NgIf, NgClass],
+  imports: [NgIf, NgClass, DecimalPipe],
   templateUrl: './card.component.html',
   styleUrl: './card.component.css'
 })

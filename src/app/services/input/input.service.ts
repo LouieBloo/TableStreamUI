@@ -48,7 +48,10 @@ export class InputService {
     }
 
     const activeElement = document.activeElement;
-    return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') ? true : false;
+
+    return activeElement && 
+    (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+    !activeElement.classList.contains('drawer-toggle') ? true : false;
   }
 
   public triggerInput(input:string){

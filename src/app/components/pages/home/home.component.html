@@ -40,7 +40,7 @@
                 class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black"
                 required
               >
-                <option *ngFor="let type of gameTypes()" [value]="type.value">{{ type.label }}</option>
+                <option *ngFor="let type of gameTypes" [value]="type.value">{{ type.label }}</option>
               </select>
             </div>
             <div class="mb-6">
@@ -89,4 +89,7 @@
         <p class="text-white text-base mt-4"><strong>Issues and Feedback:</strong> Email any problems or feedback to admin&#64;table-stream.com</p>
       </div>
 </div>
+
+<app-ip-address-warning-modal (agreeClicked)="onAgreeClicked()"></app-ip-address-warning-modal>
+
 

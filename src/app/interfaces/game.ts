@@ -1,5 +1,4 @@
 import { IPlayer, PlayerProperties } from "./player";
-import { ScryfallCard } from "./scryfall";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
@@ -28,7 +27,8 @@ export enum GameType{
     MTGModern,
     MTGLegacy,
     MTGVintage,
-    PokemonStandard
+    PokemonStandard,
+    YuGiOhStandard
 }
 
 export interface IModifyPlayerProperty{
@@ -50,13 +50,20 @@ export interface ICommanderDamage{
 
 export interface IGameError {
     type: GameErrorType;
+    severity: GameErrorSeverity;
     message:string;
+}
+
+export enum GameErrorSeverity{
+    Warning,
+    Error,
 }
 
 export enum GameErrorType{
     GameNotStarted,
     InvalidAction,
-    NoRoomName
+    NoRoomName,
+    GenericWarning
 }
 
 export interface IAlert{

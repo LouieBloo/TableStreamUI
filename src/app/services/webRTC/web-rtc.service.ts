@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
-import { GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
+import { GameErrorSeverity, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
 import { IMessage } from '../../interfaces/message';
 import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
@@ -335,7 +335,7 @@ export class WebRTCService {
   }
 
   handleErrorResponse = (error: IGameError) => {
-    this.alertService.addAlert("error", error.message);
+    this.alertService.addAlert(error.severity == GameErrorSeverity.Error ? 'error' : 'warning', error.message);
   }
 
   public subscribeToGameEvents = (callback: (update: IGameEvent) => void) => {
