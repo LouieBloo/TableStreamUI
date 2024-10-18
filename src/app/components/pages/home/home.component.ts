@@ -1,51 +1,58 @@
-import { Component } from '@angular/core';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { GAME_TYPES } from '../../../constants/game-types.constants';
 import { GameType } from '../../../interfaces/game';
-import { GameService } from '../../../services/game/game.service';
-
+import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
+import { IpAddressWarningModalComponent } from '../../modals/ip-address-warning-modal/ip-address-warning-modal.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, NgClass, NgIf, NgFor],
+  imports: [FormsModule, NgClass, NgIf, NgFor, IpAddressWarningModalComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
 })
 export class HomeComponent {
+  @ViewChild(IpAddressWarningModalComponent)
+  ipAddressModal!: IpAddressWarningModalComponent;
 
   activeTab: string = 'join';
-
+  gameTypes = GAME_TYPES;
+  isCreateGame: boolean = false;
   player = {
     name: '',
     roomName: '',
     isSpectator: false,
-    roomId:'',
+    roomId: '',
     password: null,
     gameType: GameType.MTGCommander,
-    maxPlayers: 4
+    maxPlayers: 4,
   };
 
-  constructor(private router: Router, private webRTC: WebRTCService, private route: ActivatedRoute, private gameService: GameService){}
+  constructor(
+    private router: Router,
+    private webRTC: WebRTCService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    let joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
+    const joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
 
-    if(joinRoomId){
+    if (joinRoomId) {
       this.player.roomId = joinRoomId;
     }
 
     this.webRTC.disconnect();
-    localStorage.removeItem("roomName");
-    localStorage.removeItem("gameType");
-    localStorage.removeItem("maxPlayers");
-    localStorage.removeItem("isSpectator");
-    localStorage.removeItem("password");
-    localStorage.removeItem('roomId')
+    localStorage.removeItem('roomName');
+    localStorage.removeItem('gameType');
+    localStorage.removeItem('maxPlayers');
+    localStorage.removeItem('isSpectator');
+    localStorage.removeItem('password');
+    localStorage.removeItem('roomId');
 
-    if(localStorage.getItem("playerName")){
-      this.player.name = localStorage.getItem("playerName")!;
+    if (localStorage.getItem('playerName')) {
+      this.player.name = localStorage.getItem('playerName')!;
     }
   }
 
@@ -53,72 +60,80 @@ export class HomeComponent {
     this.activeTab = tab;
   }
 
-  // Handle Create Game form submission
   onCreateGame() {
-    localStorage.setItem("playerName", this.player.name);
-    localStorage.setItem("roomName", this.player.roomName);
-    localStorage.setItem("gameType", this.player.gameType.toString());
-    localStorage.setItem("maxPlayers", this.player.maxPlayers.toString());
-    localStorage.setItem("isSpectator", 'false');
-    if(this.player.password){
-      localStorage.setItem("password", this.player.password);
+    this.isCreateGame = true;
+
+    if (this.agreedToDisclaimer()) {
+      this.setLocalStorageForCreate();
+      this.router.navigate(['/game']);
+      return;
     }
-    this.router.navigate(['/game']);
+
+    this.ipAddressModal.open();
   }
 
-  // Handle Join Game form submission
-  onJoinGame() {
-    localStorage.setItem("playerName", this.player.name);
-    localStorage.setItem("isSpectator", this.player.isSpectator + "");
-    this.router.navigate(['/game'], {
-      queryParams: { id: this.player.roomId}, 
-      queryParamsHandling: 'merge', 
-    });
+  onJoinGame(): void {
+    this.isCreateGame = false;
+
+    if (this.agreedToDisclaimer()) {
+      this.setLocalStorageForJoin();
+      this.navigateOnJoin();
+      return;
+    }
+    this.ipAddressModal.open();
   }
 
-  gameTypes = ()=>{
-    return [{
-      value: GameType.MTGCommander,
-      label: "MTG Commander",
-      defaultMaxPlayers: 4
-    },{
-      value: GameType.MTGLegacy,
-      label: "MTG Legacy",
-      defaultMaxPlayers: 2
-    },{
-      value: GameType.MTGModern,
-      label: "MTG Modern",
-      defaultMaxPlayers: 2
-    },{
-      value: GameType.MTGStandard,
-      label: "MTG Standard",
-      defaultMaxPlayers: 2
-    },{
-      value: GameType.MTGVintage,
-      label: "MTG Vintage",
-      defaultMaxPlayers: 2
-    },{
-      value: GameType.PokemonStandard,
-      label: "Pokémon (coming soon)",
-      defaultMaxPlayers: 2
-    },{
-      value: GameType.PokemonStandard,
-      label: "Yu-Gi-Oh! (coming soon)",
-      defaultMaxPlayers: 2
-    }]
+  onAgreeClicked(): void {
+    if (this.isCreateGame) {
+      this.setLocalStorageForCreate();
+      this.router.navigate(['/game']);
+    } else {
+      this.setLocalStorageForJoin();
+      this.navigateOnJoin();
+    }
   }
 
   onGameTypeChange(selectedValue: string) {
     // Find the selected game type based on the selected value
     const selectedGameTypeValue = Number(selectedValue);
-    const selectedGameType = this.gameTypes().find((gameType:any) => gameType.value === selectedGameTypeValue);
-  
+    const selectedGameType = GAME_TYPES.find(
+      (gameType: any) => gameType.value === selectedGameTypeValue
+    );
+
     if (selectedGameType) {
       this.player.maxPlayers = selectedGameType.defaultMaxPlayers;
-    } 
+    }
   }
 
-  isValidGameType = ():boolean=>{
-    return this.player.gameType != GameType.PokemonStandard;
+  isValidGameType = (): boolean => {
+    return this.player.gameType != GameType.PokemonStandard && this.player.gameType != GameType.YuGiOhStandard;
+  };
+
+  private agreedToDisclaimer(): boolean {
+    return localStorage.getItem('agreeToDisclaimer') === 'true';
+  }
+
+  private setLocalStorageForJoin(): void {
+    localStorage.setItem('playerName', this.player.name);
+    localStorage.setItem('isSpectator', String(this.player.isSpectator));
+  }
+
+  private navigateOnJoin() {
+    this.router.navigate(['/game'], {
+      queryParams: { id: this.player.roomId },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private setLocalStorageForCreate(): void {
+    localStorage.setItem('playerName', this.player.name);
+    localStorage.setItem('roomName', this.player.roomName);
+    localStorage.setItem('gameType', this.player.gameType.toString());
+    localStorage.setItem('maxPlayers', this.player.maxPlayers.toString());
+    localStorage.setItem('isSpectator', 'false');
+    
+    if (this.player.password) {
+      localStorage.setItem('password', this.player.password);
+    }
   }
 }

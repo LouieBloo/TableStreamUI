@@ -1,0 +1,28 @@
+<button class="hidden" onclick="ipAddressWarningModal.showModal()" id="toggleIpAddressWarningModal">toggle</button>
+<button class="hidden" onclick="ipAddressWarningModal.close()" id="toggleIpAddressWarningModalClose">toggle</button>
+
+<dialog id="ipAddressWarningModal" class="modal">
+    <div class="modal-box absolute top-2">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="ipAddressWarningModal.close()" id="closeipAddressingWarningModal" >✕</button>
+            <div class="bg-white">
+                <h2>Important Notice</h2>
+                <p><strong>Your IP Address May Be Exposed</strong></p>
+                <p>
+                    Please be aware that when using this application for peer-to-peer (P2P) video streaming, your IP address may be visible to other users. This is a common aspect of P2P technology, as it allows direct connections between users for streaming.
+                </p>
+                <p><strong>To protect your privacy:</strong></p>
+                <ul>
+                    <li>Consider using a Virtual Private Network (VPN) to help mask your IP address.</li>
+                    <li>Be cautious about sharing personal information while using this application.</li>
+                </ul>
+                <p>
+                    By continuing to use this app, you acknowledge that you understand the potential privacy implications.
+                </p>
+            </div>
+            <button (click)="iAgree()" class="w-full btn btn-neutral text-white py-2 px-4 rounded mt-3" id="iAgreeBtn" >I agree</button>
+            <button onclick="ipAddressWarningModal.close()" class="w-full btn btn-outline btn-ghost py-2 px-4 rounded mt-3" id="iAgreeBtn" >Take me back</button>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

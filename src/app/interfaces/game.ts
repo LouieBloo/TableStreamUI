@@ -1,5 +1,4 @@
 import { IPlayer, PlayerProperties } from "./player";
-import { ScryfallCard } from "./scryfall";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
@@ -28,7 +27,8 @@ export enum GameType{
     MTGModern,
     MTGLegacy,
     MTGVintage,
-    PokemonStandard
+    PokemonStandard,
+    YuGiOhStandard
 }
 
 export interface IModifyPlayerProperty{
