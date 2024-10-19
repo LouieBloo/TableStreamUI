@@ -16,7 +16,8 @@ export class ReportModalComponent {
 
   report = {
     title: "",
-    body: ""
+    body: "",
+    email: null
   }
 
   loading:boolean = false;
