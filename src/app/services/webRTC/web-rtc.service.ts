@@ -178,10 +178,40 @@ export class WebRTCService {
   }
 
   public disconnect() {
+    // Disconnect the socket
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
     }
+  
+    // Stop and remove all local media tracks
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => {
+        track.stop();  // Stop the track
+        track.enabled = false;  // Disable it
+      });
+      this.localStream = null;
+    }
+  
+    // Close and remove all peer connections
+    for (const pc of Object.values(this.peerConnections)) {
+      pc.getSenders().forEach(sender => {
+        if (sender.track) {
+          sender.track.stop();  // Stop all sending tracks
+        }
+      });
+      pc.close();  // Close the peer connection
+    }
+    this.peerConnections = {};
+  
+    // Clear remote streams and stop all tracks in the remote streams
+    for (const stream of Object.values(this.remoteStreams)) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    this.remoteStreams = {};
+  
+    // Optionally, remove any media devices listeners if added
+    navigator.mediaDevices.ondevicechange = null;
   }
 
   public getStream(socketId: string) {
