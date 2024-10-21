@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
-import { GameErrorSeverity, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
+import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
 import { IMessage } from '../../interfaces/message';
 import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,12 @@ export class WebRTCService {
 
   amISpectator: boolean = false;
 
+  private _roomPasswordValid: BehaviorSubject<boolean|null> = new BehaviorSubject<boolean|null>(null);
+
+  get roomPasswordValid(): Observable<boolean|null>{
+    return this._roomPasswordValid.asObservable();
+  }
+  
   constructor(private alertService: AlertsService, private logger: LoggerService) {}
 
   public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string): Promise<MediaStream> {
@@ -120,6 +127,7 @@ export class WebRTCService {
   }
 
   public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, maxPlayers:number, callback: any) {
+
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -145,9 +153,11 @@ export class WebRTCService {
         maxPlayers: maxPlayers || 4
       },
 
-        (newPlayer: IUser, room: IRoom, error: any) => {
+        (newPlayer: IUser, room: IRoom, error: IGameError) => {
           if (error) {
-            this.alertService.addAlert("error", error.message);
+              if(error.type === GameErrorType.InvalidPassword){
+                this._roomPasswordValid.next(false);
+              }
             return;
           }
           // Set all our game state
@@ -373,6 +383,10 @@ export class WebRTCService {
 
   public getRemoteStream(socketId: string): MediaStream | null {
     return this.remoteStreams[socketId] || null;
+  }
+
+  public resetRoomPasswordInvalid(){
+    this._roomPasswordValid.next(null);
   }
 
 
