@@ -249,32 +249,39 @@ export class UserStreamComponent {
     const context = canvas.getContext('2d');
 
     if (context) {
-        // Draw the current frame of the video onto the canvas
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      // Check if the camera is flipped and apply the necessary transformation
+      if (this.player.cameraFlipped) {
+        // Flip the canvas horizontally and/or vertically based on the flipped state
+        context.scale(-1, -1);  // Flip both X and Y axis
+        context.translate(-canvas.width, -canvas.height);  // Move the context back to the origin after flipping
+      }
 
-        // Convert the canvas content to a Blob (image file)
-        canvas.toBlob((blob) => {
-            if (blob) {
-                // Create a file from the Blob to send to the service
-                const photoFile = new File([blob], 'current_frame.jpg', { type: 'image/jpeg' });
+      // Draw the current frame of the video onto the canvas
+      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-                // Send the file and normalized click position to the classification service
-                this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY).subscribe(
-                    (response:any) => {
-                        if(response && response.scryfall_data){
-                          this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence}});
-                        }
-                        this.loadingCardIdentification = false;
-                    },
-                    (error:any) => {
-                        this.logger.error('Error classifying image:', error);
-                        this.loadingCardIdentification = false;
-                    }
-                );
-            }
+      // Convert the canvas content to a Blob (image file)
+      canvas.toBlob((blob) => {
+          if (blob) {
+              // Create a file from the Blob to send to the service
+              const photoFile = new File([blob], 'current_frame.jpg', { type: 'image/jpeg' });
 
-            canvas.remove();
-        }, 'image/jpeg',1.0);
+              // Send the file and normalized click position to the classification service
+              this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY).subscribe(
+                  (response:any) => {
+                      if(response && response.scryfall_data){
+                        this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence}});
+                      }
+                      this.loadingCardIdentification = false;
+                  },
+                  (error:any) => {
+                      this.logger.error('Error classifying image:', error);
+                      this.loadingCardIdentification = false;
+                  }
+              );
+          }
+
+          canvas.remove();
+      }, 'image/jpeg',1.0);
     }
   }
 

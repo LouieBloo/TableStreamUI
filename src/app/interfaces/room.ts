@@ -10,3 +10,7 @@ export interface IRoom {
     game?: Game;
     maxPlayers?:number;
 }
+
+export interface PasswordCheckResponse {
+    result: boolean;
+}

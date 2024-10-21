@@ -1,25 +1,33 @@
-import { Component, Input } from '@angular/core';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { of, tap } from 'rxjs';
+import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 
 @Component({
   selector: 'app-password-modal',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgIf, AsyncPipe],
   templateUrl: './password-modal.component.html',
   styleUrl: './password-modal.component.css'
 })
 export class PasswordModalComponent {
   
-  onSaveCallback: (password: string) => void = () => {};
+  @Output() joinGame: EventEmitter<any> = new EventEmitter<any>();
+  @Output() goBackEvent: EventEmitter<any> = new EventEmitter<any>();
 
-  data = {
-    password: ""
+  password: string = "";
+  roomPasswordValid = of<boolean|null>(null);
+  
+  constructor(public webRtcService: WebRTCService){
+    this.roomPasswordValid = webRtcService.roomPasswordValid.pipe(
+      tap((value)=> {
+        console.log(value);
+      })
+    )
   }
-
-  constructor() { }
-
-  open = (callback: (password: string) => void) => {
-    this.onSaveCallback = callback;
+  
+  open() {
     const dialogCheckbox = document.getElementById('togglePasswordModal');
     if (dialogCheckbox) {
       dialogCheckbox.click();
@@ -27,10 +35,21 @@ export class PasswordModalComponent {
   }
 
   savePassword() {
-    this.onSaveCallback(this.data.password);
+    this.joinGame.emit(this.password);
+  }
+
+  close(){
     const closeModalButton = document.getElementById('closePasswordModal');
     if (closeModalButton) {
       closeModalButton.click();
     }
+  }
+
+  goBack(){
+    this.goBackEvent.emit();
+  }
+
+  ngOnDestroy(){
+    this.webRtcService.resetRoomPasswordInvalid();
   }
 }
