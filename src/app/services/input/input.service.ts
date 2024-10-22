@@ -30,8 +30,8 @@ export class InputService {
       case 'ArrowDown':
         this.inputEventSubject.next(UserInputAction.ModifyHealthMinus1)
         break;
-      case 'i':
-        if (event.ctrlKey) {
+      case 'q':
+        if (event.ctrlKey || event.altKey) {
           this.inputEventSubject.next(UserInputAction.JumpToSearch)
         }
         break;

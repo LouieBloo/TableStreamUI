@@ -184,4 +184,8 @@ export class CardListComponent {
       closeModalButton.click();
     }
   }
+
+  clearSearchHistory = ()=>{
+    this.sharedCards = []
+  }
 }
