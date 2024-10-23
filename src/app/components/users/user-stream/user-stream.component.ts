@@ -36,7 +36,6 @@ export class UserStreamComponent {
   muted:boolean = false;
   volume: number = 1;
 
-  // Device selection properties
   audioInputDevices: MediaDeviceInfo[] = [];
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
@@ -45,7 +44,11 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
 
-  constructor(private webRTC: WebRTCService, public gameService: GameService, private cardIdentifierService:CardIdentifierService, private logger:LoggerService, private alertService: AlertsService) {}
+  constructor(private webRTC: WebRTCService,
+    public gameService: GameService,
+    private cardIdentifierService:CardIdentifierService,
+    private logger:LoggerService,
+    private alertService: AlertsService) {}
   
 
   ngAfterViewInit(){
@@ -79,17 +82,18 @@ export class UserStreamComponent {
   }
 
   initLocalStream(){
-    this.webRTC.initLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId).then(stream => {
-      if (this.video.nativeElement) {
-        this.video.nativeElement.srcObject = stream;
-        this.video.nativeElement.muted = true; // Mute local video to prevent echo
-      }
+      this.webRTC.initLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId).then(stream => {
+        if (this.video.nativeElement) {
+          this.video.nativeElement.srcObject = stream;
+          this.video.nativeElement.muted = true; // Mute local video to prevent echo
+        }
+  
+        navigator.mediaDevices.enumerateDevices().then((devices) => {
+          this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
+          this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
+        });
+      })
 
-      navigator.mediaDevices.enumerateDevices().then((devices) => {
-        this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
-        this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
-      });
-    });
   }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {

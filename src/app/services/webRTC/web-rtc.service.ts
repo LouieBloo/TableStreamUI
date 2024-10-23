@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
@@ -7,7 +8,6 @@ import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
-import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +21,6 @@ export class WebRTCService {
   onStreamRemoved: ((id: string) => void)[] = [];
   onGameEvent: ((update: IGameEvent) => void)[] = [];
   onMessage: ((message: IMessage) => void)[] = [];
-
   amISpectator: boolean = false;
 
   private _roomPasswordValid: BehaviorSubject<boolean|null> = new BehaviorSubject<boolean|null>(null);
@@ -32,42 +31,53 @@ export class WebRTCService {
   
   constructor(private alertService: AlertsService, private logger: LoggerService) {}
 
-  public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string): Promise<MediaStream> {
+
+  
+  public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string): Promise<MediaStream|null> {
     if (this.localStream) { return this.localStream; }
   
-    const constraints: MediaStreamConstraints = {
-      video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
-      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true
-    };
+    const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId);
   
     try {
-      this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      this.localStream = await this.getUserMedia(constraints);
     } catch (err:any) {
-      this.logger.error("Error getting media stream:", err)
+
+      if(err.name === "NotFoundError"){
+        this.alertService.addAlert("error", "One or more media devices could not be found");
+        return null;
+      }
   
-      // If audio permission is denied, try again without audio
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        if (constraints.audio) {
-          this.logger.log("Audio permission denied, trying again without audio")
-          constraints.audio = false;
-          try {
-            this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-          } catch (err2) {
-            this.logger.error("Error getting media stream without audio:", err2)
-            // Handle error (perhaps video is also denied)
-            throw err2;
-          }
-        } else {
-          // Audio is not requested, the error must be with video
-          throw err;
-        }
-      } else {
-        // Other errors
+        this.logger.log("Permission error: Trying again without audio")
+        await this.getUserMediaWithoutAudio(constraints)
+      }
+       else {
+        this.logger.error("Error getting media stream:", err)
         throw err;
       }
     }
   
     return this.localStream;
+  }
+  private async getUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream|null> {
+    return navigator.mediaDevices.getUserMedia(constraints);
+  }
+
+  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string): MediaStreamConstraints {
+    return {
+      video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
+      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true,
+    };
+  }
+
+  private async getUserMediaWithoutAudio(constraints: MediaStreamConstraints) {
+    try {
+      constraints.audio = false;
+      this.localStream = await this.getUserMedia(constraints);
+    } catch (err) {
+      this.logger.error("Error getting media stream without audio:", err);
+      throw err;
+    }
   }
 
   public async changeDevice(videoDeviceId?: string, audioDeviceId?: string): Promise<void> {
@@ -77,12 +87,8 @@ export class WebRTCService {
     }
 
     // Reinitialize local stream with new device(s)
-    const constraints: MediaStreamConstraints = {
-      video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
-      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true
-    };
-
-    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const constraints = this.getMediaConstraints();
+    this.localStream = await this.getUserMedia(constraints);
 
     // Replace tracks in peer connections
     for (const socketId in this.peerConnections) {
@@ -95,7 +101,7 @@ export class WebRTCService {
       });
 
       // Add new tracks
-      this.localStream.getTracks().forEach(track => {
+      this.localStream!.getTracks().forEach(track => {
         pc.addTrack(track, this.localStream!);
       });
 
@@ -106,14 +112,11 @@ export class WebRTCService {
     }
   }
 
-  public async getMediaDevices(): Promise<MediaDeviceInfo[]> {
-    return await navigator.mediaDevices.enumerateDevices();
-  }
-
   public subscribeToStreamAdd(callback: (id: string, stream: MediaStream, user: IUser) => void) {
     this.onStreamAdded.push(callback);
   }
 
+  //TODO unused method
   public unSubscribeToStreamAdd(callback: any) {
     this.onStreamAdded = this.onStreamAdded.filter((checkCallback) => { checkCallback !== callback })
   }
@@ -122,6 +125,7 @@ export class WebRTCService {
     this.onStreamRemoved.push(callback);
   }
 
+  //TODO unused method
   public unSubscribeToStreamRemove(callback: any) {
     this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
   }
@@ -182,8 +186,8 @@ export class WebRTCService {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
-    }
-  
+  }
+
     // Stop and remove all local media tracks
     if (this.localStream) {
       this.localStream.getTracks().forEach(track => {
@@ -191,8 +195,8 @@ export class WebRTCService {
         track.enabled = false;  // Disable it
       });
       this.localStream = null;
-    }
-  
+  }
+
     // Close and remove all peer connections
     for (const pc of Object.values(this.peerConnections)) {
       pc.getSenders().forEach(sender => {
@@ -203,13 +207,13 @@ export class WebRTCService {
       pc.close();  // Close the peer connection
     }
     this.peerConnections = {};
-  
+
     // Clear remote streams and stop all tracks in the remote streams
     for (const stream of Object.values(this.remoteStreams)) {
       stream.getTracks().forEach(track => track.stop());
     }
     this.remoteStreams = {};
-  
+
     // Optionally, remove any media devices listeners if added
     navigator.mediaDevices.ondevicechange = null;
   }
@@ -323,7 +327,7 @@ export class WebRTCService {
 
       if (!this.amISpectator) {
         let localS = await this.initLocalStream()
-        localS.getTracks().forEach((track) => {
+        localS!.getTracks().forEach((track) => {
           this.logger.log("adding tracks for: ", socketId);
           peerConnection.addTrack(track, this.localStream!);
         });
