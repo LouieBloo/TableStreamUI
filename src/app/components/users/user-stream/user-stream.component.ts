@@ -36,7 +36,6 @@ export class UserStreamComponent {
   muted:boolean = false;
   volume: number = 1;
 
-  // Device selection properties
   audioInputDevices: MediaDeviceInfo[] = [];
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
@@ -45,7 +44,11 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
 
-  constructor(private webRTC: WebRTCService, public gameService: GameService, private cardIdentifierService:CardIdentifierService, private logger:LoggerService, private alertService: AlertsService) {}
+  constructor(private webRTC: WebRTCService,
+    public gameService: GameService,
+    private cardIdentifierService:CardIdentifierService,
+    private logger:LoggerService,
+    private alertService: AlertsService) {}
   
 
   ngAfterViewInit(){
@@ -89,7 +92,7 @@ export class UserStreamComponent {
         this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
         this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
       });
-    });
+    })
   }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {

@@ -26,6 +26,7 @@ import { LoggerService } from '../../../services/logger/logger.service';
   styleUrl: './game.component.css'
 })
 export class GameComponent {
+  private subscriptions: Subscription = new Subscription();
 
   localPlayerId: string = ""
   localPlayer!: IPlayer;
@@ -86,8 +87,12 @@ export class GameComponent {
       }
     })
 
-    this.webRTC.subscribeToStreamAdd(this.streamAdded);
-    this.webRTC.subscribeToStreamRemove(this.streamRemoved);
+    //this.webRTC.subscribeToStreamAdd(this.streamAdded);
+    //this.webRTC.subscribeToStreamRemove(this.streamRemoved);
+    this.subscriptions.add(
+      this.webRTC.userJoined.subscribe(this.userJoined)
+    );
+
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
     this.checkPasswordProtection(this.roomId);
   }
@@ -159,7 +164,6 @@ export class GameComponent {
   }
 
 
-
   test123(): void {
     this.gameService.room.players.push(
       { ...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length + 1 });
@@ -172,14 +176,16 @@ export class GameComponent {
     }
 
     this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
+
+    this.subscriptions.unsubscribe();
   }
 
-  streamAdded = (id: string, stream: MediaStream, user: IUser) => {
-    if (user.type == UserType.Player) {
+
+  userJoined = ({ id, user }: { id: string, user: IUser }) => {
+    if (user.type === UserType.Player) {
       this.addPlayer(user as IPlayer);
     }
-    // this.remoteSocketIds.push(id);
-  }
+  };
 
   streamRemoved = (id: string) => {
     // this.remoteSocketIds = this.remoteSocketIds.filter((userId) => userId !== id)
