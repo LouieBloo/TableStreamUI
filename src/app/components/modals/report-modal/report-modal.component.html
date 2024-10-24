@@ -6,11 +6,22 @@
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeReportModal" >✕</button>
         </form>
 
-        <h3 class="text-lg font-bold">Report Issue</h3>
-        
-        <p class="text-sm">Alternatively you can email <strong>admin&#64;table-stream.com</strong> with any issues or feedback.</p>
+        <div *ngIf="!acceptedKnownBugs">
+          <h1 class="text-xl font-bold text-center mb-2 text-white">Known Bugs and Issues</h1>
+          <ul class="list-disc list-inside mb-4 text-white">
+            <li>If you are a spectator, do not have a camera, or have denied the camera permission, you may not see other players cameras on refresh. To fix, go back to the login page and rejoin.</li>
+            <li>Clicking to search for a card on a stream is in alpha and has a low succeess rate. Try bringing the card closer to the camera for better results.</li>
+          </ul>
 
-        <form #reportForm="ngForm" (ngSubmit)="submitIssue()" class="mt-4">
+          <button type="button" class="btn w-full btn-outline text-white py-2 px-4 rounded" (click)="acceptedKnownBugs = true;">I have a different issue</button>
+        </div>
+
+        <div *ngIf="acceptedKnownBugs">
+          <h3 class="text-lg font-bold">Report Issue</h3>
+        
+          <p class="text-sm">Alternatively you can email <strong>admin&#64;table-stream.com</strong> with any issues or feedback.</p>
+
+          <form #reportForm="ngForm" (ngSubmit)="submitIssue()" class="mt-4">
             <div class="mb-4">
               <label for="issueTitle" class="block text-sm font-medium text-white">Issue Title:</label>
               <input
@@ -53,6 +64,8 @@
               Submit Issue
             </button>
         </form>
+      </div>
+        
     </div>
     <form method="dialog" class="modal-backdrop">
         <button>close</button>

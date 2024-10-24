@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { LoggerService } from '../../../services/logger/logger.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-report-modal',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgIf],
   templateUrl: './report-modal.component.html',
   styleUrl: './report-modal.component.css'
 })
@@ -21,6 +22,7 @@ export class ReportModalComponent {
   }
 
   loading:boolean = false;
+  acceptedKnownBugs:boolean = false;
 
   constructor(private http:HttpClient, private alertService:AlertsService, private logger: LoggerService){}
 
