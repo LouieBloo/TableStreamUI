@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
@@ -17,8 +17,13 @@ export class WebRTCService {
   localStream: MediaStream | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {};
+
+  private userJoinedSubject = new Subject<{ id: string, user: IUser }>();
+  public userJoined = this.userJoinedSubject.asObservable();
+
   onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
+
   onGameEvent: ((update: IGameEvent) => void)[] = [];
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
@@ -42,10 +47,10 @@ export class WebRTCService {
       this.localStream = await this.getUserMedia(constraints);
     } catch (err:any) {
 
-      if(err.name === "NotFoundError"){
-        this.alertService.addAlert("error", "One or more media devices could not be found");
-        return null;
-      }
+      // if(err.name === "NotFoundError"){
+      //   this.alertService.addAlert("error", "One or more media devices could not be found");
+      //   return null;
+      // }
   
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         this.logger.log("Permission error: Trying again without audio")
@@ -251,6 +256,8 @@ export class WebRTCService {
 
   private handleNewPeer = (data: { socketId: string, user: IUser }) => {
     const { socketId } = data;
+    //not sure the correct order of this, trying in front of createPeerConnection
+    this.userJoinedSubject.next({ id: socketId, user: data.user });
     this.createPeerConnection(socketId, data.user, true);
   };
 
@@ -287,8 +294,6 @@ export class WebRTCService {
 
       peerConnection.onicecandidate = (event) => {
         this.logger.log("on ice candidate", event);
-
-
         if (event.candidate) {
           this.socket?.emit('signal', { to: socketId, signal: event.candidate });
         }
@@ -326,11 +331,27 @@ export class WebRTCService {
       };
 
       if (!this.amISpectator) {
-        let localS = await this.initLocalStream()
-        localS!.getTracks().forEach((track) => {
-          this.logger.log("adding tracks for: ", socketId);
-          peerConnection.addTrack(track, this.localStream!);
-        });
+        //try to add our tracks to the connection
+        try{
+          let localS = await this.initLocalStream()
+          localS!.getTracks().forEach((track) => {
+            this.logger.log("adding tracks for: ", socketId);
+            peerConnection.addTrack(track, this.localStream!);
+          });
+        }catch(error){
+          //if we cant, offer to receive (no permission, no camera, etc)
+          if (peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer') {
+            // Create an offer to receive remote tracks
+            const offerOptions = {
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true
+            };
+
+            const offer = await peerConnection.createOffer(offerOptions);
+            await peerConnection.setLocalDescription(offer);
+            this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
+          }
+        }
       } else if (newPeer) {
         this.logger.log("signal state: ", peerConnection.signalingState);
 

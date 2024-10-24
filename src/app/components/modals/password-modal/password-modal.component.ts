@@ -22,7 +22,7 @@ export class PasswordModalComponent {
   constructor(public webRtcService: WebRTCService){
     this.roomPasswordValid = webRtcService.roomPasswordValid.pipe(
       tap((value)=> {
-        console.log(value);
+        //console.log(value);
       })
     )
   }
