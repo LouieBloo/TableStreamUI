@@ -178,6 +178,7 @@ export class GameComponent {
     this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
 
     this.subscriptions.unsubscribe();
+    this.sortedPlayers = [];
   }
 
 
