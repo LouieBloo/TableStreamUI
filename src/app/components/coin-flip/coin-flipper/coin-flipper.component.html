@@ -1,0 +1,8 @@
+
+<div *ngIf="visible" class="">
+    <div class="flex flex-wrap">
+        <div *ngFor="let coin of activeCoins">
+            <app-coin-flip [result]="coin.result"></app-coin-flip>
+        </div>
+    </div>
+</div>

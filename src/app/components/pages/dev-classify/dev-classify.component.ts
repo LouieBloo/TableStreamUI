@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { ScryfallCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/scryfall';
 import { FormsModule, NgModel } from '@angular/forms';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { environment } from '../../../../environments/environment';
@@ -17,8 +17,8 @@ export class DevClassifyComponent {
   currentIndex: number = 0;
   currentImage: string = '';
   scryfallSearchQuery: string = '';
-  searchResults: ScryfallCard[] = [];
-  selectedCard: ScryfallCard | null = null;
+  searchResults: PlayingCard[] = [];
+  selectedCard: PlayingCard | null = null;
   message: string = '';
 
   constructor(private http: HttpClient) {}
@@ -52,7 +52,7 @@ export class DevClassifyComponent {
 
     const query = encodeURIComponent(this.scryfallSearchQuery);
     this.http
-      .get<{ data: ScryfallCard[] }>(
+      .get<{ data: PlayingCard[] }>(
         `https://api.scryfall.com/cards/search?q=${query}`
       )
       .subscribe(
@@ -65,7 +65,7 @@ export class DevClassifyComponent {
       );
   }
 
-  selectCard(card: ScryfallCard) {
+  selectCard(card: PlayingCard) {
     this.selectedCard = card;
   }
 

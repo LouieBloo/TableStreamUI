@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.coin-container {
+  @apply flex flex-col items-center;
+}
+
+.coin {
+  @apply w-48 h-48 relative;
+  perspective: 1000px;
+}
+
+.coin-inner {
+  @apply w-full h-full relative;
+  transform-style: preserve-3d;
+}
+
+.coin-face {
+  @apply absolute w-full h-full;
+  backface-visibility: hidden;
+}
+
+.heads-face {
+  transform: rotateX(0deg);
+}
+
+.tails-face {
+  transform: rotateX(180deg);
+}
+
+.coin-inner img {
+  @apply w-full h-full object-cover;
+}

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
-import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent } from '../../interfaces/game';
+import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/game';
 import { IMessage } from '../../interfaces/message';
 import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
@@ -20,6 +20,9 @@ export class WebRTCService {
 
   private userJoinedSubject = new Subject<{ id: string, user: IUser }>();
   public userJoined = this.userJoinedSubject.asObservable();
+
+  private localGameEventSubject = new Subject<IGameEvent>();
+  public localGameEvent = this.localGameEventSubject.asObservable();
 
   onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
@@ -397,6 +400,10 @@ export class WebRTCService {
         callback(event)
       }
     })
+  }
+
+  handleLocalGameEvent = (event: IGameEvent) => {
+    this.localGameEventSubject.next(event);
   }
 
   handleErrorResponse = (error: IGameError) => {

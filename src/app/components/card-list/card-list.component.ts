@@ -4,12 +4,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, Subject, Subscription } from 'rxjs';
 import { GameEvent, IGameEvent } from '../../interfaces/game';
 import { UserInputAction } from '../../interfaces/inputs';
-import { ScryfallCard } from '../../interfaces/scryfall';
+import { PlayingCard } from '../../interfaces/scryfall';
 import { GameService } from '../../services/game/game.service';
 import { InputService } from '../../services/input/input.service';
 import { LoggerService } from '../../services/logger/logger.service';
 import { ModalServiceService, ModalType } from '../../services/modal/modal-service.service';
-import { ScryfallService } from '../../services/scryfall/scryfall.service';
+import { CardSearchService } from '../../services/search/card-search.service';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { CardComponent } from '../card/card.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
@@ -26,17 +26,17 @@ export class CardListComponent {
 
   @ViewChild('cardInput') cardInput!: any;
 
-  cards:ScryfallCard[] = []
+  cards:PlayingCard[] = []
 
   searchString!:string;
   searchSubject: Subject<string> = new Subject<string>();
   sendSearchEvent: Subject<boolean> = new Subject<boolean>();
   searchSubscription!: Subscription;
-  searchResults:ScryfallCard[] = []
+  searchResults:PlayingCard[] = []
 
-  sharedCards:ScryfallCard[] = [];
+  sharedCards:PlayingCard[] = [];
 
-  cardBeingHovered!:ScryfallCard | null;
+  cardBeingHovered!:PlayingCard | null;
 
   hasSearched:boolean = false;
   searching:boolean = false;
@@ -46,7 +46,7 @@ export class CardListComponent {
   private inputSubscription!: Subscription;
 
   constructor(
-    private scryfallService: ScryfallService,
+    private cardSearchService: CardSearchService,
     private elRef: ElementRef,
     private inputService: InputService,
     private webRtc:WebRTCService,
@@ -112,14 +112,14 @@ export class CardListComponent {
   }
 
   search= ()=>{
-    if(!this.searchString){return;}
+    if(!this.searchString || !this.gameService.room.game){return;}
     this.searching = true;
 
     if(this.searchSubscription){
       this.searchSubscription.unsubscribe();
     }
 
-    this.searchSubscription = this.scryfallService.searchCards(this.searchString,true,this.gameService.room.game?.searchTag).subscribe(
+    this.searchSubscription = this.cardSearchService.searchCards(this.searchString, true, this.gameService.room.game).subscribe(
       (response: any) => {
         this.searchResults = response.data;
         this.hasSearched = true;
@@ -161,7 +161,7 @@ export class CardListComponent {
   }
 
 
-  onCardHover = (card: ScryfallCard | null)=>{
+  onCardHover = (card: PlayingCard | null)=>{
     if(!card){return}
     this.cardBeingHovered = card;
   }

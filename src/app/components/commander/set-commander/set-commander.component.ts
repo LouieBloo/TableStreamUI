@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { IPlayer } from '../../../interfaces/player';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
-import { ScryfallCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/scryfall';
 import { NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent } from '../../../interfaces/game';
@@ -33,7 +33,7 @@ export class SetCommanderComponent {
     this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
   }
 
-  cardSelected = (card:ScryfallCard)=>{
+  cardSelected = (card:PlayingCard)=>{
     if(card != null){
       this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: card});
     }

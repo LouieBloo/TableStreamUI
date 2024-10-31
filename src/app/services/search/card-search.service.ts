@@ -1,0 +1,42 @@
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { PlayingCard } from '../../interfaces/scryfall';
+import { GameType } from '../../interfaces/game';
+import { environment } from '../../../environments/environment';
+import { Game } from '../../classes/game/game';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CardSearchService {
+  
+  private scryfallUrl = 'https://api.scryfall.com/cards/search';
+
+  constructor(private http: HttpClient) { }
+
+  searchCards(query: string, fuzzy: boolean = true, game:Game): Observable<any> {
+    if(game.gameType == GameType.PokemonStandard){
+      return this.searchPokemon(query, game.searchTag);
+    }else{
+      return this.searchScryfall(query,fuzzy,game.searchTag);
+    }
+  }
+
+
+  searchScryfall(query: string, fuzzy: boolean = true, format: string = 'commander'): Observable<any> {
+    let searchQuery = query;
+    if (fuzzy) {
+      searchQuery = `${query}`;
+    }
+    const params = new HttpParams().set('q', `${searchQuery} format=${format}`);
+    return this.http.get<any>(this.scryfallUrl, { params });
+  }
+
+
+  searchPokemon(name: string, format: string = 'standard'): Observable<any> {
+    let searchQuery = `name:"*${name}*" legalities.${format}:Legal`;
+    const params = new HttpParams().set('query', searchQuery);
+    return this.http.get<any>(environment.socketUrl + "/pokemon-cards", { params });
+  }
+}

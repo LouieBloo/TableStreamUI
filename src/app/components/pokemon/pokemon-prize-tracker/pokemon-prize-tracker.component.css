@@ -1,0 +1,14 @@
+.button{
+    background-color: rgba(0, 0, 0, 0.117);
+    border: 1px solid white;
+}
+
+.button:hover{
+    /* background-color: #1e293b; */
+    background-color: #5b5b5b;
+}
+
+
+.button:active{
+    background-color: #3b3b3b; /* Change to your desired color on click */
+}

@@ -1,4 +1,4 @@
-export interface ScryfallCard {
+export interface PlayingCard {
     id: string;                         // The unique UUID of the card
     name: string;                       // The name of the card
     mana_cost: string;                  // The mana cost of the card
@@ -44,7 +44,7 @@ export interface ScryfallCard {
     digital: boolean;                   // Whether the card is available digitally (MTGO)
     classificationConfidence: number;
 
-    card_faces?:ScryfallCard[]
+    card_faces?:PlayingCard[]
   }
   
   
