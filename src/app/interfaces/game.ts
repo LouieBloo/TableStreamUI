@@ -2,11 +2,12 @@ import { IPlayer, PlayerProperties } from "./player";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
-    event: GameEvent;
+    event: GameEvent | LocalGameEvent;
     payload?:any;
     response?: any;
 }
 
+//needs to be synced with back end
 export enum GameEvent{
     RandomizePlayerOrder,
     ModifyPlayerProperty,
@@ -16,7 +17,13 @@ export enum GameEvent{
     ShareCard,
     ToggleMonarch,
     ModifyPlayerCommanderDamage,
-    SetCommander
+    SetCommander,
+    FlipCoins
+}
+
+//fine to change on front end only
+export enum LocalGameEvent{
+    FlipCoins
 }
 
 
@@ -35,13 +42,6 @@ export interface IModifyPlayerProperty{
     property:PlayerProperties;
     amountToModify:number;
 }
-
-
-
-// export interface IGame{
-//     startingLifeTotal: string;
-//     sharedCards:ScryfallCard[];
-// }
 
 export interface ICommanderDamage{
     playerId:string;
@@ -71,4 +71,8 @@ export interface IAlert{
     type: 'success' | 'error' | 'info' | 'warning';
     message: string;
     id: number;
+}
+
+export interface ICoinFlipResults{
+    results:string[]
 }

@@ -1,0 +1,17 @@
+<div class="coin-container">
+    <div class="coin">
+        <div class="coin-inner" [ngClass]="animationClass">
+            <div class="coin-face heads-face" *ngIf="isFlipping">
+                <!-- Heads Image -->
+                <img src="{{headsImg}}" alt="Heads" />
+            </div>
+            <div class="coin-face tails-face" *ngIf="isFlipping">
+                <!-- Tails Image -->
+                <img src="{{tailsImg}}" alt="Tails" />
+            </div>
+            <div *ngIf="!isFlipping" class="coin-face">
+                <img src="{{winnerImg}}" alt="Result" />
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,7 +3,7 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/player';
-import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
+import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
@@ -15,11 +15,26 @@ import { CardIdentifierService } from '../../../services/card-identifier/card-id
 import { LoggerService } from '../../../services/logger/logger.service';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { environment } from '../../../../environments/environment';
+import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.component';
+import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 
 @Component({
   selector: 'app-user-stream',
   standalone: true,
-  imports: [NgIconComponent,LifeTotalComponent,NgClass,NgIf,TimeAgoPipe,CommonModule,TitleCasePipe, PropertyCounterComponent, SetCommanderComponent,TooltipDirective],
+  imports: [
+    NgIconComponent,
+    LifeTotalComponent,
+    NgClass,
+    NgIf,
+    TimeAgoPipe,
+    CommonModule,
+    TitleCasePipe,
+    PropertyCounterComponent,
+    SetCommanderComponent,
+    TooltipDirective,
+    CoinFlipperComponent,
+    PokemonPrizeTrackerComponent
+  ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })]
@@ -201,6 +216,14 @@ export class UserStreamComponent {
     })
   }
 
+  modifyPrizeCardTotal = (amount:number)=>{
+    let payload:IModifyPlayerProperty = {amountToModify: amount, property: PlayerProperties.prizeCards}
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyPlayerProperty,
+      payload:payload
+    })
+  }
+
   setFlip(){
     this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleX(-1) scaleY(-1)' : 'scaleX(1) scaleY(1)';
   }
@@ -230,7 +253,7 @@ export class UserStreamComponent {
       return;
     }
 
-    if(!environment.cardIdentifierActive){return;}
+    if(!environment.cardIdentifierActive || !this.gameService.room.game?.classifierActive){return;}
 
     this.loadingCardIdentification = true;
 

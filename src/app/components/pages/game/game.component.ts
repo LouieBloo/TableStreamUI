@@ -3,7 +3,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
-import { GameEvent, IGameEvent } from '../../../interfaces/game';
+import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/player';
 import { IRoom, PasswordCheckResponse } from '../../../interfaces/room';
@@ -328,4 +328,11 @@ export class GameComponent {
     this.router.navigate(['/join']);
   }
 
+  flipCoins = (coinsToFlip:number)=>{
+    this.webRTC.handleLocalGameEvent({
+      event: LocalGameEvent.FlipCoins,
+      callingPlayer: this.localPlayer,
+      payload: {coinsToFlip: coinsToFlip}
+    })
+  }
 }

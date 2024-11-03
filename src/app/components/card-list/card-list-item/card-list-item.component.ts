@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ScryfallCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/scryfall';
 
 @Component({
   selector: 'app-card-list-item',
@@ -9,5 +9,5 @@ import { ScryfallCard } from '../../../interfaces/scryfall';
   styleUrl: './card-list-item.component.css'
 })
 export class CardListItemComponent {
-  @Input() card!:ScryfallCard;
+  @Input() card!:PlayingCard;
 }

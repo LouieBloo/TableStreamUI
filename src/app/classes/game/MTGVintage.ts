@@ -5,4 +5,5 @@ export class MTGVintage extends Game {
     override startingLifeTotal = 20;
     override gameType:GameType = GameType.MTGVintage;
     override searchTag:string = "vintage";
+    override classifierActive:boolean = true;
 }

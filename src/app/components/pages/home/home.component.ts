@@ -106,7 +106,7 @@ export class HomeComponent {
   }
 
   isValidGameType = (): boolean => {
-    return this.player.gameType != GameType.PokemonStandard && this.player.gameType != GameType.YuGiOhStandard;
+    return this.player.gameType != GameType.YuGiOhStandard;
   };
 
   private agreedToDisclaimer(): boolean {

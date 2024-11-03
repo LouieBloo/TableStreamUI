@@ -34,12 +34,11 @@
 
                     <div class="justify-center mb-2 grid grid-cols-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
-                        
                         <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
                         <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
                     </div>
-
+                    
                     <div *ngIf="showingHotkeys" class="mb-4">
                         <ul class="text-white ">
                             <li>(Space Bar) - pass turn</li>
@@ -52,6 +51,23 @@
                 </div>
 
                 <app-messenger></app-messenger>
+
+                <div class="justify-center mt-2">
+                    <div>
+                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none" style="border-right: none;">Flip Coin</button>
+                        <div class="dropdown dropdown-left button text-white rounded-none " >
+                            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+                                <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
+                            </div>
+                            <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                                <li (click)="flipCoins(2)"><a>2</a></li>
+                                <li (click)="flipCoins(3)"><a>3</a></li>
+                                <li (click)="flipCoins(4)"><a>4</a></li>
+                                <li (click)="flipCoins(5)"><a>5</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="mt-2">
                     <app-card-list></app-card-list>
