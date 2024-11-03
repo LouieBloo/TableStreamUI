@@ -7,9 +7,6 @@ export class PokemonStandard extends Game {
     override searchTag:string = "standard";
     override coinImagePathPrefix:string = "mew"
 
-    _prizeCardsToWin:number = 6;
-
-    get prizeCardsToWin():number{
-        return this._prizeCardsToWin;
-    }
+    //this cant be a getter as it is set when instantiating rooms
+    prizeCardsToWin:number = 6;
 }
