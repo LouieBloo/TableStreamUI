@@ -11,6 +11,7 @@ import { MTGVintage } from '../../classes/game/MTGVintage';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
+import { PokemonStandard } from '../../classes/game/PokemonStandard';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +42,26 @@ export class GameService {
     return this.room.game?.gameType == GameType.MTGCommander;
   }
 
+  public isMagicGame = (): boolean => {
+    if(!this.room.game?.gameType){return false;}
+    const magicGameTypes = [
+        GameType.MTGStandard,
+        GameType.MTGCommander,
+        GameType.MTGLegacy,
+        GameType.MTGVintage,
+        GameType.MTGModern
+    ];
+    return magicGameTypes.includes(this.room.game?.gameType);
+}
+
+  public isPokemonGame = ():boolean =>{
+    return this.room.game?.gameType == GameType.PokemonStandard;
+  }
+
+  get pokemonGame():PokemonStandard{
+    return this.room.game as PokemonStandard;
+  }
+
   static createGame(gameType: GameType) : Game {
     switch (gameType) {
       case GameType.MTGCommander:
@@ -57,6 +78,9 @@ export class GameService {
         break;
       case GameType.MTGVintage:
         return new MTGVintage();
+        break;
+      case GameType.PokemonStandard:
+        return new PokemonStandard();
         break;
     }
 

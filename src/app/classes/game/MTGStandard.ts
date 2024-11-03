@@ -5,4 +5,5 @@ export class MTGStandard extends Game {
     override startingLifeTotal = 20;
     override gameType:GameType = GameType.MTGStandard;
     override searchTag:string = "standard";
+    override classifierActive:boolean = true;
 }

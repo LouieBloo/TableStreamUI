@@ -1,0 +1,49 @@
+<div class="flex">
+    <!-- Left Side: Image Display -->
+    <div class="w-1/2 p-4">
+      <div *ngIf="currentImage">
+        <img [src]="getCurrentImageUrl()" alt="Current Image" class="max-w-full" />
+      </div>
+      <div *ngIf="message">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  
+    <!-- Right Side: Scryfall Search and Results -->
+    <div class="w-1/2 p-4">
+      <input
+        type="text"
+        [(ngModel)]="scryfallSearchQuery"
+        (input)="searchScryfall()"
+        placeholder="Search for a card"
+        class="input input-bordered w-full mb-4"
+      />
+  
+      <div *ngIf="searchResults.length > 0">
+        <ul>
+          <li
+            *ngFor="let card of searchResults"
+            (click)="selectCard(card)"
+            [class.selected]="selectedCard?.id === card.id"
+            class="cursor-pointer p-2 hover:bg-gray-200"
+          >
+            {{ card.name }}
+          </li>
+        </ul>
+      </div>
+  
+      <div *ngIf="selectedCard" class="mt-4">
+        <h3 class="text-lg font-bold">{{ selectedCard.name }}</h3>
+        <img
+          *ngIf="selectedCard.image_uris"
+          [src]="selectedCard.image_uris.normal"
+          alt="{{ selectedCard.name }}"
+          class="max-w-full"
+        />
+        <button (click)="saveImage()" class="btn btn-primary mt-4">
+          Save Image
+        </button>
+      </div>
+    </div>
+  </div>
+  

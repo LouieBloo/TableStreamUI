@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ScryfallCard } from '../../interfaces/scryfall';
+import { PlayingCard } from '../../interfaces/scryfall';
 import { DecimalPipe, NgClass, NgIf } from '@angular/common';
 
 @Component({
@@ -10,7 +10,7 @@ import { DecimalPipe, NgClass, NgIf } from '@angular/common';
   styleUrl: './card.component.css'
 })
 export class CardComponent {
-  @Input() card!:ScryfallCard | null;
+  @Input() card!:PlayingCard | null;
 
   @Input() showPopup:boolean = true;
 
