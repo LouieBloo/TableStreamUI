@@ -136,4 +136,23 @@ export class HomeComponent {
       localStorage.setItem('password', this.player.password);
     }
   }
+
+
+  get backgroundImage():string{
+    if(this.player.gameType == GameType.PokemonStandard){
+      return "pokemon"
+    }else if(this.player.gameType == GameType.MTGCommander){
+      return "magic"
+    }else if(this.player.gameType == GameType.MTGLegacy){
+      return "wrenn"
+    }else if(this.player.gameType == GameType.MTGModern){
+      return "ulamog"
+    }else if(this.player.gameType == GameType.MTGStandard){
+      return "rakdos"
+    }else if(this.player.gameType == GameType.MTGVintage){
+      return "mana-vault"
+    }
+        
+    return "magic"
+  }
 }
