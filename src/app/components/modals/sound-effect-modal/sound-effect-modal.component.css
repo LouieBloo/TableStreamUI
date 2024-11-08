@@ -1,0 +1,8 @@
+#modalbox{
+    max-width: 600px;
+}
+
+.custom-range{
+    --range-shdw: oklch(0.16 0.02 265.02);
+    background-color: #6a6a6a;
+}

@@ -1,0 +1,29 @@
+<button class="hidden" onclick="soundEffectModal.showModal()" id="soundEffectToggleModal">toggle</button>
+<dialog id="soundEffectModal" class="modal">
+
+    <div class="modal-box bg-slate-800 text-white absolute top-2">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeSoundEffectModal">✕</button>
+        </form>
+
+        <h3 class="text-lg font-bold">Play Sounds</h3>
+        <p class="text-sm mb-4">Play sounds for all to hear! 15s cooldown.</p>
+
+        <div *ngFor="let group of soundListKeys">
+            <h4 class="font-semibold text-md mb-2">{{ group }}</h4>
+            <ul class="grid grid-cols-3">
+                <li *ngFor="let sound of soundList[group]" class="mb-2">
+                    <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" (click)="playSoundLocal(sound)">{{sound.icon}} {{ sound.name }}</button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mt-4">
+            <h3 class="text-lg font-bold">Global Effect Volume</h3>
+            <input type="range" min="0" max="1" step="0.01" [(ngModel)]="volume" class="range custom-range w-full" />
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
