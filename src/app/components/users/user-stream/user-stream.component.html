@@ -26,10 +26,8 @@
 
     <div class="absolute left-2 text-white flex flex-col leftPanel">
         <div class="text-xs">
-            <!-- <p class="">{{ !localStream ? "Remote: " + player.socketId : "Local" }} - {{player.name}}</p> -->
-            <!-- todo this re-renders the whole component every tick -->
-            <p>Turn: {{ player.currentTurnStartTime | timeAgo | async }}</p>
-            <p>Avg: {{ (player.totalTurnTime/ ( (player.totalTurns) || 1 ) ) | timeAgo | async }}</p>
+            <p>Turn: <app-timer [date]="player.currentTurnStartTime"></app-timer></p>
+            <p>Avg: <app-timer [date]="(player.totalTurnTime/ ( (player.totalTurns) || 1 ) )"></app-timer></p>
         </div>
 
         <div *ngIf="player && gameService.isCommanderGame()">

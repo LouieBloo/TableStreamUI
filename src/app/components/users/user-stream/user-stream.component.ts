@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
@@ -6,7 +6,6 @@ import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/player';
 import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
-import { TimeAgoPipe } from '../../../pipes/time-ago.pipe';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 import { GameService } from '../../../services/game/game.service';
 import { SetCommanderComponent } from '../../commander/set-commander/set-commander.component';
@@ -18,6 +17,7 @@ import { environment } from '../../../../environments/environment';
 import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.component';
 import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
+import { TimerComponent } from '../../timer/timer.component';
 
 @Component({
   selector: 'app-user-stream',
@@ -27,7 +27,6 @@ import { ReactionsComponent } from '../../effects/reactions/reactions.component'
     LifeTotalComponent,
     NgClass,
     NgIf,
-    TimeAgoPipe,
     CommonModule,
     TitleCasePipe,
     PropertyCounterComponent,
@@ -35,7 +34,8 @@ import { ReactionsComponent } from '../../effects/reactions/reactions.component'
     TooltipDirective,
     CoinFlipperComponent,
     PokemonPrizeTrackerComponent,
-    ReactionsComponent
+    ReactionsComponent,
+    TimerComponent
   ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
