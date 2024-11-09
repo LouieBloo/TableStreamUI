@@ -66,22 +66,16 @@ export class GameService {
     switch (gameType) {
       case GameType.MTGCommander:
         return new MTGCommander();
-        break;
       case GameType.MTGStandard:
         return new MTGStandard();
-        break;
       case GameType.MTGModern:
         return new MTGModern();
-        break;
       case GameType.MTGLegacy:
         return new MTGLegacy();
-        break;
       case GameType.MTGVintage:
         return new MTGVintage();
-        break;
       case GameType.PokemonStandard:
         return new PokemonStandard();
-        break;
     }
 
     return new MTGCommander();

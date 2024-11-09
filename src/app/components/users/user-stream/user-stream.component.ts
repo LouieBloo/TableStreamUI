@@ -44,7 +44,7 @@ import { TimerComponent } from '../../timer/timer.component';
 export class UserStreamComponent {
 
   @Input() player!: IPlayer;
-  @Input() localStream: boolean = false;
+  @Input() isLocalStream: boolean = false;
   
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
 
@@ -69,7 +69,7 @@ export class UserStreamComponent {
   
 
   ngAfterViewInit(){
-    if(!this.localStream){
+    if(!this.isLocalStream){
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
       // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
       this.setStream(this.webRTC.getStream(this.player.socketId))  

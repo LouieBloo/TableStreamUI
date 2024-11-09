@@ -2,22 +2,22 @@
 
     <div class="flex justify-center h-full">
         <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 
-            [muted]="localStream || muted"></video>
+            [muted]="isLocalStream || muted"></video>
     </div>
 
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <div *ngIf="gameService.isMagicGame()">
-            <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"
+            <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="isLocalStream"
                 [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal"></app-life-total>
         </div>
         <div *ngIf="gameService.isPokemonGame()">
-            <app-pokemon-prize-tracker [player]="player" [modifyPrizeCardsCallback]="modifyPrizeCardTotal" [editable]="localStream"></app-pokemon-prize-tracker>
+            <app-pokemon-prize-tracker [player]="player" [modifyPrizeCardsCallback]="modifyPrizeCardTotal" [editable]="isLocalStream"></app-pokemon-prize-tracker>
         </div>
     </div>
 
     <div class="absolute top-20 left-2 flex flex-col" *ngIf="showCommanderDamage">
         <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
-            <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
+            <app-property-counter [editable]="isLocalStream" [title]="gameService.getPlayerById(playerId)!.name"
                 [total]="player.commanderDamages[playerId].damage"
                 [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-1">
             </app-property-counter>
@@ -31,7 +31,7 @@
         </div>
 
         <div *ngIf="player && gameService.isCommanderGame()">
-            <app-set-commander [player]="player" [editable]="localStream"></app-set-commander>
+            <app-set-commander [commanders]="player.commanders" [editable]="isLocalStream"></app-set-commander>
         </div>
     </div>
 
@@ -69,7 +69,7 @@
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
                 <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Commander Damage</a></li>
                 <!-- Local Stream Controls -->
-                <ng-container *ngIf="localStream">
+                <ng-container *ngIf="isLocalStream">
                     <li (click)="toggleMuteSelf()" class="text-slate-800">
                         <a>{{ isMutedSelf ? 'Unmute Mic' : 'Mute Mic' }}</a>
                     </li>
@@ -103,7 +103,7 @@
                 </ng-container>
 
                 <!-- Remote Stream Controls -->
-                <ng-container *ngIf="!localStream">
+                <ng-container *ngIf="!isLocalStream">
                     <li *ngIf="!muted" (click)="muteRemoteUser()" class="text-slate-800">
                         <a>Mute Player</a>
                     </li>

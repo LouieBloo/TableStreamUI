@@ -148,8 +148,8 @@ export class GameComponent {
       localStorage.setItem("playerId", me.id);
       this.router.navigate([], {
         queryParams: { id: room.id },
-        queryParamsHandling: 'merge', // This merges with any existing query params
-        replaceUrl: true // Replace the current URL in history
+        queryParamsHandling: 'merge',
+        replaceUrl: true
       });
 
       if (me.type == UserType.Player) {
@@ -226,7 +226,7 @@ export class GameComponent {
   }
 
   addPlayer = (newPlayer: IPlayer) => {
-    let foundPlayer = this.getPlayer(newPlayer.id)
+    let foundPlayer = this.getPlayer(newPlayer.id);
 
     if (!foundPlayer) {
       this.gameService.room.players.push(newPlayer);

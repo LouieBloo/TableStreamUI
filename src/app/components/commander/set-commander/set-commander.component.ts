@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { IPlayer } from '../../../interfaces/player';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
 import { PlayingCard } from '../../../interfaces/scryfall';
-import { NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent } from '../../../interfaces/game';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
@@ -12,22 +12,33 @@ import { CardComponent } from '../../card/card.component';
 @Component({
   selector: 'app-set-commander',
   standalone: true,
-  imports: [NgIf,NgIconComponent, CardComponent],
+  imports: [NgIf,NgIconComponent, CardComponent, NgFor],
   templateUrl: './set-commander.component.html',
   styleUrl: './set-commander.component.css',
   viewProviders: [provideIcons({ bootstrapPencilSquare })]
 })
 export class SetCommanderComponent {
 
-  @Input() player!: IPlayer;
+  @Input() commanders!: PlayingCard[];
   @Input() editable!: boolean;
   
   popoverPosition: { top: number, left: number } = { top: 0, left: 0 };
+  constructor(private modalService: ModalServiceService, private webRtc:WebRTCService){}
 
-  constructor(private modalService: ModalServiceService, private webRtc:WebRTCService){
 
+  imageSrc(commander: PlayingCard) {
+    const foundCommander = this.commanders.find(c => c.id === commander.id);
+  
+    if (foundCommander?.image_uris?.normal) {
+      return foundCommander.image_uris.normal;
+    }
+  
+    if (foundCommander?.card_faces) {
+      return foundCommander.card_faces[0].image_uris?.normal;
+    }
+  
+    return "";
   }
-
   openSearch = ()=>{
     if(!this.editable){return;}
     this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
@@ -39,23 +50,6 @@ export class SetCommanderComponent {
     }
   }
 
-  imageUrl = ()=>{
-    if(!this.player.commander){return "";}
-
-    if(this.player.commander.image_uris?.normal){
-      return this.player.commander.image_uris?.normal;
-    }
-
-    if(this.player.commander.card_faces){
-      if(this.player.commander.card_faces.length > 1){
-        return this.player.commander.card_faces[0].image_uris?.normal;
-      }else{
-        return this.player.commander.card_faces[0].image_uris?.normal;
-      }
-    }
-
-    return ""
-  }
 
   onMouseOver(event: MouseEvent) {
     this.popoverPosition = this.getPopoverPosition(event);

@@ -14,14 +14,14 @@
                 <!-- Top row -->
                 <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
                     <div *ngFor="let player of topRowPlayers" class="bg-slate-800" [ngClass]="bottomRowPlayers.length < 1 ? 'full-height' : 'half-height'">
-                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+                        <app-user-stream [player]="player" [isLocalStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
                 </div>
             
                 <!-- Bottom row -->
                 <div class="grid" [ngClass]="{'grid-cols-1': bottomRowPlayers.length === 1,'grid-cols-2': bottomRowPlayers.length === 2, 'grid-cols-3': bottomRowPlayers.length > 2}">
                     <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height">
-                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
+                        <app-user-stream [player]="player" [isLocalStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
                 </div>
             </div>

@@ -13,22 +13,16 @@ export interface IPlayer extends IUser{
     lifeTotal:number;
     admin?:boolean;
     cameraFlipped:boolean;
-
     isTakingTurn?: boolean;
     totalTurns: number;
     currentTurnStartTime?: Date;
     totalTurnTime: number;
-
     isMonarch?:boolean;
     hasCitiesBlessing?:boolean;
-
     poisonTotal:number;
     energyTotal:number;
-
     commanderDamages: { [playerId: string]: ICommanderDamage };
-
-    commander: PlayingCard;
-
+    commanders: PlayingCard[];
     prizeCards:number;
 
     reactionsMuted:boolean;

@@ -166,10 +166,8 @@ export class WebRTCService {
       },
 
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
-          if (error) {
-              if(error.type === GameErrorType.InvalidPassword){
-                this._roomPasswordValid.next(false);
-              }
+          if (error && error.type === GameErrorType.InvalidPassword) {
+            this._roomPasswordValid.next(false);
             return;
           }
           // Set all our game state
