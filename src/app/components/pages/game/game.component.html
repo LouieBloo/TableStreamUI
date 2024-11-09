@@ -52,7 +52,7 @@
 
                 <app-messenger></app-messenger>
 
-                <div class="justify-center mt-2">
+                <div class="justify-center mt-2 grid grid-cols-2">
                     <div>
                         <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none" style="border-right: none;">Flip Coin</button>
                         <div class="dropdown dropdown-left button text-white rounded-none " >
@@ -67,6 +67,7 @@
                             </ul>
                         </div>
                     </div>
+                    <button (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
                 </div>
 
                 <div class="mt-2">
@@ -89,5 +90,6 @@
     </div>
 
     <app-report-modal></app-report-modal>
+    <app-sound-effect-modal [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
 </div>

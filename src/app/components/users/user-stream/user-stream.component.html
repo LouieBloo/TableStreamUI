@@ -60,6 +60,10 @@
         <app-coin-flipper [playerId]="player.id"></app-coin-flipper>
     </div>
 
+    <div class="absolute top-0 w-full h-full pointer-events-none flex justify-center items-center">
+        <app-reactions [player]="player"></app-reactions>
+    </div>
+
     <div class="absolute right-2 top-2 ">
         <div class="dropdown">
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
@@ -69,7 +73,7 @@
                 <!-- Local Stream Controls -->
                 <ng-container *ngIf="localStream">
                     <li (click)="toggleMuteSelf()" class="text-slate-800">
-                        <a>{{ isMutedSelf ? 'Unmute Self' : 'Mute Self' }}</a>
+                        <a>{{ isMutedSelf ? 'Unmute Mic' : 'Mute Mic' }}</a>
                     </li>
                     <li (click)="toggleVideo()" class="text-slate-800">
                         <a>{{ isVideoOff ? 'Turn On Video' : 'Turn Off Video' }}</a>
@@ -108,9 +112,15 @@
                     <li *ngIf="muted" (click)="unmuteRemoteUser()" class="text-slate-800">
                         <a>Unmute Player</a>
                     </li>
+                    <li *ngIf="!player.reactionsMuted" (click)="player.reactionsMuted = true;" class="text-slate-800">
+                        <a>Mute Reactions</a>
+                    </li>
+                    <li *ngIf="player.reactionsMuted" (click)="player.reactionsMuted = false;" class="text-slate-800">
+                        <a>Unmute Reactions</a>
+                    </li>
                     <li class="text-slate-800">
                         <div class="flex items-center">
-                            <label class="block text-sm font-medium mb-1 mr-2">Volume:</label>
+                            <label class="block text-sm font-medium mb-1 mr-2">Mic Volume:</label>
                             <input type="range" min="0" max="1" step="0.01" [value]="volume"
                                 (input)="onVolumeChange($event)" class="range range-primary flex-grow" />
                         </div>
