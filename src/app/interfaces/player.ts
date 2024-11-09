@@ -30,6 +30,8 @@ export interface IPlayer extends IUser{
     commander: PlayingCard;
 
     prizeCards:number;
+
+    reactionsMuted:boolean;
 }
 
 export interface ISpectator extends IUser{

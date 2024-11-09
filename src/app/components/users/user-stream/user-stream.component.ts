@@ -17,6 +17,7 @@ import { AlertsService } from '../../../services/alerts/alerts.service';
 import { environment } from '../../../../environments/environment';
 import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.component';
 import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
+import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 
 @Component({
   selector: 'app-user-stream',
@@ -33,7 +34,8 @@ import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracke
     SetCommanderComponent,
     TooltipDirective,
     CoinFlipperComponent,
-    PokemonPrizeTrackerComponent
+    PokemonPrizeTrackerComponent,
+    ReactionsComponent
   ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',

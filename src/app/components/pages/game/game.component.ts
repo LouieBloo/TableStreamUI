@@ -17,11 +17,12 @@ import { PasswordModalComponent } from '../../modals/password-modal/password-mod
 import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { LoggerService } from '../../../services/logger/logger.service';
+import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -40,6 +41,7 @@ export class GameComponent {
 
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
+  @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
 
   constructor(
     private webRTC: WebRTCService,

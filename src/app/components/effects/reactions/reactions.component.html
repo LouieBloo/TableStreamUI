@@ -1,0 +1,6 @@
+<div *ngIf="showing">
+    <picture>
+        <source srcset="{{selectedAnimoji.webpSrc}}" type="image/webp">
+        <img src="{{selectedAnimoji.gifSrc}}" alt="{{selectedAnimoji.alt}}" width="200" height="200">
+    </picture>
+</div>

@@ -17,22 +17,22 @@
       <div *ngIf="activeTab === 'create'">
         <form #createForm="ngForm" (ngSubmit)="onCreateGame()">
           <div class="mb-4">
-            <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
+            <label for="playerName" class="block text-sm font-medium text-white text-left">Your Name:</label>
             <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
               class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
           </div>
           <div class="mb-4">
-            <label for="gameName" class="block text-sm font-medium text-white">Room Name:</label>
+            <label for="gameName" class="block text-sm font-medium text-white text-left">Room Name:</label>
             <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required
               class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
           </div>
           <div class="mb-4">
-            <label for="password" class="block text-sm font-medium text-white">Password (optional):</label>
+            <label for="password" class="block text-sm font-medium text-white text-left">Password (optional):</label>
             <input type="text" id="password" name="password" [(ngModel)]="player.password"
               class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
           </div>
           <div class="mb-6">
-            <label for="gameType" class="block text-sm font-medium text-white">Game Type:</label>
+            <label for="gameType" class="block text-sm font-medium text-white text-left">Game Type:</label>
             <select id="gameType" name="gameType" [(ngModel)]="player.gameType"
               (ngModelChange)="onGameTypeChange($event)"
               class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black" required>
@@ -40,7 +40,7 @@
             </select>
           </div>
           <div class="mb-6">
-            <label for="gameType" class="block text-sm font-medium text-white">Max Players:</label>
+            <label for="gameType" class="block text-sm font-medium text-white text-left">Max Players:</label>
             <input id="maxPlayers" name="maxPlayers" type="number" min="2" step="1" max="6"
               [(ngModel)]="player.maxPlayers" class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black"
               required>
@@ -57,17 +57,17 @@
       <div *ngIf="activeTab === 'join'">
         <form #joinForm="ngForm" (ngSubmit)="onJoinGame()">
           <div class="mb-4">
-            <label for="playerName" class="block text-sm font-medium text-white">Your Name:</label>
+            <label for="playerName" class="block text-sm font-medium text-white text-left">Your Name:</label>
             <input type="text" id="playerName" name="name" [(ngModel)]="player.name" autofocus required
               class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
           </div>
           <div class="mb-6">
-            <label for="roomId" class="block text-sm font-medium text-white">Room ID:</label>
+            <label for="roomId" class="block text-sm font-medium text-white text-left">Room ID:</label>
             <input type="text" id="roomId" name="roomId" [(ngModel)]="player.roomId" required
               class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
           </div>
           <div class="mb-6 flex">
-            <label for="isSpectator" class="text-sm font-medium text-white">Join as Spectator:</label>
+            <label for="isSpectator" class="text-sm font-medium text-white text-left">Join as Spectator:</label>
             <input type="checkbox" id="isSpectator" name="isSpectator" [(ngModel)]="player.isSpectator"
               class="mt-1 ml-2">
           </div>

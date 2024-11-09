@@ -18,12 +18,14 @@ export enum GameEvent{
     ToggleMonarch,
     ModifyPlayerCommanderDamage,
     SetCommander,
-    FlipCoins
+    FlipCoins,
+    PlayEffect
 }
 
 //fine to change on front end only
 export enum LocalGameEvent{
-    FlipCoins
+    FlipCoins,
+    PlayReaction
 }
 
 
