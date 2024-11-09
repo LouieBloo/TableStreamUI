@@ -1,18 +1,36 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { interval, map, Observable, startWith } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, NgZone } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-@Pipe({
-  name: 'timeAgo',
+@Component({
+  selector: 'app-timer',
   standalone: true,
-  pure: false
+  imports: [CommonModule],
+  templateUrl: './timer.component.html',
+  styleUrl: './timer.component.css',
 })
-export class TimeAgoPipe implements PipeTransform {
+export class TimerComponent {
+  @Input() date:any;
 
-  transform(value: Date | number | undefined): Observable<string> {
-    return interval(1000).pipe(
-      startWith(0), // Ensure the pipe updates immediately
-      map(() => this.parse(value))
-    );
+  display!:string;
+  interval:any;
+
+  constructor(private ngZone:NgZone,private cdr:ChangeDetectorRef){
+    this.startTimer();
+  }
+
+  ngOnDestroy(): void {
+    if (this.interval) {
+      clearInterval(this.interval)
+    }
+  }
+
+  startTimer(){
+    this.ngZone.runOutsideAngular(() => {
+      this.interval = setInterval(() => {
+        this.display = this.parse(this.date);
+        this.cdr.detectChanges();
+      }, 1000);
+    });
   }
 
   private parse(payload: Date | number | undefined){
@@ -52,5 +70,4 @@ export class TimeAgoPipe implements PipeTransform {
         return `${seconds}s`;
     }
   }
-
 }
