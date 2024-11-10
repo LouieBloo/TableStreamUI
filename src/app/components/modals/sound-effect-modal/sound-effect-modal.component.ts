@@ -49,6 +49,8 @@ export class SoundEffectModalComponent {
       name: 'Female Laugh', url: '/assets/sounds/femaleLaugh.mp3', animojiId: "Laughing", icon: "😆"
     }],
     "Misc": [{
+      name: 'Tick Tock', url: '/assets/sounds/tickTock.mp3', animojiId: "Snail", icon: "🐌"
+    },{
       name: 'Charge!', url: '/assets/sounds/charge1.mp3', animojiId: "Salute", icon: "🫡"
     },{
       name: 'Oops', url: '/assets/sounds/oops1.mp3', animojiId: "Melting", icon: "🫠"
