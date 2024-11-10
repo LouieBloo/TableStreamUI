@@ -77,6 +77,12 @@ export class ReactionsComponent {
       alt: "🙀",
       lifeTimeInMS: 3000
     },
+    "Snail": {
+      webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f40c/512.webp",
+      gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f40c/512.gif",
+      alt: "🐌",
+      lifeTimeInMS: 2000
+    },
     "Sunglasses": {
       webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp",
       gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.gif",
