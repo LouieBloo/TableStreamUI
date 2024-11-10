@@ -1,10 +1,12 @@
 <div *ngIf="editable && commanders.length < 2">
-    <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch()">Commander
+    <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch(null)">Commander
         <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon>
     </button>
 </div>
+
+<button (click)="test()">TEST</button>
 <div *ngFor="let commander of commanders" class="relative group " (mouseover)="onMouseOver($event)">
-    <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch()">{{commander?.name}}
+    <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch(commander)">{{commander?.name}}
         <ng-icon *ngIf="editable" class="ml-1" name="bootstrapPencilSquare"></ng-icon>
     </p>
     <div class="fixed hidden group-hover:block z-10">

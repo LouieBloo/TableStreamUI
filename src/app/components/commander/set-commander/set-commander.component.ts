@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { IPlayer } from '../../../interfaces/player';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
 import { PlayingCard } from '../../../interfaces/scryfall';
 import { NgFor, NgIf } from '@angular/common';
@@ -22,33 +21,39 @@ export class SetCommanderComponent {
   @Input() commanders!: PlayingCard[];
   @Input() editable!: boolean;
   
+  selectedCommander: PlayingCard|null = null;
   popoverPosition: { top: number, left: number } = { top: 0, left: 0 };
   constructor(private modalService: ModalServiceService, private webRtc:WebRTCService){}
 
 
   imageSrc(commander: PlayingCard) {
-    const foundCommander = this.commanders.find(c => c.id === commander.id);
   
-    if (foundCommander?.image_uris?.normal) {
-      return foundCommander.image_uris.normal;
-    }
+    if (commander?.image_uris?.normal)
+      return commander.image_uris.normal;
   
-    if (foundCommander?.card_faces) {
-      return foundCommander.card_faces[0].image_uris?.normal;
-    }
+    if (commander?.card_faces)
+      return commander.card_faces[0].image_uris?.normal;
   
     return "";
   }
-  openSearch = ()=>{
-    if(!this.editable){return;}
-    this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
-  }
 
-  cardSelected = (card:PlayingCard)=>{
-    if(card != null){
-      this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: card});
-    }
+  test(){
+    console.log(this.commanders);
+    debugger;
   }
+  
+  openSearch = (commander: PlayingCard|null) => {
+    if (!this.editable)
+      return;
+
+    this.selectedCommander = commander;
+    this.modalService.openModal(ModalType.SearchCards, this.cardSelected);
+  };
+  
+  cardSelected = (newCommander: PlayingCard) => {
+    if (newCommander != null)
+      this.webRtc.sendGameEvent({ event: GameEvent.SetCommander, payload: {newCommander: newCommander, oldCommander: this.selectedCommander} });
+  };
 
 
   onMouseOver(event: MouseEvent) {
