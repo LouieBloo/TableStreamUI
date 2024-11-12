@@ -1,11 +1,7 @@
-<div *ngIf="editable && commanders.length < 2">
-    <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch(null)">Commander
-        <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon>
-    </button>
-</div>
 
-<button (click)="test()">TEST</button>
-<div *ngFor="let commander of commanders" class="relative group " (mouseover)="onMouseOver($event)">
+<!-- <div style="font-size: 18px; letter-spacing: 2px; font-weight: 600 " class="pb-1">Commanders</div> -->
+
+<div *ngFor="let commander of commanders" class="relative group"  (mouseover)="onMouseOver($event)">
     <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch(commander)">{{commander?.name}}
         <ng-icon *ngIf="editable" class="ml-1" name="bootstrapPencilSquare"></ng-icon>
     </p>
@@ -15,3 +11,10 @@
         </div>
     </div>
 </div>
+
+<div *ngIf="editable && commanders.length < 2">
+    <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch(null)">Select Commander
+        <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon>
+    </button>
+</div>
+

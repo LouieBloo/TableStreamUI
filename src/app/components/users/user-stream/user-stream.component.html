@@ -30,7 +30,7 @@
             <p>Avg: <app-timer [date]="(player.totalTurnTime/ ( (player.totalTurns) || 1 ) )"></app-timer></p>
         </div>
 
-        <div *ngIf="player && gameService.isCommanderGame()">
+        <div *ngIf="player && gameService.isCommanderGame()" class="pt-2">
             <app-set-commander [commanders]="player.commanders" [editable]="isLocalStream"></app-set-commander>
         </div>
     </div>

@@ -7,6 +7,7 @@ import { GameEvent } from '../../../interfaces/game';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapPencilSquare } from '@ng-icons/bootstrap-icons';
 import { CardComponent } from '../../card/card.component';
+import { ICommanderSelected } from '../../../interfaces/payloads/iCommanderSelected';
 
 @Component({
   selector: 'app-set-commander',
@@ -37,10 +38,6 @@ export class SetCommanderComponent {
     return "";
   }
 
-  test(){
-    console.log(this.commanders);
-    debugger;
-  }
   
   openSearch = (commander: PlayingCard|null) => {
     if (!this.editable)
@@ -51,8 +48,13 @@ export class SetCommanderComponent {
   };
   
   cardSelected = (newCommander: PlayingCard) => {
+    const payload: ICommanderSelected = {
+      newCommander: newCommander,
+      oldCommander: this.selectedCommander
+    };
+
     if (newCommander != null)
-      this.webRtc.sendGameEvent({ event: GameEvent.SetCommander, payload: {newCommander: newCommander, oldCommander: this.selectedCommander} });
+      this.webRtc.sendGameEvent({ event: GameEvent.SetCommander, payload: payload });
   };
 
 
