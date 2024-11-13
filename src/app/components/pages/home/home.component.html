@@ -1,4 +1,4 @@
-<div class="hero min-h-screen" [style.background-image]="'url(' + backgroundImage + '-background.jpg)'">
+<div class="hero min-h-screen" [ngClass]="backgroundImage + 'Background'">
   <div class="hero-overlay bg-opacity-60 background"></div>
   <div class="hero-content text-center text-white heroBackground flex-col">
     <div class="text-center max-w-xl  w-full">
@@ -63,7 +63,7 @@
           </div>
           <div class="mb-6">
             <label for="roomId" class="block text-sm font-medium text-white text-left">Room ID:</label>
-            <input type="text" id="roomId" name="roomId" [(ngModel)]="player.roomId" required
+            <input type="text" id="roomId" name="roomId" [(ngModel)]="player.roomId" required pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
               class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
           </div>
           <div class="mb-6 flex">

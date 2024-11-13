@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { Howl } from 'howler';
 import { ISound } from '../../../interfaces/effects';
 import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +6,7 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
 import { IPlayer } from '../../../interfaces/player';
 import { GameService } from '../../../services/game/game.service';
+import { SoundService } from '../../../services/sounds/sound.service';
 
 @Component({
   selector: 'app-sound-effect-modal',
@@ -53,6 +53,8 @@ export class SoundEffectModalComponent {
     },{
       name: 'Charge!', url: '/assets/sounds/charge1.mp3', animojiId: "Salute", icon: "🫡"
     },{
+      name: 'Cheers', url: '/assets/sounds/toast.mp3', animojiId: "Clinking-glasses", icon: "🥂"
+    },{
       name: 'Oops', url: '/assets/sounds/oops1.mp3', animojiId: "Melting", icon: "🫠"
     },{
       name: 'Right Baby', url: '/assets/sounds/thatsRightBaby.mp3', animojiId: "Kissing-heart", icon: "😘"
@@ -63,9 +65,8 @@ export class SoundEffectModalComponent {
 
   soundListKeys:string[]
 
-  volume: number = .75;
 
-  constructor(private webRTC:WebRTCService, private gameService:GameService){
+  constructor(private webRTC:WebRTCService, private gameService:GameService, public soundService:SoundService){
     this.webRTC.subscribeToGameEvents(this.handleGameEvent)
 
     this.soundListKeys = Object.keys(this.soundList);
@@ -113,11 +114,7 @@ export class SoundEffectModalComponent {
     if(!localIncomingPlayer){return;}
 
     if(!localIncomingPlayer.reactionsMuted){
-      const audio = new Howl({
-        src: [sound.url],
-        volume: this.volume
-      });
-      audio.play();
+      this.soundService.playSound(sound);
 
       this.webRTC.handleLocalGameEvent({
         event: LocalGameEvent.PlayReaction,
