@@ -14,3 +14,31 @@
 .heroBackground{
     background-color: #00000078;
 }
+
+.hero{
+    transition: background-image 0.5s ease-in-out;
+}
+
+.magicBackground{
+    background-image: url("/assets/images/magic-background.jpg");
+}
+
+.pokemonBackground{
+    background-image: url("/assets/images/pokemon-background.jpg");
+}
+
+.wrennBackground{
+    background-image: url("/assets/images/wrenn-background.jpg");
+}
+
+.ulamogBackground{
+    background-image: url("/assets/images/ulamog-background.jpg");
+}
+
+.rakdosBackground{
+    background-image: url("/assets/images/rakdos-background.jpg");
+}
+
+.mana-vaultBackground{
+    background-image: url("/assets/images/mana-vault-background.jpg");
+}
