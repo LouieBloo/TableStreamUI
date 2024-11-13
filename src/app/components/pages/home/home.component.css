@@ -19,6 +19,12 @@
     transition: background-image 0.5s ease-in-out;
 }
 
+/* This is hack so we load all of our possible background images at the start so when we switch between them they dont flicker */
+.preloader::after{
+    position:absolute; width:0; height:0; overflow:hidden; z-index:-1;
+    content:url(/assets/images/magic-background.jpg) url(/assets/images/pokemon-background.jpg) url(/assets/images/wrenn-background.jpg) url(/assets/images/ulamog-background.jpg) url(/assets/images/rakdos-background.jpg) url(/assets/images/mana-vault-background.jpg);  
+}
+
 .magicBackground{
     background-image: url("/assets/images/magic-background.jpg");
 }
