@@ -9,3 +9,7 @@
 .heroBackground{
     background-color: #00000078;
 }
+
+.backgroundImage{
+    background-image: url("/assets/images/table-stream.jpg");
+}

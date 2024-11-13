@@ -4,6 +4,8 @@ import { NgFor, NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, ICoinFlipResults, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
 import { Subscription } from 'rxjs';
+import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
+import { SoundService } from '../../../services/sounds/sound.service';
 
 @Component({
   selector: 'app-coin-flipper',
@@ -23,7 +25,7 @@ export class CoinFlipperComponent {
   private clearCoinTimeout: any;
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private webRTC: WebRTCService) {}
+  constructor(private webRTC: WebRTCService, private soundService:SoundService) {}
 
   ngOnInit() {
     this.webRTC.subscribeToGameEvents(this.handleGameEvent);
@@ -66,6 +68,12 @@ export class CoinFlipperComponent {
     this.activeCoins = flips.results.map(result => ({ result: result as 'heads' | 'tails' }));
 
     this.setClearCoinTimeout();
+
+    this.soundService.playSound({
+      name: 'Coin Flip',
+      url: '/assets/sounds/coinFlip.mp3',
+      animojiId: ''
+    })
   }
 
   private handleGameEvent = (event: IGameEvent) => {

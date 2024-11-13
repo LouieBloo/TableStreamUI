@@ -29,6 +29,12 @@ export class ReactionsComponent {
       alt: "👏",
       lifeTimeInMS: 5000
     },
+    "Clinking-glasses": {
+      webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f942/512.webp",
+      gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f942/512.gif",
+      alt: "🥂",
+      lifeTimeInMS: 2000
+    },
     "Imp-smile": {
       webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f608/512.webp",
       gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f608/512.gif",
