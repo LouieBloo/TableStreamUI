@@ -1,5 +1,4 @@
 <div class="relative h-full glow" [ngClass]="{'glow':  player.isTakingTurn}">
-
     <div class="flex justify-center h-full">
         <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 
             [muted]="isLocalStream || muted"></video>
@@ -15,9 +14,9 @@
         </div>
     </div>
 
-    <div class="absolute top-20 left-2 flex flex-col" *ngIf="showCommanderDamage">
-        <ng-container *ngFor="let playerId of getCommanderDamageKeys()">
-            <app-property-counter [editable]="isLocalStream" [title]="gameService.getPlayerById(playerId)!.name"
+    <div class="absolute top-[100px] left-2 flex flex-col" >
+        <ng-container *ngIf="showCommanderDamage">
+            <app-property-counter *ngFor="let playerId of getCommanderDamageKeys()" [editable]="isLocalStream" [title]="gameService.getPlayerById(playerId)!.name"
                 [total]="player.commanderDamages[playerId].damage"
                 [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-1">
             </app-property-counter>

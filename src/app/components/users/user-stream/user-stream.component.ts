@@ -246,6 +246,7 @@ export class UserStreamComponent {
   }
 
   getCommanderDamageKeys(): string[] {
+    console.log(this.player.commanderDamages);
     return Object.keys(this.player.commanderDamages);
   }
 
