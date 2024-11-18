@@ -1,5 +1,5 @@
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-property-counter',
@@ -9,9 +9,15 @@ import { Component, Input } from '@angular/core';
   styleUrl: './property-counter.component.css',
 })
 export class PropertyCounterComponent {
+  @Output() incrementClicked: EventEmitter<number> = new EventEmitter<number>();
   @Input() editable!: boolean;
   @Input() title!: string;
   @Input() total!: number;
   @Input() modifyCallback: any;
   @Input() emoji!: string;
+
+  incremement(number: number){
+    this.incrementClicked.emit(number);
+  }
+
 }

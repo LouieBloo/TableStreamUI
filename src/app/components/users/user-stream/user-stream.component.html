@@ -4,6 +4,7 @@
             [muted]="isLocalStream || muted"></video>
     </div>
 
+
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <div *ngIf="gameService.isMagicGame()">
             <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="isLocalStream"
@@ -14,23 +15,19 @@
         </div>
     </div>
 
-    <div class="absolute top-[100px] left-2 flex flex-col" >
-        <ng-container *ngIf="showCommanderDamage">
-            <app-property-counter *ngFor="let playerId of getCommanderDamageKeys()" [editable]="isLocalStream" [title]="gameService.getPlayerById(playerId)!.name"
-                [total]="player.commanderDamages[playerId].damage"
-                [modifyCallback]="getModifyCommanderDamageCallback(playerId)" class="mb-1">
-            </app-property-counter>
-        </ng-container>
-    </div>
 
     <div class="absolute left-2 text-white flex flex-col leftPanel">
         <div class="text-xs">
             <p>Turn: <app-timer [date]="player.currentTurnStartTime"></app-timer></p>
             <p>Avg: <app-timer [date]="(player.totalTurnTime/ ( (player.totalTurns) || 1 ) )"></app-timer></p>
         </div>
-
         <div *ngIf="player && gameService.isCommanderGame()" class="pt-2">
-            <app-set-commander [commanders]="player.commanders" [editable]="isLocalStream"></app-set-commander>
+            <app-set-commander
+                [player]="player"
+                [commanders]="player.commanders"
+                [isLocalStream]="isLocalStream"
+                [showCommanderDamage]="showCommanderDamage">
+            </app-set-commander>
         </div>
     </div>
 

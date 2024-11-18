@@ -3,10 +3,9 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/player';
-import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
+import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
-import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 import { GameService } from '../../../services/game/game.service';
 import { SetCommanderComponent } from '../../commander/set-commander/set-commander.component';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
@@ -29,7 +28,6 @@ import { TimerComponent } from '../../timer/timer.component';
     NgIf,
     CommonModule,
     TitleCasePipe,
-    PropertyCounterComponent,
     SetCommanderComponent,
     TooltipDirective,
     CoinFlipperComponent,
@@ -235,20 +233,6 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
-  modifyCommanderDamage = (playerId: string, amount: number)=>{
-    this.webRTC.sendGameEvent({event: GameEvent.ModifyPlayerCommanderDamage, payload: { damagingPlayer: this.gameService.getPlayerById(playerId), amount: amount}})
-  }
-
-  getModifyCommanderDamageCallback(playerId: string): (amount: number) => void {
-    return (amount: number) => {
-      this.modifyCommanderDamage(playerId, amount);
-    };
-  }
-
-  getCommanderDamageKeys(): string[] {
-    console.log(this.player.commanderDamages);
-    return Object.keys(this.player.commanderDamages);
-  }
 
   onVideoClick(event: MouseEvent) {
     if(this.loadingCardIdentification){

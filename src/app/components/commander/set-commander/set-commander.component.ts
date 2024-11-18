@@ -8,23 +8,35 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapPencilSquare } from '@ng-icons/bootstrap-icons';
 import { CardComponent } from '../../card/card.component';
 import { ICommanderSelected } from '../../../interfaces/payloads/iCommanderSelected';
+import { IPlayer } from '../../../interfaces/player';
+import { GameService } from '../../../services/game/game.service';
+import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 
 @Component({
   selector: 'app-set-commander',
   standalone: true,
-  imports: [NgIf,NgIconComponent, CardComponent, NgFor],
+  imports: [NgIf,NgIconComponent, CardComponent, NgFor, PropertyCounterComponent],
   templateUrl: './set-commander.component.html',
   styleUrl: './set-commander.component.css',
   viewProviders: [provideIcons({ bootstrapPencilSquare })]
 })
 export class SetCommanderComponent {
 
+  @Input() player!: IPlayer;
   @Input() commanders!: PlayingCard[];
-  @Input() editable!: boolean;
+  @Input() isLocalStream!: boolean;
+  @Input() showCommanderDamage!: boolean;
   
   selectedCommander: PlayingCard|null = null;
   popoverPosition: { top: number, left: number } = { top: 0, left: 0 };
-  constructor(private modalService: ModalServiceService, private webRtc:WebRTCService){}
+  constructor(private modalService: ModalServiceService, private webRtc:WebRTCService, public gameService: GameService){}
+
+  getCommanderDamageKeys(): string[] {
+    if(this.player){
+      return Object.keys(this.player?.commanderDamages);
+    }
+    return ['']
+  }
 
 
   imageSrc(commander: PlayingCard) {
@@ -40,7 +52,7 @@ export class SetCommanderComponent {
 
   
   openSearch = (commander: PlayingCard|null) => {
-    if (!this.editable)
+    if (!this.isLocalStream)
       return;
 
     this.selectedCommander = commander;
@@ -96,5 +108,17 @@ export class SetCommanderComponent {
   
     return { top, left };
   }
+
+  modifyCommanderDamage = (playerId: string, amount: number)=>{
+    this.webRtc.sendGameEvent({event: GameEvent.ModifyPlayerCommanderDamage, payload: { damagingPlayer: this.gameService.getPlayerById(playerId), amount: amount}})
+  }
+
+  getModifyCommanderDamageCallback(playerId: string): (amount: number) => void {
+    return (amount: number) => {
+      this.modifyCommanderDamage(playerId, amount);
+    };
+  }
+
+
   
 }

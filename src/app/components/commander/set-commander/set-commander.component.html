@@ -1,20 +1,38 @@
 
-<!-- <div style="font-size: 18px; letter-spacing: 2px; font-weight: 600 " class="pb-1">Commanders</div> -->
+    <table class="table">
+      <thead>
+        <tr class="text-white">
+          <th>Commander</th>
+          <th class="text-center" *ngFor="let playerId of getCommanderDamageKeys()">{{gameService.getPlayerById(playerId)?.name}}</th>
+        </tr>
+      </thead>
+      <tbody>
 
-<div *ngFor="let commander of commanders" class="relative group"  (mouseover)="onMouseOver($event)">
-    <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch(commander)">{{commander?.name}}
-        <ng-icon *ngIf="editable" class="ml-1" name="bootstrapPencilSquare"></ng-icon>
-    </p>
-    <div class="fixed hidden group-hover:block z-10">
-        <div class="">
-            <img [src]="imageSrc(commander)" alt="Card Image" class="cardHoverImg w-full rounded-xl" [style.top.px]="popoverPosition.top" [style.left.px]="popoverPosition.left">
-        </div>
-    </div>
-</div>
-
-<div *ngIf="editable && commanders.length < 2">
-    <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch(null)">Select Commander
-        <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon>
-    </button>
-</div>
-
+        <tr *ngFor="let commander of commanders">
+          <td class="text-sm flex items-center cursor-pointer text-pop" (mouseover)="onMouseOver($event)" (click)="openSearch(commander)">
+            {{commander?.name}}
+            <ng-icon *ngIf="isLocalStream" class="ml-1" name="bootstrapPencilSquare"></ng-icon>
+            <div class="fixed hidden group-hover:block z-10">
+                <img [src]="imageSrc(commander)" alt="Card Image" class="cardHoverImg w-full rounded-xl" [style.top.px]="popoverPosition.top" [style.left.px]="popoverPosition.left">
+            </div>
+         </td>
+         <td *ngFor="let playerId of getCommanderDamageKeys()">
+            <app-property-counter
+                [editable]="isLocalStream"
+                [total]="player.commanderDamages[playerId].damage"
+                [modifyCallback]="getModifyCommanderDamageCallback(playerId)"
+                class="mb-1">
+            </app-property-counter>
+          </td>
+        </tr>
+        <tr>
+            <td class="text-sm flex items-center cursor-pointer text-pop">
+                <div *ngIf="isLocalStream && commanders.length < 2" class="text-white">
+                    <button type="button" class="text-sm flex items-center text-pop text-white" (click)="openSearch(null)">Select Commander
+                        <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon>
+                    </button>
+                </div>
+            </td>
+        </tr>
+      </tbody>
+    </table>
