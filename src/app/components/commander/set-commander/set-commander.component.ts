@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { IPlayer } from '../../../interfaces/player';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
 import { PlayingCard } from '../../../interfaces/scryfall';
@@ -6,7 +6,7 @@ import { NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent } from '../../../interfaces/game';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { bootstrapPencilSquare } from '@ng-icons/bootstrap-icons';
+import { bootstrapPencilSquare, bootstrapTrash3 } from '@ng-icons/bootstrap-icons';
 import { CardComponent } from '../../card/card.component';
 
 @Component({
@@ -15,14 +15,17 @@ import { CardComponent } from '../../card/card.component';
   imports: [NgIf,NgIconComponent, CardComponent],
   templateUrl: './set-commander.component.html',
   styleUrl: './set-commander.component.css',
-  viewProviders: [provideIcons({ bootstrapPencilSquare })]
+  viewProviders: [provideIcons({ bootstrapPencilSquare, bootstrapTrash3 })]
 })
 export class SetCommanderComponent {
 
   @Input() player!: IPlayer;
   @Input() editable!: boolean;
+  @Input() index!: number;
+  @Input() commander!:PlayingCard;
   
   popoverPosition: { top: number, left: number } = { top: 0, left: 0 };
+  flipped:boolean = false;
 
   constructor(private modalService: ModalServiceService, private webRtc:WebRTCService){
 
@@ -35,23 +38,27 @@ export class SetCommanderComponent {
 
   cardSelected = (card:PlayingCard)=>{
     if(card != null){
-      this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: card});
+      this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: {card: card, index: this.index}});
     }
   }
 
-  imageUrl = ()=>{
-    if(!this.player.commander){return "";}
+  clearCommander = ()=>{
+    this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: {card: null, index: this.index}});
+  }
 
-    if(this.player.commander.image_uris?.normal){
-      return this.player.commander.image_uris?.normal;
+  imageUrl = ()=>{
+    if(!this.commander){return "";}
+
+    if(this.commander.image_uris?.normal){
+      return this.commander.image_uris?.normal;
     }
 
-    if(this.player.commander.card_faces){
-      if(this.player.commander.card_faces.length > 1){
-        return this.player.commander.card_faces[0].image_uris?.normal;
-      }else{
-        return this.player.commander.card_faces[0].image_uris?.normal;
+    if(this.commander.card_faces){
+      if(this.commander.card_faces.length > 1){
+        return this.commander.card_faces[this.flipped ? 1 : 0].image_uris?.normal;
       }
+
+      return this.commander.card_faces[0].image_uris?.normal;
     }
 
     return ""
