@@ -3,7 +3,7 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/player';
-import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
+import { GameEvent, ICommanderDamage, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
@@ -18,6 +18,7 @@ import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.
 import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 import { TimerComponent } from '../../timer/timer.component';
+import { PlayingCard } from '../../../interfaces/scryfall';
 
 @Component({
   selector: 'app-user-stream',
@@ -235,18 +236,18 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
-  modifyCommanderDamage = (playerId: string, amount: number)=>{
-    this.webRTC.sendGameEvent({event: GameEvent.ModifyPlayerCommanderDamage, payload: { damagingPlayer: this.gameService.getPlayerById(playerId), amount: amount}})
+  modifyCommanderDamage = (playerId: string, amount: number, card: PlayingCard)=>{
+    this.webRTC.sendGameEvent({event: GameEvent.ModifyPlayerCommanderDamage, payload: { damagingPlayer: this.gameService.getPlayerById(playerId), amount: amount, card: card}})
   }
 
-  getModifyCommanderDamageCallback(playerId: string): (amount: number) => void {
+  getModifyCommanderDamageCallback(playerId: string, card:PlayingCard): (amount: number) => void {
     return (amount: number) => {
-      this.modifyCommanderDamage(playerId, amount);
+      this.modifyCommanderDamage(playerId, amount, card);
     };
   }
 
-  getCommanderDamageKeys(): string[] {
-    return Object.keys(this.player.commanderDamages);
+  getKeys(object:any):string[]{
+    return Object.keys(object);
   }
 
   onVideoClick(event: MouseEvent) {

@@ -25,9 +25,9 @@ export interface IPlayer extends IUser{
     poisonTotal:number;
     energyTotal:number;
 
-    commanderDamages: { [playerId: string]: ICommanderDamage };
+    commanderDamages: { [playerId: string]: { [cardId: string]: ICommanderDamage } };
 
-    commander: PlayingCard;
+    commanders: PlayingCard[];
 
     prizeCards:number;
 
