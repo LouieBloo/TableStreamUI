@@ -1,4 +1,5 @@
 import { IPlayer, PlayerProperties } from "./player";
+import { PlayingCard } from "./scryfall";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
@@ -48,6 +49,7 @@ export interface IModifyPlayerProperty{
 export interface ICommanderDamage{
     playerId:string;
     damage:number;
+    card:PlayingCard;
 }
 
 export interface IGameError {

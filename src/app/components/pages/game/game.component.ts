@@ -220,7 +220,7 @@ export class GameComponent {
         this.updatePlayers([event.response]);
         break;
       case GameEvent.SetCommander:
-        this.updatePlayers([event.response]);
+        this.updatePlayers(event.response);
         break;
     }
   }
