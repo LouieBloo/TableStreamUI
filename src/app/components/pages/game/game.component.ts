@@ -91,13 +91,14 @@ export class GameComponent {
       }
     })
 
-    //this.webRTC.subscribeToStreamAdd(this.streamAdded);
-    //this.webRTC.subscribeToStreamRemove(this.streamRemoved);
     this.subscriptions.add(
-      this.webRTC.userJoined.subscribe(this.userJoined)
+      this.webRTC.userJoined.subscribe(user => this.userJoined(user))
     );
 
-    this.webRTC.subscribeToGameEvents(this.handleGameEvent);
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+    );
+
     this.checkPasswordProtection(this.roomId);
   }
 
@@ -179,8 +180,6 @@ export class GameComponent {
       this.inputSubscription.unsubscribe();
     }
 
-    this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
-
     this.subscriptions.unsubscribe();
     this.sortedPlayers = [];
   }
@@ -226,8 +225,7 @@ export class GameComponent {
         break;
       case GameEvent.SetPlayerTurnOrders:
         this.updatePlayers(event.response);
-        //sort is broken luke!
-        this.sortPlayers();
+        this.sortPlayers ();
         break;
     }
   }
@@ -269,41 +267,42 @@ export class GameComponent {
   }
 
   get topRowPlayers() {
-    let topPlayers: IPlayer[] = [];
     switch (this.sortedPlayers.length) {
       case 1:
+        return this.sortedPlayers;
       case 2:
-        topPlayers = this.sortedPlayers;
-        break;
+        return this.sortedPlayers;
       case 3:
+        return this.sortedPlayers.slice(0, 2);
       case 4:
-        topPlayers = this.sortedPlayers.filter((_, index) => index < 2);
-        break;
+        return this.sortedPlayers.slice(0, 2);
       case 5:
+        return this.sortedPlayers.slice(0, 3);
       case 6:
-        topPlayers = this.sortedPlayers.filter((_, index) => index < 3);
-        break;
+        return this.sortedPlayers.slice(0, 3);
     }
-    return topPlayers;
+
+    return []
   }
-  
+
   get bottomRowPlayers() {
-    let bottomPlayers: IPlayer[] = [];
     switch (this.sortedPlayers.length) {
+      case 1:
+        return [];
+      case 2:
+        return [];
       case 3:
-        bottomPlayers = [this.sortedPlayers[2]];
-        break;
+        return [this.sortedPlayers[2]];
       case 4:
-        bottomPlayers = [this.sortedPlayers[3], this.sortedPlayers[2]];
-        break;
+        //notice the change in order, always clockwise rotation
+        return [this.sortedPlayers[3], this.sortedPlayers[2]];
       case 5:
-        bottomPlayers = [this.sortedPlayers[4], this.sortedPlayers[3]];
-        break;
+        return [this.sortedPlayers[4], this.sortedPlayers[3]];
       case 6:
-        bottomPlayers = [this.sortedPlayers[5], this.sortedPlayers[4], this.sortedPlayers[3]];
-        break;
+        return [this.sortedPlayers[5], this.sortedPlayers[4], this.sortedPlayers[3]];
     }
-    return bottomPlayers;
+
+    return []
   }
 
   startGame = () => {

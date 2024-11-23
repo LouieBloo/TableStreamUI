@@ -71,7 +71,7 @@
     <div class="absolute right-2 top-2 ">
         <div class="dropdown">
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
-            <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow bg-white ">
+            <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
                 <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Commander Damage</a></li>
                 <!-- Local Stream Controls -->
@@ -94,6 +94,16 @@
                             </select>
                         </div>
                     </li>
+                    <li class="text-slate-800">
+                        <div>
+                          <label class="block text-sm font-medium mb-1">Aspect Ratio:</label>
+                          <select (change)="onAspectRatioChange($event)"
+                              class="select select-bordered w-full max-w-xs bg-white">
+                            <option value="16/9" [selected]="aspectRatio === '16/9'">16:9</option>
+                            <option value="4/3" [selected]="aspectRatio === '4/3'">4:3</option>
+                          </select>
+                        </div>
+                      </li>
                     <li class="text-slate-800 text-red-600">
                         <div>
                             <label class="block text-sm font-medium mb-1">Audio Device:</label>
