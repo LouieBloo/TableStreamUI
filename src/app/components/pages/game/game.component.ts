@@ -18,11 +18,12 @@ import { ReportModalComponent } from '../../modals/report-modal/report-modal.com
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { LoggerService } from '../../../services/logger/logger.service';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
+import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent,PlayerTurnOrderModalComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -42,6 +43,7 @@ export class GameComponent {
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
   @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
+  @ViewChild(PlayerTurnOrderModalComponent) playerTurnOrderModal!: PlayerTurnOrderModalComponent;
 
   constructor(
     private webRTC: WebRTCService,
@@ -89,13 +91,14 @@ export class GameComponent {
       }
     })
 
-    //this.webRTC.subscribeToStreamAdd(this.streamAdded);
-    //this.webRTC.subscribeToStreamRemove(this.streamRemoved);
     this.subscriptions.add(
-      this.webRTC.userJoined.subscribe(this.userJoined)
+      this.webRTC.userJoined.subscribe(user => this.userJoined(user))
     );
 
-    this.webRTC.subscribeToGameEvents(this.handleGameEvent);
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+    );
+
     this.checkPasswordProtection(this.roomId);
   }
 
@@ -177,8 +180,6 @@ export class GameComponent {
       this.inputSubscription.unsubscribe();
     }
 
-    this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
-
     this.subscriptions.unsubscribe();
     this.sortedPlayers = [];
   }
@@ -222,6 +223,10 @@ export class GameComponent {
       case GameEvent.SetCommander:
         this.updatePlayers(event.response);
         break;
+      case GameEvent.SetPlayerTurnOrders:
+        this.updatePlayers(event.response);
+        this.sortPlayers ();
+        break;
     }
   }
 
@@ -259,11 +264,6 @@ export class GameComponent {
     if (this.gameService.room && this.gameService.room.players) {
       this.sortedPlayers = this.gameService.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
-    // if(this.sortedPlayers.length == 4){
-    //   let temp:IPlayer = this.sortedPlayers[2];
-    //   this.sortedPlayers[2] = this.sortedPlayers[3];
-    //   this.sortedPlayers[3] = temp;
-    // }
   }
 
   get topRowPlayers() {
@@ -311,10 +311,6 @@ export class GameComponent {
 
   resetGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.ResetGame });
-  }
-
-  randomizeTurnOrder = () => {
-    this.webRTC.sendGameEvent({ event: GameEvent.RandomizePlayerOrder });
   }
 
   copyUrl() {

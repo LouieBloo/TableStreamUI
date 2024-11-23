@@ -28,7 +28,9 @@ export class CoinFlipperComponent {
   constructor(private webRTC: WebRTCService, private soundService:SoundService) {}
 
   ngOnInit() {
-    this.webRTC.subscribeToGameEvents(this.handleGameEvent);
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+    );
 
     this.subscriptions.add(
       this.webRTC.localGameEvent.subscribe((localGameEvent:IGameEvent)=>{
@@ -40,7 +42,7 @@ export class CoinFlipperComponent {
   }
 
   ngOnDestroy(): void {
-    this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
+    //this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
     this.clearTimeouts();
     this.subscriptions.unsubscribe();
   }
@@ -76,7 +78,7 @@ export class CoinFlipperComponent {
     })
   }
 
-  private handleGameEvent = (event: IGameEvent) => {
+  handleGameEvent = (event: IGameEvent) => {
     if (event.event === GameEvent.FlipCoins && event.callingPlayer?.id === this.playerId) {
       return this.showFlips(event.response as ICoinFlipResults);
     }

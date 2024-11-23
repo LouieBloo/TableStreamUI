@@ -58,6 +58,7 @@ export class UserStreamComponent {
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
   selectedVideoDeviceId: string = '';
+  aspectRatio: string = '16/9';
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
@@ -147,10 +148,17 @@ export class UserStreamComponent {
 
   changeDevice() {
     this.webRTC
-      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
+      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId, this.aspectRatio)
       .then(() => {
         this.initLocalStream();
+      }).catch((err)=>{
+        console.log(err)
       });
+  }
+
+  onAspectRatioChange(event: any) {
+    this.aspectRatio = event.target.value;
+    this.changeDevice();
   }
 
   toggleMuteSelf() {
