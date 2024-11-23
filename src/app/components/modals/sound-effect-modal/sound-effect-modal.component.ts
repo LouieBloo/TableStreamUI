@@ -7,6 +7,7 @@ import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/game'
 import { IPlayer } from '../../../interfaces/player';
 import { GameService } from '../../../services/game/game.service';
 import { SoundService } from '../../../services/sounds/sound.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sound-effect-modal',
@@ -17,6 +18,8 @@ import { SoundService } from '../../../services/sounds/sound.service';
 })
 export class SoundEffectModalComponent {
   @Input() localPlayer!: IPlayer;
+
+  private subscriptions: Subscription = new Subscription();
 
   soundList: { [key: string]: ISound[] } = {
     "Aww": [{
@@ -67,13 +70,15 @@ export class SoundEffectModalComponent {
 
 
   constructor(private webRTC:WebRTCService, private gameService:GameService, public soundService:SoundService){
-    this.webRTC.subscribeToGameEvents(this.handleGameEvent)
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+    );
 
     this.soundListKeys = Object.keys(this.soundList);
   }
 
   ngOnDestroy(): void {
-    this.webRTC.unsubscribeToGameEvent(this.handleGameEvent);
+    this.subscriptions.unsubscribe();
   }
 
   open() {

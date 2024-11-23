@@ -83,13 +83,14 @@
     <div class="drawer-side ">
         <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <ul class="menu popupColors min-h-full w-80 p-4">
-            <li><button type="button" (click)="randomizeTurnOrder()">Randomize Turn Order</button></li>
             <li><button type="button" (click)="startGame()">Start Game</button></li>
             <li><button type="button" (click)="resetGame()">Reset Game</button></li>
+            <li><button type="button" (click)="playerTurnOrderModal.open()">Modify Turn Order</button></li>
         </ul>
     </div>
 
     <app-report-modal></app-report-modal>
     <app-sound-effect-modal [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
+    <app-player-turn-order-modal></app-player-turn-order-modal>
 </div>

@@ -43,6 +43,7 @@ export class CardListComponent {
 
   currentCallback: any;
 
+  private subscriptions: Subscription = new Subscription();
   private inputSubscription!: Subscription;
 
   constructor(
@@ -63,14 +64,13 @@ export class CardListComponent {
   }
 
   ngAfterViewInit(): void {
-    //this.adjustHeight();
-    // setTimeout(this.adjustHeight);
-    this.webRtc.subscribeToGameEvents((event:IGameEvent)=>{
-      if(event.event == GameEvent.ShareCard && event.response){
-        this.sharedCards.unshift(event.response);
-        this.adjustHeight();
-      }
-    })
+    this.subscriptions.add(
+      this.webRtc.gameEvent.subscribe((event:IGameEvent)=>{
+        if(event.event == GameEvent.ShareCard && event.response){
+          this.sharedCards.unshift(event.response);
+          this.adjustHeight();
+        }
+    }));
   }
 
   ngOnInit(): void {
@@ -94,6 +94,8 @@ export class CardListComponent {
     if (this.inputSubscription) {
       this.inputSubscription.unsubscribe();
     }
+
+    this.subscriptions.unsubscribe();
   }
 
   sendSearch=()=>{

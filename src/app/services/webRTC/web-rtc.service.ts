@@ -27,7 +27,9 @@ export class WebRTCService {
   onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
 
-  onGameEvent: ((update: IGameEvent) => void)[] = [];
+  private gameEventSubject = new Subject<IGameEvent>();
+  public gameEvent = this.gameEventSubject.asObservable();
+  
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
 
@@ -39,25 +41,38 @@ export class WebRTCService {
   
   constructor(private alertService: AlertsService, private logger: LoggerService) {}
 
-
+  //adding this just for testing
+  private logAspectRatio(stream: any): void {
+    if(!stream){return;}
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack) {
+      const settings = videoTrack.getSettings();
+      if (settings.width && settings.height) {
+        const aspectRatio = settings.width / settings.height;
+        this.logger.log(`Camera aspect ratio: ${aspectRatio.toFixed(2)} (width: ${settings.width}, height: ${settings.height})`);
+      } else {
+        this.logger.log("Could not determine camera aspect ratio (width/height not available in settings).");
+      }
+    } else {
+      this.logger.log("No video track available to determine aspect ratio.");
+    }
+  }
   
-  public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string): Promise<MediaStream|null> {
-    if (this.localStream) { return this.localStream; }
+  public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): Promise<MediaStream|null> {
+    if (this.localStream) { 
+      this.logAspectRatio(this.localStream);
+      return this.localStream; }
   
-    const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId);
+    const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
   
     try {
       this.localStream = await this.getUserMedia(constraints);
+      this.logAspectRatio(this.localStream);
     } catch (err:any) {
-
-      // if(err.name === "NotFoundError"){
-      //   this.alertService.addAlert("error", "One or more media devices could not be found");
-      //   return null;
-      // }
-  
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         this.logger.log("Permission error: Trying again without audio")
         await this.getUserMediaWithoutAudio(constraints)
+        this.logAspectRatio(this.localStream);
       }
        else {
         this.logger.error("Error getting media stream:", err)
@@ -71,10 +86,38 @@ export class WebRTCService {
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
-  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string): MediaStreamConstraints {
+  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): MediaStreamConstraints {
+    let idealWidth: number;
+    let idealHeight: number;
+    let aspectRatioValue: number;
+  
+    if (aspectRatio === '4/3') {
+      idealWidth = 1280;
+      idealHeight = 960;
+      aspectRatioValue = 4 / 3;
+    } else {
+      // Default to 16:9
+      idealWidth = 1920;
+      idealHeight = 1080;
+      aspectRatioValue = 16 / 9;
+    }
+  
     return {
-      video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
-      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true,
+      video: videoDeviceId
+        ? {
+            deviceId: { exact: videoDeviceId },
+            width: { ideal: idealWidth },
+            height: { ideal: idealHeight },
+            aspectRatio: { ideal: aspectRatioValue },
+          }
+        : {
+            width: { ideal: idealWidth },
+            height: { ideal: idealHeight },
+            aspectRatio: { ideal: aspectRatioValue },
+          },
+      audio: audioDeviceId
+        ? { deviceId: { exact: audioDeviceId } }
+        : true,
     };
   }
 
@@ -84,39 +127,173 @@ export class WebRTCService {
       this.localStream = await this.getUserMedia(constraints);
     } catch (err) {
       this.logger.error("Error getting media stream without audio:", err);
-      throw err;
+      //unsure if this should be thrown or not
+      //throw err;
     }
   }
 
-  public async changeDevice(videoDeviceId?: string, audioDeviceId?: string): Promise<void> {
-    // Stop existing tracks
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(track => track.stop());
+  // public async changeDevice(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): Promise<void> {
+  //   // Stop existing tracks
+  //   if (this.localStream) {
+  //     this.localStream.getTracks().forEach(track => track.stop());
+  //   }
+
+  //   // Reinitialize local stream with new device(s)
+  //   const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
+  //   const videoTrack = this.localStream?.getVideoTracks()[0];
+  //   await videoTrack?.applyConstraints({
+  //     ...(videoDeviceId && { deviceId: { exact: videoDeviceId } }),
+  //     width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
+  //     height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
+  //     aspectRatio: { ideal: aspectRatio === '16/9' ? 16 / 9 : 4 / 3 },
+  //   });
+  //   this.localStream = await this.getUserMedia(constraints);
+
+  //   // Replace tracks in peer connections
+  //   for (const socketId in this.peerConnections) {
+  //     const pc = this.peerConnections[socketId];
+
+  //     // Remove existing senders
+  //     const senders = pc.getSenders();
+  //     senders.forEach(sender => {
+  //       pc.removeTrack(sender);
+  //     });
+
+  //     // Add new tracks
+  //     this.localStream!.getTracks().forEach(track => {
+  //       pc.addTrack(track, this.localStream!);
+  //     });
+
+  //     // Renegotiate the connection
+  //     const offer = await pc.createOffer();
+  //     await pc.setLocalDescription(offer);
+  //     this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
+  //   }
+  // }
+  public async changeDevice(
+    videoDeviceId?: string,
+    audioDeviceId?: string,
+    aspectRatio: string = '16/9'
+  ): Promise<void> {
+    if (!this.localStream) {
+      // No existing stream, initialize it
+      const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
+      this.localStream = await this.getUserMedia(constraints);
+      await this.updatePeerConnections();
+      return;
     }
+  
+    // Get current tracks and device IDs
+    const currentVideoTrack = this.localStream.getVideoTracks()[0];
+    const currentAudioTrack = this.localStream.getAudioTracks()[0];
+  
+    const currentVideoDeviceId = currentVideoTrack?.getSettings().deviceId;
+    const currentAudioDeviceId = currentAudioTrack?.getSettings().deviceId;
+  
+    const videoDeviceChanged = videoDeviceId && videoDeviceId !== currentVideoDeviceId;
+    const audioDeviceChanged = audioDeviceId && audioDeviceId !== currentAudioDeviceId;
+  
+    // Apply new constraints to existing video track if device hasn't changed
+    if (!videoDeviceChanged && currentVideoTrack) {
+      try {
+        await currentVideoTrack.applyConstraints({
+          width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
+          height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
+          aspectRatio: { ideal: aspectRatio === '16/9' ? 16/9 : 4/3 },
+        });
+      } catch (err) {
+        console.error('Error applying constraints to video track:', err);
+      }
+    }
+  
+    // If we need new tracks, get them before stopping existing tracks
+    let newVideoTrack: MediaStreamTrack | null = null;
+    let newAudioTrack: MediaStreamTrack | null = null;
+  
+    if (videoDeviceChanged || audioDeviceChanged) {
+      const constraints: MediaStreamConstraints = {
+        video: videoDeviceChanged
+          ? {
+              deviceId: { exact: videoDeviceId },
+              width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
+              height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
+              aspectRatio: { ideal: aspectRatio === '16/9' ? 16 / 9 : 4 / 3 },
+            }
+          : false,
+        audio: audioDeviceChanged
+          ? {
+              deviceId: { exact: audioDeviceId },
+            }
+          : false,
+      };
+  
+      try {
+        const newStream = await this.getUserMedia(constraints);
+        if(newStream){
+          if (videoDeviceChanged) {
+            newVideoTrack = newStream.getVideoTracks()[0];
+          }
+          if (audioDeviceChanged) {
+            newAudioTrack = newStream.getAudioTracks()[0];
+          }
+        }
+      } catch (err) {
+        console.error('Error getting new media stream:', err);
+        // Handle error appropriately
+        return;
+      }
+    }
+  
+    // Now we can stop existing tracks and replace them
+    if (videoDeviceChanged && newVideoTrack) {
+      currentVideoTrack?.stop();
+      this.localStream.removeTrack(currentVideoTrack);
+      this.localStream.addTrack(newVideoTrack);
+      await this.replaceTrackInPeerConnections('video', newVideoTrack);
+    }
+  
+    if (audioDeviceChanged && newAudioTrack) {
+      currentAudioTrack?.stop();
+      this.localStream.removeTrack(currentAudioTrack);
+      this.localStream.addTrack(newAudioTrack);
+      await this.replaceTrackInPeerConnections('audio', newAudioTrack);
+    }
+  
+    // Log aspect ratio
+    this.logAspectRatio(this.localStream);
+  }
 
-    // Reinitialize local stream with new device(s)
-    const constraints = this.getMediaConstraints();
-    this.localStream = await this.getUserMedia(constraints);
-
-    // Replace tracks in peer connections
+  private async updatePeerConnections(): Promise<void> {
     for (const socketId in this.peerConnections) {
       const pc = this.peerConnections[socketId];
-
-      // Remove existing senders
+  
+      // Replace tracks in peer connections
       const senders = pc.getSenders();
-      senders.forEach(sender => {
-        pc.removeTrack(sender);
+      this.localStream!.getTracks().forEach((track) => {
+        const sender = senders.find((s) => s.track?.kind === track.kind);
+        if (sender) {
+          sender.replaceTrack(track);
+        } else {
+          pc.addTrack(track, this.localStream!);
+        }
       });
-
-      // Add new tracks
-      this.localStream!.getTracks().forEach(track => {
-        pc.addTrack(track, this.localStream!);
-      });
-
-      // Renegotiate the connection
+  
+      // Renegotiate the connection if necessary
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
+    }
+  }
+
+  private async replaceTrackInPeerConnections(kind: 'video' | 'audio', newTrack: MediaStreamTrack) {
+    for (const socketId in this.peerConnections) {
+      const pc = this.peerConnections[socketId];
+      const sender = pc.getSenders().find((s) => s.track?.kind === kind);
+      if (sender) {
+        await sender.replaceTrack(newTrack);
+      } else {
+        pc.addTrack(newTrack, this.localStream!);
+      }
     }
   }
 
@@ -395,11 +572,14 @@ export class WebRTCService {
   }
 
   handleGameEvent = (event: IGameEvent) => {
-    this.onGameEvent.forEach(callback => {
-      if (callback != null) {
-        callback(event)
-      }
-    })
+    this.gameEventSubject.next(event);
+    // console.log("callbacks: ", this.onGameEvent.length);
+    // // debugger
+    // this.onGameEvent.forEach(callback => {
+    //   if (callback != null) {
+    //     callback(event)
+    //   }
+    // })
   }
 
   handleLocalGameEvent = (event: IGameEvent) => {
@@ -408,14 +588,6 @@ export class WebRTCService {
 
   handleErrorResponse = (error: IGameError) => {
     this.alertService.addAlert(error.severity == GameErrorSeverity.Error ? 'error' : 'warning', error.message);
-  }
-
-  public subscribeToGameEvents = (callback: (update: IGameEvent) => void) => {
-    this.onGameEvent.push(callback);
-  }
-
-  public unsubscribeToGameEvent = (callback: (update: IGameEvent) => void) => {
-    this.onGameEvent = this.onGameEvent.filter((checkCallback) => { checkCallback !== callback })
   }
 
   // Mute/Unmute methods
