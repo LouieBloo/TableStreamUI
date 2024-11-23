@@ -18,11 +18,12 @@ import { ReportModalComponent } from '../../modals/report-modal/report-modal.com
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { LoggerService } from '../../../services/logger/logger.service';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
+import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent,PlayerTurnOrderModalComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -42,6 +43,7 @@ export class GameComponent {
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
   @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
+  @ViewChild(PlayerTurnOrderModalComponent) playerTurnOrderModal!: PlayerTurnOrderModalComponent;
 
   constructor(
     private webRTC: WebRTCService,
@@ -222,6 +224,11 @@ export class GameComponent {
       case GameEvent.SetCommander:
         this.updatePlayers(event.response);
         break;
+      case GameEvent.SetPlayerTurnOrders:
+        this.updatePlayers(event.response);
+        //sort is broken luke!
+        this.sortPlayers();
+        break;
     }
   }
 
@@ -259,50 +266,44 @@ export class GameComponent {
     if (this.gameService.room && this.gameService.room.players) {
       this.sortedPlayers = this.gameService.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
-    // if(this.sortedPlayers.length == 4){
-    //   let temp:IPlayer = this.sortedPlayers[2];
-    //   this.sortedPlayers[2] = this.sortedPlayers[3];
-    //   this.sortedPlayers[3] = temp;
-    // }
   }
 
   get topRowPlayers() {
+    let topPlayers: IPlayer[] = [];
     switch (this.sortedPlayers.length) {
       case 1:
-        return this.sortedPlayers;
       case 2:
-        return this.sortedPlayers;
+        topPlayers = this.sortedPlayers;
+        break;
       case 3:
-        return this.sortedPlayers.slice(0, 2);
       case 4:
-        return this.sortedPlayers.slice(0, 2);
+        topPlayers = this.sortedPlayers.filter((_, index) => index < 2);
+        break;
       case 5:
-        return this.sortedPlayers.slice(0, 3);
       case 6:
-        return this.sortedPlayers.slice(0, 3);
+        topPlayers = this.sortedPlayers.filter((_, index) => index < 3);
+        break;
     }
-
-    return []
+    return topPlayers;
   }
-
+  
   get bottomRowPlayers() {
+    let bottomPlayers: IPlayer[] = [];
     switch (this.sortedPlayers.length) {
-      case 1:
-        return [];
-      case 2:
-        return [];
       case 3:
-        return [this.sortedPlayers[2]];
+        bottomPlayers = [this.sortedPlayers[2]];
+        break;
       case 4:
-        //notice the change in order, always clockwise rotation
-        return [this.sortedPlayers[3], this.sortedPlayers[2]];
+        bottomPlayers = [this.sortedPlayers[3], this.sortedPlayers[2]];
+        break;
       case 5:
-        return [this.sortedPlayers[4], this.sortedPlayers[3]];
+        bottomPlayers = [this.sortedPlayers[4], this.sortedPlayers[3]];
+        break;
       case 6:
-        return [this.sortedPlayers[5], this.sortedPlayers[4], this.sortedPlayers[3]];
+        bottomPlayers = [this.sortedPlayers[5], this.sortedPlayers[4], this.sortedPlayers[3]];
+        break;
     }
-
-    return []
+    return bottomPlayers;
   }
 
   startGame = () => {
@@ -311,10 +312,6 @@ export class GameComponent {
 
   resetGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.ResetGame });
-  }
-
-  randomizeTurnOrder = () => {
-    this.webRTC.sendGameEvent({ event: GameEvent.RandomizePlayerOrder });
   }
 
   copyUrl() {

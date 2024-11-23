@@ -84,7 +84,8 @@ export class WebRTCService {
       this.localStream = await this.getUserMedia(constraints);
     } catch (err) {
       this.logger.error("Error getting media stream without audio:", err);
-      throw err;
+      //unsure if this should be thrown or not
+      //throw err;
     }
   }
 
@@ -395,6 +396,7 @@ export class WebRTCService {
   }
 
   handleGameEvent = (event: IGameEvent) => {
+    console.log(event);
     this.onGameEvent.forEach(callback => {
       if (callback != null) {
         callback(event)

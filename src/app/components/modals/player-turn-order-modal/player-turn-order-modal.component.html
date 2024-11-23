@@ -1,0 +1,35 @@
+<button class="hidden" onclick="playerTurnOrderModal.showModal()" id="playerTurnOrderToggleModal">toggle</button>
+<dialog id="playerTurnOrderModal" class="modal">
+
+    <div class="modal-box bg-slate-800 text-white absolute top-2">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                id="closePlayerTurnOrderModal">✕</button>
+        </form>
+
+        <h3 class="text-lg font-bold mb-2">Modify Turn Order</h3>
+        <!-- <p class="text-sm mb-4">Play sounds for all to hear! 15s cooldown.</p> -->
+        <div>
+            <div *ngFor="let player of getTemporaryPlayers">
+                <div class="flex flex-row text-xl">
+                    <p class="mb-0 mr-2">{{player.turnOrder + 1}}.</p>
+                    <p class="mb-0 grow">{{player.name}}</p>
+                    <div class="flex flex-row">
+                        <button type="button" class="text-xl btn btn-sm btn-outline p-1 rounded-none text-white" (click)="movePlayerDown(player)" [disabled]="player.turnOrder == (temporaryPlayers.length -1)">˅</button>
+                        <button type="button" class="text-xl btn btn-sm btn-outline p-1 rounded-none text-white" (click)="movePlayerUp(player)" [disabled]="player.turnOrder == 0">˄</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-right mt-2">
+                <button (click)="randomizeTurnOrder()" class="btn btn-sm btn-outline text-white py-2 px-4 rounded mt-3 mr-2" >Randomize</button>
+                <button (click)="save()" class="btn btn-sm btn-outline text-white py-2 px-4 rounded mt-3" >Save</button>
+            </div>
+            
+        </div>
+
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

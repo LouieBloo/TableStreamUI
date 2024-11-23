@@ -20,7 +20,8 @@ export enum GameEvent{
     ModifyPlayerCommanderDamage,
     SetCommander,
     FlipCoins,
-    PlayEffect
+    PlayEffect,
+    SetPlayerTurnOrders
 }
 
 //fine to change on front end only
