@@ -1,4 +1,22 @@
+.arrowsMove{
+    /* position: absolute;
+    right: 0px;
+    top:0px; */
+}
+
+.seeThrough{
+    opacity: 0.2;
+}
+
 .token{
     width: 114px;
     height: 160px;
+}
+
+#buttonPanel{
+    position: absolute;
+    bottom:-34px;
+
+    font-size: 22px;
+    background-color: #00000099;
 }

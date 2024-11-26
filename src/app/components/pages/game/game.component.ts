@@ -229,10 +229,13 @@ export class GameComponent {
         this.sortPlayers ();
         break;
       case GameEvent.CreateToken:
-      case GameEvent.DeleteToken:
-      case GameEvent.ModifyToken:
         if(this.gameService.room.game){
-          this.gameService.room.game.setTokens(event.response)
+          this.gameService.room.game.createToken(event.response)
+        }
+        break;
+      case GameEvent.DeleteToken:
+        if(this.gameService.room.game){
+          this.gameService.room.game.removeToken(event.response)
         }
         break;
     }

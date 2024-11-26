@@ -1,14 +1,21 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
-import { Token } from '../../../interfaces/scryfall';
+import { PlayingCard, Token } from '../../../interfaces/scryfall';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent } from '../../../interfaces/game';
+import { GameEvent, IGameEvent } from '../../../interfaces/game';
+import { CardComponent } from '../../card/card.component';
+import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
+import { bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill, bootstrapEyeSlashFill, bootstrapEyeFill } from '@ng-icons/bootstrap-icons';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { NgClass, NgIf } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-card-token',
   standalone: true,
-  imports: [],
+  imports: [CardComponent,NgIf,NgClass,NgIcon],
   templateUrl: './card-token.component.html',
-  styleUrl: './card-token.component.css'
+  styleUrl: './card-token.component.css',
+  viewProviders: [provideIcons({ bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill,bootstrapEyeSlashFill, bootstrapEyeFill })]
 })
 export class CardTokenComponent implements OnInit {
   @Input() token!: Token;
@@ -20,10 +27,19 @@ export class CardTokenComponent implements OnInit {
   private containerBounds: DOMRect | undefined;
   private unlistenMouseMove!: () => void;
   private unlistenMouseUp!: () => void;
+  hidden:boolean = false;
 
-  constructor(private elRef: ElementRef, private renderer: Renderer2, private webRTC: WebRTCService) {}
+  private subscriptions: Subscription = new Subscription();
+
+  constructor(
+    private elRef: ElementRef,
+    private renderer: Renderer2,
+    private webRTC: WebRTCService,
+    private modalService:ModalServiceService
+  ) {}
 
   ngOnInit(): void {
+    
     // Set the initial position of the card based on the token
     const container = document.querySelector('#userStreams');
     if (container) {
@@ -31,23 +47,50 @@ export class CardTokenComponent implements OnInit {
     }
 
     this.updateCardPositionFromNormalized();
+
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+    );
   }
 
   ngOnDestroy(){
     this.clearMouseListeners();
+    this.subscriptions.unsubscribe();
   }
 
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   // Update card position if token input changes
-  //   console.log("NG ON CHANGES")
-  //   // if (changes['token'] && !this.isDragging) {
-  //   //   this.updateCardPosition();
-  //   // }
-  // }
+  handleGameEvent = (event: IGameEvent) => {
+    if (event.event === GameEvent.ModifyToken && event.response.id == this.token.id) {
+      Object.assign(this.token, event.response);
+      this.updateCardPositionFromNormalized();
+    }
+  }
 
-  // ngAfterViewInit(): void {
-    
-  // }
+  openSearch = ()=>{
+    if(!this.editable){return;}
+    this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
+  }
+
+  cardSelected = (card:PlayingCard)=>{
+    if(card != null){
+      this.token.card = card;
+      this.modifyToken();
+    }
+  }
+
+  modifyToken = ()=>{
+    // Notify the server of the change
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyToken,
+      payload: this.token
+    });
+  }
+
+  delete = ()=>{
+    this.webRTC.sendGameEvent({
+      event: GameEvent.DeleteToken,
+      payload: this.token
+    })
+  }
 
   clearMouseListeners = ()=>{
     if (this.unlistenMouseMove) this.unlistenMouseMove();
@@ -56,7 +99,12 @@ export class CardTokenComponent implements OnInit {
 
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
+    this.clearMouseListeners();
     if(!this.editable){return;}
+     // Check if the target element is the arrowsMove icon
+    const targetElement = event.target as HTMLElement;
+    if (!targetElement || !targetElement.closest('.arrowsMove')) return;
+
     this.isDragging = true;
 
     const card = this.elRef.nativeElement.querySelector('.token');
@@ -101,11 +149,7 @@ export class CardTokenComponent implements OnInit {
 
     this.clearMouseListeners();
 
-    // Notify the server of the change
-    this.webRTC.sendGameEvent({
-      event: GameEvent.ModifyToken,
-      payload: this.token
-    });
+    this.modifyToken();
   }
 
   private updateCardPositionFromNormalized(): void {
@@ -121,9 +165,6 @@ export class CardTokenComponent implements OnInit {
       console.log("screen x: " + screenX)
       console.log("token y: " + this.token.yPosition)
       console.log("screen y: " + screenY)
-
-      
-      // console.log("screen y: " + screenY)
 
       this.renderer.setStyle(card, 'left', `${screenX}px`);
       this.renderer.setStyle(card, 'top', `${screenY}px`);
