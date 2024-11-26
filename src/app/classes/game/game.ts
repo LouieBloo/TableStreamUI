@@ -1,4 +1,4 @@
-import { PlayingCard } from "../../interfaces/scryfall";
+import { PlayingCard, Token } from "../../interfaces/scryfall";
 import {GameType} from "../../interfaces/game";
 export class Game {
 
@@ -12,4 +12,10 @@ export class Game {
     coinImagePathPrefix:string = "magic"
 
     classifierActive:boolean = false;
+
+    tokens:Token[] = [];
+
+    setTokens = (newTokens:Token[])=>{
+        this.tokens = newTokens;
+    }
 }

@@ -19,11 +19,12 @@ import { UserStreamComponent } from '../../users/user-stream/user-stream.compone
 import { LoggerService } from '../../../services/logger/logger.service';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
+import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent,PlayerTurnOrderModalComponent],
+  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent,PlayerTurnOrderModalComponent, CardTokenComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -227,6 +228,13 @@ export class GameComponent {
         this.updatePlayers(event.response);
         this.sortPlayers ();
         break;
+      case GameEvent.CreateToken:
+      case GameEvent.DeleteToken:
+      case GameEvent.ModifyToken:
+        if(this.gameService.room.game){
+          this.gameService.room.game.setTokens(event.response)
+        }
+        break;
     }
   }
 
@@ -331,6 +339,12 @@ export class GameComponent {
       event: LocalGameEvent.FlipCoins,
       callingPlayer: this.localPlayer,
       payload: {coinsToFlip: coinsToFlip}
+    })
+  }
+
+  createToken = ()=>{
+    this.webRTC.sendGameEvent({
+      event: GameEvent.CreateToken
     })
   }
 }

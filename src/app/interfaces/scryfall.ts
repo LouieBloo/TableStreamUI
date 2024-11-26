@@ -47,4 +47,11 @@ export interface PlayingCard {
     card_faces?:PlayingCard[]
   }
   
-  
+export interface Token{
+  id?:string;
+  ownerId?:string;
+  name?:string;
+  card?:PlayingCard;
+  xPosition:number;
+  yPosition:number;
+}

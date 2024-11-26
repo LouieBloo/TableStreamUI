@@ -21,7 +21,10 @@ export enum GameEvent{
     SetCommander,
     FlipCoins,
     PlayEffect,
-    SetPlayerTurnOrders
+    SetPlayerTurnOrders,
+    CreateToken,
+    ModifyToken,
+    DeleteToken
 }
 
 //fine to change on front end only

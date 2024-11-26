@@ -4,13 +4,8 @@
     <div class="w-screen h-screen flex flex-col drawer-content ">
 
         <div class="flex flex-row flex-grow">
-
-            <!-- <div class="grid grid-cols-2 flex-grow" [ngClass]="{'grid-cols-2': sortedPlayers.length <= 4, 'grid-cols-3': sortedPlayers.length > 4  }">
-                <div *ngFor="let player of sortedPlayers" class="bg-slate-800" [ngClass]="sortedPlayers.length <= 2 ? 'full-height' : 'half-height'">
-                    <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
-                </div>
-            </div> -->
-            <div class="flex-grow">
+           
+            <div class="flex-grow" id="userStreams">
                 <!-- Top row -->
                 <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
                     <div *ngFor="let player of topRowPlayers" class="bg-slate-800" [ngClass]="bottomRowPlayers.length < 1 ? 'full-height' : 'half-height'">
@@ -23,6 +18,12 @@
                     <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height">
                         <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
+                </div>
+            </div>
+
+            <div>
+                <div *ngFor="let token of gameService.room?.game?.tokens">
+                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayer.id"></app-card-token>
                 </div>
             </div>
 
@@ -68,6 +69,7 @@
                         </div>
                     </div>
                     <button (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
+                    <button (click)="createToken()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
                 </div>
 
                 <div class="mt-2">
