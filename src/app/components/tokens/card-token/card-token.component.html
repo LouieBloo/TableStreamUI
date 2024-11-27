@@ -1,4 +1,4 @@
-<div class="token fixed bg-white group" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden, 'tapped': token.tapped}">
+<div class="token fixed bg-white group" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden, 'tapped': token.tapped, 'hidden': !settingService.tokensEnabled}">
     
     @if (token.card) {
         <app-card [card]="token.card" [showPopup]="true"></app-card>
@@ -22,7 +22,7 @@
             <ng-icon name="bootstrapArrowsMove" ></ng-icon>
         </div>
 
-        <div *ngIf="editable" id="tapIcon" (click)="tapCard()" class="w-full text-center">
+        <div *ngIf="editable" id="tapIcon" (click)="tapCard()" class="w-full text-center cursor-pointer">
             <ng-icon name="bootstrapArrowClockwise"></ng-icon>
         </div>
 

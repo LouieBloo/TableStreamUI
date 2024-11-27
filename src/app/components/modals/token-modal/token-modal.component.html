@@ -1,0 +1,28 @@
+<button class="hidden" onclick="tokenModal.showModal()" id="tokenToggleModal">toggle</button>
+<dialog id="tokenModal" class="modal">
+
+    <div class="modal-box bg-slate-800 text-white absolute top-2">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                id="closeTokenModal">✕</button>
+        </form>
+
+        <h3 class="text-lg font-bold mb-2">Tokens</h3>
+        <p class="text-sm mb-4">Create custom tokens or copies of cards.</p>
+        <div>
+            <button type="button" class="btn btn-outline text-white w-full rounded-none" (click)="createToken()">Create Token</button>
+        </div>
+
+        <div class="mt-4">
+            <label class="cursor-pointer flex flex-row">
+                <h3 class="text-lg font-bold mr-2">Tokens Enabled</h3>
+                <input type="checkbox" [(ngModel)]="settingService.tokensEnabled">
+            </label>
+            
+        </div>
+
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

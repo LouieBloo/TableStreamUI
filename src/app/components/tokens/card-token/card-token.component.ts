@@ -8,6 +8,7 @@ import { bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill, bootstrapEye
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { NgClass, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { SettingsService } from '../../../services/settings/settings.service';
 
 @Component({
   selector: 'app-card-token',
@@ -44,7 +45,8 @@ export class CardTokenComponent implements OnInit {
     private elRef: ElementRef,
     private renderer: Renderer2,
     private webRTC: WebRTCService,
-    private modalService:ModalServiceService
+    private modalService:ModalServiceService,
+    public settingService:SettingsService
   ) {}
 
   ngOnInit(): void {

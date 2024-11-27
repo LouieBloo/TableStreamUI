@@ -69,7 +69,7 @@
                         </div>
                     </div>
                     <button (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
-                    <button (click)="createToken()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
+                    <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
                 </div>
 
                 <div class="mt-2">
@@ -95,4 +95,5 @@
     <app-sound-effect-modal [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
+    <app-token-modal></app-token-modal>
 </div>

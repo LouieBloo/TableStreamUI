@@ -20,11 +20,26 @@ import { LoggerService } from '../../../services/logger/logger.service';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
+import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent,PlayerTurnOrderModalComponent, CardTokenComponent],
+  imports: [
+    NgFor, 
+    UserStreamComponent, 
+    MessengerComponent, 
+    NgIf, 
+    NgClass, 
+    CardListComponent, 
+    ReportModalComponent, 
+    PasswordModalComponent,
+    TooltipDirective, 
+    SoundEffectModalComponent,
+    PlayerTurnOrderModalComponent, 
+    CardTokenComponent,
+    TokenModalComponent
+  ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -45,6 +60,7 @@ export class GameComponent {
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
   @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
   @ViewChild(PlayerTurnOrderModalComponent) playerTurnOrderModal!: PlayerTurnOrderModalComponent;
+  @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
 
   constructor(
     private webRTC: WebRTCService,
@@ -342,12 +358,6 @@ export class GameComponent {
       event: LocalGameEvent.FlipCoins,
       callingPlayer: this.localPlayer,
       payload: {coinsToFlip: coinsToFlip}
-    })
-  }
-
-  createToken = ()=>{
-    this.webRTC.sendGameEvent({
-      event: GameEvent.CreateToken
     })
   }
 }
