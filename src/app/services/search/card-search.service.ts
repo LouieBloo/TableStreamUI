@@ -15,21 +15,31 @@ export class CardSearchService {
 
   constructor(private http: HttpClient) { }
 
-  searchCards(query: string, fuzzy: boolean = true, game:Game): Observable<any> {
+  searchCards(query: string, fuzzy: boolean = true, game:Game, options:any): Observable<any> {
     if(game.gameType == GameType.PokemonStandard){
       return this.searchPokemon(query, game.searchTag);
     }else{
-      return this.searchScryfall(query,fuzzy,game.searchTag);
+      return this.searchScryfall(query,fuzzy,game.searchTag, options);
     }
   }
 
 
-  searchScryfall(query: string, fuzzy: boolean = true, format: string = 'commander'): Observable<any> {
+  searchScryfall(query: string, fuzzy: boolean = true, format: string = 'commander', options:any={}): Observable<any> {
     let searchQuery = query;
     if (fuzzy) {
       searchQuery = `${query}`;
     }
-    const params = new HttpParams().set('q', `${searchQuery} format=${format}`);
+
+    if (options && options.includeOption && options.includeOption == 'tokens') {
+      searchQuery += ' type:token';
+    }
+    else if (options && options.includeOption && options.includeOption == 'emblems') {
+      searchQuery += ' type:emblem';
+    }else{
+      searchQuery += ' format=' + format
+    }
+
+    const params = new HttpParams().set('q', `${searchQuery}`);
     return this.http.get<any>(this.scryfallUrl, { params });
   }
 

@@ -1,22 +1,39 @@
 .arrowsMove{
-    /* position: absolute;
+    position: absolute;
     right: 0px;
-    top:0px; */
+    top:0px;
+    /* background-color: #00000099; */
+}
+
+.arrowsMove ng-icon{
+    background-color: #00000099;
+    font-size: 24px;
+}
+
+#buttonPanel{
+    position: absolute;
+    bottom:-30px;
+
+    font-size: 20px;
+    background-color: #00000099;
 }
 
 .seeThrough{
     opacity: 0.2;
 }
 
+#tapIcon{
+    position: absolute;
+    bottom: 0px;
+    font-size: 40px;
+}
+
 .token{
+    transition: transform 0.3s ease; /* Smooth rotation transition */
     width: 114px;
     height: 160px;
 }
 
-#buttonPanel{
-    position: absolute;
-    bottom:-34px;
-
-    font-size: 22px;
-    background-color: #00000099;
+.token.tapped {
+    transform: rotate(90deg); /* Rotate 90 degrees */
 }

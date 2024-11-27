@@ -1,26 +1,44 @@
-<div class="token fixed bg-white" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden}">
+<div class="token fixed bg-white group" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden, 'tapped': token.tapped}">
     
     @if (token.card) {
         <app-card [card]="token.card" [showPopup]="true"></app-card>
     }  @else {
-        <p>{{token.name}}</p>
+
+        @if (isEditingText) {
+            <input
+                type="text"
+                [value]="token.name"
+                (keydown.enter)="endEditingText($event)"
+                (keydown.escape)="cancelEditingText()"
+                class="w-full"
+            />
+        }  @else {
+            <p (click)="startEditingText()" class="cursor-pointer text-center">{{token.name}}</p>
+        }
     }
 
-    
-
-    <div id="buttonPanel" class="text-white flex flex-row w-full">
-        <button *ngIf="editable" type="button" (click)="openSearch()" class="pl-1 pr-1"><ng-icon name="bootstrapSearch" ></ng-icon></button>
-        <button *ngIf="editable" type="button" (click)="delete()" class="pl-1 pr-1"><ng-icon name="bootstrapTrash3Fill" ></ng-icon></button>
-        <button type="button" (click)="hidden = !hidden" class="pl-1 pr-1">
-            @if (hidden) {
-                <ng-icon name="bootstrapEyeSlashFill" ></ng-icon>
-            }  @else {
-                <ng-icon name="bootstrapEyeFill" ></ng-icon>
-            }
-            
-        </button>
+    <div class="hidden group-hover:block">
         <div *ngIf="editable" class="arrowsMove text-white grow text-center">
             <ng-icon name="bootstrapArrowsMove" ></ng-icon>
         </div>
+
+        <div *ngIf="editable" id="tapIcon" (click)="tapCard()" class="w-full text-center">
+            <ng-icon name="bootstrapArrowClockwise"></ng-icon>
+        </div>
+
+        <div id="buttonPanel" class="text-white flex flex-row w-full">
+            <button *ngIf="editable" type="button" (click)="openSearch()" class="pl-1 pr-1"><ng-icon name="bootstrapSearch" ></ng-icon></button>
+            <button *ngIf="editable" type="button" (click)="delete()" class="pl-1 pr-1"><ng-icon name="bootstrapTrash3Fill" ></ng-icon></button>
+            <button *ngIf="editable" type="button" (click)="copyToken()" class="pl-1 pr-1"><ng-icon name="bootstrapCopy" ></ng-icon></button>
+            <button type="button" (click)="hidden = !hidden" class="pl-1 pr-1">
+                @if (hidden) {
+                    <ng-icon name="bootstrapEyeSlashFill" ></ng-icon>
+                }  @else {
+                    <ng-icon name="bootstrapEyeFill" ></ng-icon>
+                }
+                
+            </button>
+        </div>
     </div>
+    
 </div>

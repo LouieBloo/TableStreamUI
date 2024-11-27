@@ -4,7 +4,7 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../../interfaces/game';
 import { CardComponent } from '../../card/card.component';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
-import { bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill, bootstrapEyeSlashFill, bootstrapEyeFill } from '@ng-icons/bootstrap-icons';
+import { bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill, bootstrapEyeSlashFill, bootstrapEyeFill, bootstrapCopy, bootstrapArrowClockwise } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { NgClass, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -15,13 +15,22 @@ import { Subscription } from 'rxjs';
   imports: [CardComponent,NgIf,NgClass,NgIcon],
   templateUrl: './card-token.component.html',
   styleUrl: './card-token.component.css',
-  viewProviders: [provideIcons({ bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill,bootstrapEyeSlashFill, bootstrapEyeFill })]
+  viewProviders: [provideIcons({ 
+    bootstrapSearch, 
+    bootstrapArrowsMove, 
+    bootstrapTrash3Fill,
+    bootstrapEyeSlashFill, 
+    bootstrapEyeFill, 
+    bootstrapCopy,
+    bootstrapArrowClockwise
+   })]
 })
 export class CardTokenComponent implements OnInit {
   @Input() token!: Token;
   @Input() editable: boolean = false;
 
   private isDragging = false;
+  isEditingText = false;
   private offsetX = 0;
   private offsetY = 0;
   private containerBounds: DOMRect | undefined;
@@ -65,6 +74,32 @@ export class CardTokenComponent implements OnInit {
     }
   }
 
+  startEditingText = ()=>{
+    if(this.editable){
+      this.isEditingText = true;
+    }
+  }
+
+  cancelEditingText = ()=>{
+    this.isEditingText = false;
+  }
+
+  endEditingText = (event: Event)=>{
+    this.cancelEditingText();
+    const inputElement = event.target as HTMLInputElement;
+    const newName = inputElement.value.trim();
+
+    if (newName && newName !== this.token.name) {
+      this.token.name = newName; // Update token name
+      this.updateToken();
+    }
+  }
+
+  tapCard = ()=>{
+    this.token.tapped = !this.token.tapped;
+    this.updateToken();
+  }
+
   openSearch = ()=>{
     if(!this.editable){return;}
     this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
@@ -73,16 +108,23 @@ export class CardTokenComponent implements OnInit {
   cardSelected = (card:PlayingCard)=>{
     if(card != null){
       this.token.card = card;
-      this.modifyToken();
+      this.updateToken();
     }
   }
 
-  modifyToken = ()=>{
-    // Notify the server of the change
+  // Notify the server of the change
+  updateToken = ()=>{
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyToken,
       payload: this.token
     });
+  }
+
+  copyToken = ()=>{
+    this.webRTC.sendGameEvent({
+      event: GameEvent.CreateToken,
+      payload: this.token
+    })
   }
 
   delete = ()=>{
@@ -115,6 +157,9 @@ export class CardTokenComponent implements OnInit {
 
     this.unlistenMouseMove = this.renderer.listen('window', 'mousemove', this.onMouseMove.bind(this));
     this.unlistenMouseUp = this.renderer.listen('window', 'mouseup', this.onMouseUp.bind(this));
+
+    //so we dont select other things on the page
+    event.preventDefault();
   }
 
   onMouseMove(event: MouseEvent): void {
@@ -149,7 +194,7 @@ export class CardTokenComponent implements OnInit {
 
     this.clearMouseListeners();
 
-    this.modifyToken();
+    this.updateToken();
   }
 
   private updateCardPositionFromNormalized(): void {

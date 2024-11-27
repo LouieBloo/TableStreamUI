@@ -54,4 +54,5 @@ export interface Token{
   card?:PlayingCard;
   xPosition:number;
   yPosition:number;
+  tapped?:boolean;
 }
