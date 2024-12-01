@@ -54,8 +54,8 @@
                 <app-messenger></app-messenger>
 
                 <div class="justify-center mt-2 grid grid-cols-2">
-                    <div>
-                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none" style="border-right: none;">Flip Coin</button>
+                    <div class="flex flex-row">
+                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
                         <div class="dropdown dropdown-left text-white rounded-none " >
                             <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
                                 <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
@@ -65,6 +65,20 @@
                                 <li (click)="flipCoins(3)"><a>3</a></li>
                                 <li (click)="flipCoins(4)"><a>4</a></li>
                                 <li (click)="flipCoins(5)"><a>5</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex flex-row">
+                        <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Roll Dice</button>
+                        <div class="dropdown dropdown-left text-white rounded-none " >
+                            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+                                <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
+                            </div>
+                            <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                                <li (click)="rollDice(1,6)"><a>D4</a></li>
+                                <li (click)="rollDice(1,8)"><a>D8</a></li>
+                                <li (click)="rollDice(1,12)"><a>D12</a></li>
+                                <li (click)="rollDice(1,20)"><a>D20</a></li>
                             </ul>
                         </div>
                     </div>

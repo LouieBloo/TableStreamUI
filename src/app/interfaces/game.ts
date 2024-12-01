@@ -24,7 +24,8 @@ export enum GameEvent{
     SetPlayerTurnOrders,
     CreateToken,
     ModifyToken,
-    DeleteToken
+    DeleteToken,
+    RollDice
 }
 
 //fine to change on front end only

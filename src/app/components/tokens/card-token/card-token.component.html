@@ -1,4 +1,4 @@
-<div class="token fixed bg-white group" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden, 'tapped': token.tapped, 'hidden': !settingService.tokensEnabled}">
+<div class="token fixed bg-white group" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden, 'tapped': token.tapped, 'hidden': !settingService.tokensEnabled, 'tokenBackground': !token.card}">
     
     @if (token.card) {
         <app-card [card]="token.card" [showPopup]="true"></app-card>
@@ -10,10 +10,10 @@
                 [value]="token.name"
                 (keydown.enter)="endEditingText($event)"
                 (keydown.escape)="cancelEditingText()"
-                class="w-full"
+                class="w-full p-2"
             />
         }  @else {
-            <p (click)="startEditingText()" class="cursor-pointer text-center">{{token.name}}</p>
+            <p (click)="startEditingText()" class="cursor-pointer text-center p-2">{{token.name}}</p>
         }
     }
 

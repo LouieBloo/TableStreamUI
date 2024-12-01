@@ -19,7 +19,7 @@
             <form #searchForm="ngForm" (ngSubmit)="sendSearch()" class="mb-2">
                 <input (ngModelChange)="searchStringChanged($event)" type="text" id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="popupColors mt-1 p-2 w-full border rounded-md shadow-sm">
                 <div class="flex flex-row">
-                    <label *ngIf="gameService.isMagicGame()" class="mr-4 flex flex-row items-center">
+                    <label *ngIf="gameService.isMagicGame()" class="mr-4 flex flex-row items-center cursor-pointer">
                         <span class="mr-1">Tokens only</span>
                         <input 
                             type="radio" 
@@ -29,7 +29,7 @@
                         >
                     </label>
                       
-                    <label *ngIf="gameService.isMagicGame()" class="flex flex-row items-center">
+                    <label *ngIf="gameService.isMagicGame()" class="flex flex-row items-center cursor-pointer">
                         <span class="mr-1">Emblems only</span>
                         <input 
                             type="radio" 

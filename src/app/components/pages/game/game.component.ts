@@ -360,4 +360,11 @@ export class GameComponent {
       payload: {coinsToFlip: coinsToFlip}
     })
   }
+
+  rollDice = (dicesToRoll:Number, sidedDice:number)=>{
+    this.webRTC.sendGameEvent({
+      event: GameEvent.RollDice,
+      payload: {dicesToRoll: dicesToRoll, sidedDice: sidedDice}
+    })
+  }
 }

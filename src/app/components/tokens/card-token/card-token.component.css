@@ -34,6 +34,10 @@
     height: 160px;
 }
 
+.tokenBackground{
+    background-image: url("/assets/images/token-frame.png");
+}
+
 .token.tapped {
     transform: rotate(90deg); /* Rotate 90 degrees */
 }
