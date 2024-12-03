@@ -5,6 +5,7 @@ export class PokemonStandard extends Game {
     override startingLifeTotal = 0;
     override gameType:GameType = GameType.PokemonStandard;
     override searchTag:string = "standard";
+    override name:string = "Standard";
     override coinImagePathPrefix:string = "mew"
 
     //this cant be a getter as it is set when instantiating rooms

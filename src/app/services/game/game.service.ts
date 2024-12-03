@@ -12,6 +12,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { PokemonStandard } from '../../classes/game/PokemonStandard';
+import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +40,7 @@ export class GameService {
   }
 
   public isCommanderGame = ():boolean =>{
-    return this.room.game?.gameType == GameType.MTGCommander;
+    return this.room.game?.gameType == GameType.MTGCommander || this.room.game?.gameType == GameType.MTGPauperCommander;
   }
 
   public isMagicGame = (): boolean => {
@@ -49,7 +50,8 @@ export class GameService {
         GameType.MTGCommander,
         GameType.MTGLegacy,
         GameType.MTGVintage,
-        GameType.MTGModern
+        GameType.MTGModern,
+        GameType.MTGPauperCommander
     ];
     return magicGameTypes.includes(this.room.game?.gameType);
 }
@@ -81,6 +83,9 @@ export class GameService {
         break;
       case GameType.PokemonStandard:
         return new PokemonStandard();
+        break;
+      case GameType.MTGPauperCommander:
+        return new MTGPauperCommander();
         break;
     }
 

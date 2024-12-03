@@ -43,6 +43,7 @@ export enum GameType{
     MTGLegacy,
     MTGVintage,
     PokemonStandard,
+    MTGPauperCommander,
     YuGiOhStandard
 }
 

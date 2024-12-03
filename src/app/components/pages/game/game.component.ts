@@ -21,6 +21,7 @@ import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound
 import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
+import { TimerComponent } from '../../timer/timer.component';
 
 @Component({
   selector: 'app-game',
@@ -38,7 +39,8 @@ import { TokenModalComponent } from '../../modals/token-modal/token-modal.compon
     SoundEffectModalComponent,
     PlayerTurnOrderModalComponent, 
     CardTokenComponent,
-    TokenModalComponent
+    TokenModalComponent,
+    TimerComponent
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
@@ -223,10 +225,16 @@ export class GameComponent {
         this.updatePlayers([event.response]);
         break;
       case GameEvent.StartGame:
-        this.updatePlayers(event.response);
+        this.updatePlayers(event.response.players);
+        if(this.gameService.room.game){
+          this.gameService.room.game.startedAt = event.response.game.startedAt;
+        }
         break;
       case GameEvent.ResetGame:
-        this.updatePlayers(event.response);
+        this.updatePlayers(event.response.players);
+        if(this.gameService.room.game){
+          this.gameService.room.game.startedAt = event.response.game.startedAt;
+        }
         break;
       case GameEvent.EndCurrentTurn:
         this.updatePlayers(event.response);

@@ -10,10 +10,13 @@ export class Game {
     gameType: GameType = GameType.Game;
     searchTag:string = "game";
     coinImagePathPrefix:string = "magic"
+    name:string = "game";
 
     classifierActive:boolean = false;
 
     tokens:Token[] = [];
+
+    startedAt!:Date;
 
     createToken = (newToken:Token)=>{
         this.tokens.push(newToken);

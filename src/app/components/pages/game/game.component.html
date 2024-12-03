@@ -31,7 +31,8 @@
 
                 <div class="">
                     <h3 class="text-white">Room Name: <span class="text-pop">{{gameService.room.name}}</span></h3>
-                    <h3 class="text-white mb-2 ">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.searchTag}}</span></h3>
+                    <h3 class="text-white">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.name}}</span></h3>
+                    <h3 class="text-white mb-2 ">Game Time: <app-timer [date]="gameService.room.game?.startedAt"></app-timer></h3>
 
                     <div class="justify-center mb-2 grid grid-cols-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>

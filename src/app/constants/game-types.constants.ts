@@ -5,6 +5,7 @@ export const GAME_TYPES = [
   { value: GameType.MTGLegacy, label: "MTG Legacy", defaultMaxPlayers: 2 },
   { value: GameType.MTGModern, label: "MTG Modern", defaultMaxPlayers: 2 },
   { value: GameType.MTGStandard, label: "MTG Standard", defaultMaxPlayers: 2 },
+  { value: GameType.MTGPauperCommander, label: "MTG Pauper Commander", defaultMaxPlayers: 4 },
   { value: GameType.MTGVintage, label: "MTG Vintage", defaultMaxPlayers: 2 },
   { value: GameType.PokemonStandard, label: "Pokémon Standard", defaultMaxPlayers: 2 },
   { value: GameType.YuGiOhStandard, label: "Yu-Gi-Oh! (coming soon)", defaultMaxPlayers: 2 }
