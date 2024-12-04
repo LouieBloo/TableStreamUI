@@ -9,6 +9,7 @@ export interface IRoom {
     messages: IMessage[];
     game?: Game;
     maxPlayers?:number;
+    reactionsEnabled?:boolean;
 }
 
 export interface PasswordCheckResponse {

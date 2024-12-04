@@ -76,14 +76,14 @@
                                 <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
                             </div>
                             <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                                <li (click)="rollDice(1,6)"><a>D4</a></li>
+                                <li (click)="rollDice(1,4)"><a>D4</a></li>
                                 <li (click)="rollDice(1,8)"><a>D8</a></li>
                                 <li (click)="rollDice(1,12)"><a>D12</a></li>
                                 <li (click)="rollDice(1,20)"><a>D20</a></li>
                             </ul>
                         </div>
                     </div>
-                    <button (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
+                    <button *ngIf="gameService.room.reactionsEnabled" (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
                     <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
                 </div>
 
