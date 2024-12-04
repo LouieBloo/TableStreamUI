@@ -1,6 +1,6 @@
 <div class="relative group inline-block">
   <!-- Card content (e.g., card name, image, etc.) -->
-  <div class="cursor-pointer" (click)="flipImage()">
+  <div class="cursor-pointer" (click)="flipImage()" (mouseenter)="onMouseEnter($event)">
     <div class="">
       <!-- <h2 class="card-title">{{card?.name}}</h2> -->
       <div *ngIf="loadingCard" class="cardLoad">
@@ -14,9 +14,9 @@
     </div>
   </div>
 
-  <div *ngIf="showPopup">
+  <div *ngIf="showPopup" >
     <!-- Popup content -->
-    <div class="cardHover hidden group-hover:block z-10">
+    <div class="cardHover hidden group-hover:block z-10" [ngStyle]="popupStyle" >
       <div class="">
         <img [src]="imageUrl()" alt="Card Image" class="cardHoverImg w-full rounded-xl">
       </div>

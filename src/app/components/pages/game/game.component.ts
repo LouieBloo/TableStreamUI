@@ -19,11 +19,29 @@ import { UserStreamComponent } from '../../users/user-stream/user-stream.compone
 import { LoggerService } from '../../../services/logger/logger.service';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
+import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
+import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
+import { TimerComponent } from '../../timer/timer.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [NgFor, UserStreamComponent, MessengerComponent, NgIf, NgClass, CardListComponent, ReportModalComponent, PasswordModalComponent, TooltipDirective, SoundEffectModalComponent,PlayerTurnOrderModalComponent],
+  imports: [
+    NgFor, 
+    UserStreamComponent, 
+    MessengerComponent, 
+    NgIf, 
+    NgClass, 
+    CardListComponent, 
+    ReportModalComponent, 
+    PasswordModalComponent,
+    TooltipDirective, 
+    SoundEffectModalComponent,
+    PlayerTurnOrderModalComponent, 
+    CardTokenComponent,
+    TokenModalComponent,
+    TimerComponent
+  ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css'
 })
@@ -44,6 +62,7 @@ export class GameComponent {
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
   @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
   @ViewChild(PlayerTurnOrderModalComponent) playerTurnOrderModal!: PlayerTurnOrderModalComponent;
+  @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
 
   constructor(
     private webRTC: WebRTCService,
@@ -206,10 +225,16 @@ export class GameComponent {
         this.updatePlayers([event.response]);
         break;
       case GameEvent.StartGame:
-        this.updatePlayers(event.response);
+        this.updatePlayers(event.response.players);
+        if(this.gameService.room.game){
+          this.gameService.room.game.startedAt = event.response.game.startedAt;
+        }
         break;
       case GameEvent.ResetGame:
-        this.updatePlayers(event.response);
+        this.updatePlayers(event.response.players);
+        if(this.gameService.room.game){
+          this.gameService.room.game.startedAt = event.response.game.startedAt;
+        }
         break;
       case GameEvent.EndCurrentTurn:
         this.updatePlayers(event.response);
@@ -226,6 +251,16 @@ export class GameComponent {
       case GameEvent.SetPlayerTurnOrders:
         this.updatePlayers(event.response);
         this.sortPlayers ();
+        break;
+      case GameEvent.CreateToken:
+        if(this.gameService.room.game){
+          this.gameService.room.game.createToken(event.response)
+        }
+        break;
+      case GameEvent.DeleteToken:
+        if(this.gameService.room.game){
+          this.gameService.room.game.removeToken(event.response)
+        }
         break;
     }
   }
@@ -331,6 +366,13 @@ export class GameComponent {
       event: LocalGameEvent.FlipCoins,
       callingPlayer: this.localPlayer,
       payload: {coinsToFlip: coinsToFlip}
+    })
+  }
+
+  rollDice = (dicesToRoll:Number, sidedDice:number)=>{
+    this.webRTC.sendGameEvent({
+      event: GameEvent.RollDice,
+      payload: {dicesToRoll: dicesToRoll, sidedDice: sidedDice}
     })
   }
 }

@@ -40,6 +40,7 @@ export class CardListComponent {
 
   hasSearched:boolean = false;
   searching:boolean = false;
+  includeOption: string = '';
 
   currentCallback: any;
 
@@ -121,7 +122,11 @@ export class CardListComponent {
       this.searchSubscription.unsubscribe();
     }
 
-    this.searchSubscription = this.cardSearchService.searchCards(this.searchString, true, this.gameService.room.game).subscribe(
+    this.searchSubscription = this.cardSearchService.searchCards(
+      this.searchString, true, 
+      this.gameService.room.game, 
+      {includeOption: this.includeOption})
+    .subscribe(
       (response: any) => {
         this.searchResults = response.data;
         this.hasSearched = true;
@@ -143,6 +148,7 @@ export class CardListComponent {
 
   openSearchModal = ()=>{
     this.searchString = "";
+    this.includeOption = '';
     this.searchResults = [];
 
     //do this on startup so we always wipe it from the service

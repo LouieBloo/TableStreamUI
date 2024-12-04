@@ -151,6 +151,8 @@ export class HomeComponent {
       return "rakdos"
     }else if(this.player.gameType == GameType.MTGVintage){
       return "mana-vault"
+    }else if(this.player.gameType == GameType.MTGPauperCommander){
+      return "magic"
     }
         
     return "magic"
