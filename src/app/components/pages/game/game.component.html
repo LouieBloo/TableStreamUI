@@ -4,13 +4,8 @@
     <div class="w-screen h-screen flex flex-col drawer-content ">
 
         <div class="flex flex-row flex-grow">
-
-            <!-- <div class="grid grid-cols-2 flex-grow" [ngClass]="{'grid-cols-2': sortedPlayers.length <= 4, 'grid-cols-3': sortedPlayers.length > 4  }">
-                <div *ngFor="let player of sortedPlayers" class="bg-slate-800" [ngClass]="sortedPlayers.length <= 2 ? 'full-height' : 'half-height'">
-                    <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
-                </div>
-            </div> -->
-            <div class="flex-grow">
+           
+            <div class="flex-grow" id="userStreams">
                 <!-- Top row -->
                 <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
                     <div *ngFor="let player of topRowPlayers" class="bg-slate-800" [ngClass]="bottomRowPlayers.length < 1 ? 'full-height' : 'half-height'">
@@ -26,11 +21,18 @@
                 </div>
             </div>
 
+            <div>
+                <div *ngFor="let token of gameService.room?.game?.tokens">
+                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayerId"></app-card-token>
+                </div>
+            </div>
+
             <div class="flex flex-col p-1 bg-slate-900 min-w-64 max-w-64 pl-2 pr-2">
 
                 <div class="">
                     <h3 class="text-white">Room Name: <span class="text-pop">{{gameService.room.name}}</span></h3>
-                    <h3 class="text-white mb-2 ">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.searchTag}}</span></h3>
+                    <h3 class="text-white">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.name}}</span></h3>
+                    <h3 class="text-white mb-2 ">Game Time: <app-timer [date]="gameService.room.game?.startedAt"></app-timer></h3>
 
                     <div class="justify-center mb-2 grid grid-cols-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
@@ -53,8 +55,8 @@
                 <app-messenger></app-messenger>
 
                 <div class="justify-center mt-2 grid grid-cols-2">
-                    <div>
-                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none" style="border-right: none;">Flip Coin</button>
+                    <div class="flex flex-row">
+                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
                         <div class="dropdown dropdown-left text-white rounded-none " >
                             <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
                                 <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
@@ -67,7 +69,22 @@
                             </ul>
                         </div>
                     </div>
-                    <button (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
+                    <div class="flex flex-row">
+                        <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Roll Dice</button>
+                        <div class="dropdown dropdown-left text-white rounded-none " >
+                            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+                                <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
+                            </div>
+                            <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                                <li (click)="rollDice(1,4)"><a>D4</a></li>
+                                <li (click)="rollDice(1,8)"><a>D8</a></li>
+                                <li (click)="rollDice(1,12)"><a>D12</a></li>
+                                <li (click)="rollDice(1,20)"><a>D20</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button *ngIf="gameService.room.reactionsEnabled" (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
+                    <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
                 </div>
 
                 <div class="mt-2">
@@ -93,4 +110,5 @@
     <app-sound-effect-modal [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
+    <app-token-modal></app-token-modal>
 </div>

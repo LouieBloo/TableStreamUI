@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { PlayingCard } from '../../interfaces/scryfall';
-import { DecimalPipe, NgClass, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [NgIf, NgClass, DecimalPipe],
+  imports: [NgIf, NgClass, DecimalPipe, NgStyle],
   templateUrl: './card.component.html',
   styleUrl: './card.component.css'
 })
@@ -13,6 +13,10 @@ export class CardComponent {
   @Input() card!:PlayingCard | null;
 
   @Input() showPopup:boolean = true;
+
+  @Input() hoverMinDistance:number = 50;
+
+  popupStyle: any = {};
 
   flipped:boolean = false;
   loadingCard:boolean = true;
@@ -33,6 +37,38 @@ export class CardComponent {
     }
 
     return ""
+  }
+
+  onMouseEnter(event: MouseEvent) {
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate position with constraints
+    const popupWidth = 427; 
+    const popupHeight = 600;
+    const xOffset = this.hoverMinDistance; 
+
+    let left = mouseX + xOffset;
+    if (left + popupWidth > viewportWidth) {
+      left = mouseX - popupWidth - xOffset;
+    }
+
+
+    let top = (mouseY - (popupHeight/2));//pretend the click is a bit lower than it is so the card is right in the middle
+    //cursor is at bottom of screen
+    if ((top + popupHeight) >= viewportHeight) {
+      top = viewportHeight - popupHeight;
+    }
+    if (top < 0) {
+      top = 10;
+    }
+
+    this.popupStyle = {
+      left: `${left}px`,
+      top: `${top}px`,
+    };
   }
 
   flipImage = ()=>{

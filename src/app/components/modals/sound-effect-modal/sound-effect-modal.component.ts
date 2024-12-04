@@ -8,6 +8,7 @@ import { IPlayer } from '../../../interfaces/player';
 import { GameService } from '../../../services/game/game.service';
 import { SoundService } from '../../../services/sounds/sound.service';
 import { Subscription } from 'rxjs';
+import { SettingsService } from '../../../services/settings/settings.service';
 
 @Component({
   selector: 'app-sound-effect-modal',
@@ -69,7 +70,7 @@ export class SoundEffectModalComponent {
   soundListKeys:string[]
 
 
-  constructor(private webRTC:WebRTCService, private gameService:GameService, public soundService:SoundService){
+  constructor(private webRTC:WebRTCService, private gameService:GameService, public soundService:SoundService, public settingService:SettingsService){
     this.subscriptions.add(
       this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
     );

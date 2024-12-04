@@ -21,7 +21,11 @@ export enum GameEvent{
     SetCommander,
     FlipCoins,
     PlayEffect,
-    SetPlayerTurnOrders
+    SetPlayerTurnOrders,
+    CreateToken,
+    ModifyToken,
+    DeleteToken,
+    RollDice
 }
 
 //fine to change on front end only
@@ -39,6 +43,7 @@ export enum GameType{
     MTGLegacy,
     MTGVintage,
     PokemonStandard,
+    MTGPauperCommander,
     YuGiOhStandard
 }
 
