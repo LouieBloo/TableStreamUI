@@ -23,7 +23,7 @@
 
             <div>
                 <div *ngFor="let token of gameService.room?.game?.tokens">
-                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayer.id"></app-card-token>
+                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayerId"></app-card-token>
                 </div>
             </div>
 

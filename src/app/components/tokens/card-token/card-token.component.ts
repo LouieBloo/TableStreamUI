@@ -207,11 +207,11 @@ export class CardTokenComponent implements OnInit {
       const screenX = this.denormalizeX(this.token.xPosition);
       const screenY = this.denormalizeY(this.token.yPosition);
 
-      console.log("container: ", this.containerBounds)
-      console.log("token x: " + this.token.xPosition)
-      console.log("screen x: " + screenX)
-      console.log("token y: " + this.token.yPosition)
-      console.log("screen y: " + screenY)
+      // console.log("container: ", this.containerBounds)
+      // console.log("token x: " + this.token.xPosition)
+      // console.log("screen x: " + screenX)
+      // console.log("token y: " + this.token.yPosition)
+      // console.log("screen y: " + screenY)
 
       this.renderer.setStyle(card, 'left', `${screenX}px`);
       this.renderer.setStyle(card, 'top', `${screenY}px`);

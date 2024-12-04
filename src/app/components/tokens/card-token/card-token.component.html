@@ -1,7 +1,7 @@
 <div class="token fixed bg-white group" [ngClass]="{'bg-white': !token.card, 'seeThrough' : hidden, 'tapped': token.tapped, 'hidden': !settingService.tokensEnabled, 'tokenBackground': !token.card}">
     
     @if (token.card) {
-        <app-card [card]="token.card" [showPopup]="true"></app-card>
+        <app-card [card]="token.card" [showPopup]="true" [hoverMinDistance]="130"></app-card>
     }  @else {
 
         @if (isEditingText) {
