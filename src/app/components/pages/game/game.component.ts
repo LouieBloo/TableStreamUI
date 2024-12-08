@@ -152,6 +152,7 @@ export class GameComponent {
     const playerName = localStorage.getItem('playerName');
     const roomName = localStorage.getItem('roomName');
     const maxPlayers: number = parseInt(localStorage.getItem("maxPlayers") || "4");
+    const reactionsEnabled: boolean = localStorage.getItem('reactionsEnabled') && localStorage.getItem('reactionsEnabled') == 'false' ? false : true;
 
     this.webRTC.joinRoom(
       playerName,
@@ -161,6 +162,7 @@ export class GameComponent {
       roomName,
       amISpectator ? UserType.Spectator : UserType.Player,
       maxPlayers,
+      reactionsEnabled,
       (me: IUser, roomName: string, room: IRoom) => {
       this.gameService.setRoom(room);
       this.passwordModal.close();

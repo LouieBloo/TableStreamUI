@@ -28,6 +28,7 @@ export class HomeComponent {
     password: null,
     gameType: GameType.MTGCommander,
     maxPlayers: 4,
+    reactionsEnabled: true
   };
 
   constructor(
@@ -50,6 +51,7 @@ export class HomeComponent {
     localStorage.removeItem('isSpectator');
     localStorage.removeItem('password');
     localStorage.removeItem('roomId');
+    localStorage.removeItem('reactionsEnabled');
 
     if (localStorage.getItem('playerName')) {
       this.player.name = localStorage.getItem('playerName')!;
@@ -131,6 +133,7 @@ export class HomeComponent {
     localStorage.setItem('gameType', this.player.gameType.toString());
     localStorage.setItem('maxPlayers', this.player.maxPlayers.toString());
     localStorage.setItem('isSpectator', 'false');
+    localStorage.setItem('reactionsEnabled', this.player.reactionsEnabled + "");
     
     if (this.player.password) {
       localStorage.setItem('password', this.player.password);
