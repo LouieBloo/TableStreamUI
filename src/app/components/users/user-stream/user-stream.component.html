@@ -8,7 +8,7 @@
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <div *ngIf="gameService.isMagicGame()">
             <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"
-                [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal"></app-life-total>
+                [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal" [toggleCommanderDamages]="toggleCommanderDamages"></app-life-total>
         </div>
         <div *ngIf="gameService.isPokemonGame()">
             <app-pokemon-prize-tracker [player]="player" [modifyPrizeCardsCallback]="modifyPrizeCardTotal" [editable]="localStream"></app-pokemon-prize-tracker>
@@ -73,7 +73,6 @@
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
-                <li (click)="showCommanderDamage = !showCommanderDamage;" class="text-slate-800"><a>Commander Damage</a></li>
                 <!-- Local Stream Controls -->
                 <ng-container *ngIf="localStream">
                     <li (click)="toggleMuteSelf()" class="text-slate-800">

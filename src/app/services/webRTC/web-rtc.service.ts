@@ -61,7 +61,8 @@ export class WebRTCService {
   public async initLocalStream(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): Promise<MediaStream|null> {
     if (this.localStream) { 
       this.logAspectRatio(this.localStream);
-      return this.localStream; }
+      return this.localStream;
+    }
   
     const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
   
@@ -132,44 +133,6 @@ export class WebRTCService {
     }
   }
 
-  // public async changeDevice(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): Promise<void> {
-  //   // Stop existing tracks
-  //   if (this.localStream) {
-  //     this.localStream.getTracks().forEach(track => track.stop());
-  //   }
-
-  //   // Reinitialize local stream with new device(s)
-  //   const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
-  //   const videoTrack = this.localStream?.getVideoTracks()[0];
-  //   await videoTrack?.applyConstraints({
-  //     ...(videoDeviceId && { deviceId: { exact: videoDeviceId } }),
-  //     width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
-  //     height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
-  //     aspectRatio: { ideal: aspectRatio === '16/9' ? 16 / 9 : 4 / 3 },
-  //   });
-  //   this.localStream = await this.getUserMedia(constraints);
-
-  //   // Replace tracks in peer connections
-  //   for (const socketId in this.peerConnections) {
-  //     const pc = this.peerConnections[socketId];
-
-  //     // Remove existing senders
-  //     const senders = pc.getSenders();
-  //     senders.forEach(sender => {
-  //       pc.removeTrack(sender);
-  //     });
-
-  //     // Add new tracks
-  //     this.localStream!.getTracks().forEach(track => {
-  //       pc.addTrack(track, this.localStream!);
-  //     });
-
-  //     // Renegotiate the connection
-  //     const offer = await pc.createOffer();
-  //     await pc.setLocalDescription(offer);
-  //     this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
-  //   }
-  // }
   public async changeDevice(
     videoDeviceId?: string,
     audioDeviceId?: string,
@@ -315,7 +278,7 @@ export class WebRTCService {
     this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
   }
 
-  public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, maxPlayers:number, callback: any) {
+  public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, maxPlayers:number, reactionsEnabled:boolean, callback: any) {
 
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
@@ -339,7 +302,8 @@ export class WebRTCService {
         playerName: playerName,
         password: password && password != "null" ? password : null,
         userType: userType,
-        maxPlayers: maxPlayers || 4
+        maxPlayers: maxPlayers || 4,
+        reactionsEnabled: reactionsEnabled
       },
 
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
@@ -371,7 +335,7 @@ export class WebRTCService {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
-  }
+    }
 
     // Stop and remove all local media tracks
     if (this.localStream) {
@@ -380,7 +344,7 @@ export class WebRTCService {
         track.enabled = false;  // Disable it
       });
       this.localStream = null;
-  }
+    }
 
     // Close and remove all peer connections
     for (const pc of Object.values(this.peerConnections)) {
@@ -514,8 +478,16 @@ export class WebRTCService {
         //try to add our tracks to the connection
         try{
           let localS = await this.initLocalStream()
-          localS!.getTracks().forEach((track) => {
+          localS!.getTracks().forEach((track:MediaStreamTrack) => {
             this.logger.log("adding tracks for: ", socketId);
+            this.logger.log("track: ", track)
+            if(track.kind == 'audio'){
+              const startMuted = localStorage.getItem("micMuted") && localStorage.getItem("micMuted") == 'true' ? true : false;
+              if(startMuted){
+                track.enabled = false;
+              }
+            }
+            
             peerConnection.addTrack(track, this.localStream!);
           });
         }catch(error){
@@ -573,13 +545,6 @@ export class WebRTCService {
 
   handleGameEvent = (event: IGameEvent) => {
     this.gameEventSubject.next(event);
-    // console.log("callbacks: ", this.onGameEvent.length);
-    // // debugger
-    // this.onGameEvent.forEach(callback => {
-    //   if (callback != null) {
-    //     callback(event)
-    //   }
-    // })
   }
 
   handleLocalGameEvent = (event: IGameEvent) => {

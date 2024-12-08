@@ -21,12 +21,13 @@
                     <p class="text-center">{{player.name | titlecase}}</p>
                     <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
                 </div>
-                <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                    <li (click)="setToZero()"><a>Set to 0</a></li>
-                    <li (click)="toggleMonarch()"><a>Become Monarch</a></li>
-                    <li (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
-                    <li (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
-                    <li (click)="toggleCitiesBlessing()"><a>Toggle Cities Blessing</a></li>
+                <ul *ngIf="editable || gameService.isCommanderGame()" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                    <li *ngIf="editable" (click)="setToZero()"><a>Set to 0</a></li>
+                    <li *ngIf="gameService.isCommanderGame()" (click)="toggleCommanderDamages()"><a>Commander Damage</a></li>
+                    <li *ngIf="editable" (click)="toggleMonarch()"><a>Become Monarch</a></li>
+                    <li *ngIf="editable" (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
+                    <li *ngIf="editable" (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
+                    <li *ngIf="editable" (click)="toggleCitiesBlessing()"><a>Toggle Cities Blessing</a></li>
                 </ul>
             </div>
     

@@ -111,6 +111,9 @@ export class UserStreamComponent {
         this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
         this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
       });
+
+      //check if we have saved a mic muted preference
+      this.isMutedSelf = localStorage.getItem("micMuted") && localStorage.getItem("micMuted") == 'true' ? true : false;
     })
   }
 
@@ -163,6 +166,7 @@ export class UserStreamComponent {
 
   toggleMuteSelf() {
     this.isMutedSelf = !this.isMutedSelf;
+    localStorage.setItem("micMuted", this.isMutedSelf + "");
     if (this.isMutedSelf) {
       this.webRTC.muteSelf();
     } else {
@@ -233,6 +237,10 @@ export class UserStreamComponent {
       event: GameEvent.ModifyPlayerProperty,
       payload:payload
     })
+  }
+
+  toggleCommanderDamages = ()=>{
+    this.showCommanderDamage = !this.showCommanderDamage;
   }
 
   setFlip(){

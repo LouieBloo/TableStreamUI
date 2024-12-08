@@ -1,5 +1,5 @@
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, input, Input } from '@angular/core';
 import { bootstrapSuitHeartFill } from '@ng-icons/bootstrap-icons';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
@@ -10,6 +10,7 @@ import { GameEvent, IModifyPlayerProperty } from '../../interfaces/game';
 import { PropertyCounterComponent } from '../property-counter/property-counter.component';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../directives/tooltip.directive';
+import { GameService } from '../../services/game/game.service';
 
 @Component({
   selector: 'app-life-total',
@@ -25,13 +26,14 @@ export class LifeTotalComponent {
   @Input() modifyPoisonCallback!: (amount:number)=> void;
   @Input() modifyEnergyCallback!: (amount:number)=> void;
   @Input() editable!:boolean;
+  @Input() toggleCommanderDamages!: ()=> void;
 
   showPoisonCounter!:boolean;
   showEnergyCounter!:boolean;
 
   private inputSubscription!: Subscription;
 
-  constructor(private inputService: InputService, private webRtc: WebRTCService){
+  constructor(private inputService: InputService, private webRtc: WebRTCService, public gameService:GameService){
     
   }
 
