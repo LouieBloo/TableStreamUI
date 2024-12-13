@@ -1,49 +1,55 @@
-<div class="flex">
-    <!-- Left Side: Image Display -->
-    <div class="w-1/2 p-4">
-      <div *ngIf="currentImage">
-        <img [src]="getCurrentImageUrl()" alt="Current Image" class="max-w-full" />
-      </div>
-      <div *ngIf="message">
-        <p>{{ message }}</p>
+<div *ngIf="!password.initialSubmit" class="text-white">
+  <label for="password">Password</label>
+  <input name="password" type="text" class="text-black" [(ngModel)]="password.value">
+  <button type="button" (click)="password.initialSubmit = true; loadImages()" class="btn ">Submit</button>
+</div>
+<div *ngIf="password.initialSubmit" class="flex">
+  
+  <!-- Left Side: Image Display -->
+  <div class="w-1/2 p-4">
+    <div>
+      <button type="button" (click)="deleteImage()" class="btn btn-sm btn-danger mr-16">Vote to delete</button>
+  
+  
+      <button type="button" (click)="previousImage()" class="btn btn-primary mr-2">Prev</button>
+      <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Next</button>
+      <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Im not sure</button>
+
+      <div class="text-right">
+        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="nextImage()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button>
       </div>
     </div>
-  
-    <!-- Right Side: Scryfall Search and Results -->
-    <div class="w-1/2 p-4">
-      <input
-        type="text"
-        [(ngModel)]="scryfallSearchQuery"
-        (input)="searchScryfall()"
-        placeholder="Search for a card"
-        class="input input-bordered w-full mb-4"
-      />
-  
+    <div *ngIf="currentImage" class="text-center w-full">
+      <!-- <h2>Current Image: {{ currentImage.imageName }}</h2>
+        <h2>Url: {{ currentImage.presignedUrl }}</h2> -->
+      <img [src]="currentImage.presignedUrl" alt="Current Image" style="width:450px;" />
+    </div>
+    <div *ngIf="message">
+      <p>{{ message }}</p>
+    </div>
+  </div>
+
+  <!-- Right Side: Scryfall Search and Results -->
+  <div class="w-1/2 p-4 flex flex-row text-white">
+    <div>
+      <input type="text" [(ngModel)]="scryfallSearchQuery" (input)="onInputChange($event)"
+        placeholder="Search for a card" class="input input-bordered w-full mb-4 text-black" />
+
+      <div *ngIf="searching">Searching...</div>
       <div *ngIf="searchResults.length > 0">
-        <ul>
-          <li
-            *ngFor="let card of searchResults"
-            (click)="selectCard(card)"
-            [class.selected]="selectedCard?.id === card.id"
-            class="cursor-pointer p-2 hover:bg-gray-200"
-          >
+        <ul class="max-h-screen overflow-y-auto">
+          <li *ngFor="let card of searchResults" (click)="selectCard(card)"
+            [class.selected]="selectedCard?.id === card.id" class="cursor-pointer p-2 hover:bg-gray-200"
+            (mouseenter)="onCardHover(card)" (mouseleave)="onCardHover(null)" (click)="selectCard(card)">
             {{ card.name }}
           </li>
         </ul>
       </div>
-  
-      <div *ngIf="selectedCard" class="mt-4">
-        <h3 class="text-lg font-bold">{{ selectedCard.name }}</h3>
-        <img
-          *ngIf="selectedCard.image_uris"
-          [src]="selectedCard.image_uris.normal"
-          alt="{{ selectedCard.name }}"
-          class="max-w-full"
-        />
-        <button (click)="saveImage()" class="btn btn-primary mt-4">
-          Save Image
-        </button>
-      </div>
     </div>
+    <div class="max-w-64  ml-3" *ngIf="cardBeingHovered">
+      <app-card [card]="cardBeingHovered" [showPopup]="false"></app-card>
+    </div>
+    
+
   </div>
-  
+</div>

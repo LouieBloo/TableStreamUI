@@ -1,0 +1,30 @@
+
+<div class="text-white">
+
+    <div>
+        <label>Password</label>
+        <input type="text" class="text-black" [(ngModel)]="password.value">
+        <button type="button" (click)="loadImages()">Search</button>
+    </div>
+
+    <div>
+        <button type="button" (click)="deleteImage()" class="btn btn-sm btn-danger mr-16">Delete</button>
+        
+
+        <button type="button" (click)="previousImage()" class="btn btn-primary mr-2">Prev</button>
+        <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Next</button>
+        <a [href]="currentImage.presignedUrl" target="_blank" download="currentImage.imageName" class="btn btn-primary download-button mr-2">
+            <button>Download Image</button>
+        </a>
+        <button type="button" (click)="markComplete()" class="btn btn-primary mr-2">Mark Completed</button>
+    </div>
+    <div *ngIf="currentImage" class="text-center w-full">
+        <!-- <h2>Current Image: {{ currentImage.imageName }}</h2>
+        <h2>Url: {{ currentImage.presignedUrl }}</h2> -->
+        <img [src]="currentImage.presignedUrl" alt="Current Image" class="max-w-screen-sm"/>
+    </div>
+
+    
+</div>
+    
+    
