@@ -5,6 +5,9 @@ export interface IMongoImage{
     imageType: string;
     status: string;
     presignedUrl:string;
+    possibleOracleIds:string[];
+    votesToDelete:number;
+    votesNotSure:number;
     createdAt: Date;
     updatedAt: Date;
 }

@@ -8,15 +8,17 @@
   <!-- Left Side: Image Display -->
   <div class="w-1/2 p-4">
     <div>
-      <button type="button" (click)="deleteImage()" class="btn btn-sm btn-danger mr-16">Vote to delete</button>
+      <button type="button" (click)="clearCache()" class="btn btn-sm btn-danger mr-16">Clear Local Cache</button>
+      <button type="button" (click)="voteToDelete()" class="btn btn-sm btn-danger mr-16">Vote to delete</button>
   
   
       <button type="button" (click)="previousImage()" class="btn btn-primary mr-2">Prev</button>
       <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Next</button>
-      <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Im not sure</button>
+      <button type="button" (click)="imNotSure()" class="btn btn-primary mr-2">Im not sure</button>
 
       <div class="text-right">
-        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="nextImage()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button>
+        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button>
+        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch(true)" class="btn btn-primary mr-2">OVERRIDE {{selectedCard.name}}</button>
       </div>
     </div>
     <div *ngIf="currentImage" class="text-center w-full">

@@ -63,8 +63,10 @@ export class DevClassifyComponent {
         this.http.get<IMongoImage[]>(`${environment.socketUrl}/classify/train/images`, { params, headers })
       );
       this.images = data;
+
       if (this.images.length > 0) {
-        this.currentImage = this.images[this.currentIndex];
+        this.currentIndex = -1;
+        this.nextImage();
       }
     } catch (error) {
       console.error('Error loading images:', error);
@@ -127,28 +129,106 @@ export class DevClassifyComponent {
     }
   }
 
-  previousImage(){
-    this.currentIndex--;
-    if(this.currentIndex < 0){
-      this.currentIndex = this.images.length-1;
-    }
-
-    this.currentImage = this.images[this.currentIndex];
+  nextImage(): void {
+    let initialIndex = this.currentIndex;
+  
+    do {
+      this.currentIndex++;
+      if (this.currentIndex > this.images.length - 1) {
+        this.currentIndex = 0;
+      }
+      this.currentImage = this.images[this.currentIndex];
+    } while (this.hasSeenImage(this.currentImage._id) && this.currentIndex !== initialIndex);
+  
+    this.selectedCard = null;
+  }
+  
+  previousImage(): void {
+    let initialIndex = this.currentIndex;
+  
+    do {
+      this.currentIndex--;
+      if (this.currentIndex < 0) {
+        this.currentIndex = this.images.length - 1;
+      }
+      this.currentImage = this.images[this.currentIndex];
+    } while (this.hasSeenImage(this.currentImage._id) && this.currentIndex !== initialIndex);
+  
     this.selectedCard = null;
   }
 
-  nextImage(){
-    this.currentIndex++;
-    if(this.currentIndex > this.images.length -1){
-      this.currentIndex = 0;
+  private updateSeenImages(): void {
+    const seenImages = this.getSeenImages();
+    if (!seenImages.includes(this.currentImage._id)) {
+      seenImages.push(this.currentImage._id);
+      localStorage.setItem('seenImages', JSON.stringify(seenImages));
     }
+  }
+  
+  private getSeenImages(): string[] {
+    const stored = localStorage.getItem('seenImages');
+    return stored ? JSON.parse(stored) : [];
+  }
+  
+  hasSeenImage(imageId: string): boolean {
+    const seenImages = this.getSeenImages();
+    return seenImages.includes(imageId);
+  }
 
-    this.currentImage = this.images[this.currentIndex];
-    this.selectedCard = null;
+  clearCache(): void {
+    localStorage.removeItem('seenImages');
+    console.log('Seen images cache cleared.');
   }
 
   getCurrentImageUrl(): string {
     return `${environment.socketUrl}/image/${this.currentImage}`;
+  }
+
+  voteToDelete(){
+    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    if(!image.votesToDelete){image.votesToDelete = 0}
+    image.votesToDelete++;
+    this.saveImage(image);
+  }
+
+  imNotSure(){
+    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    if(!image.votesNotSure){image.votesNotSure = 0}
+    image.votesNotSure++;
+    this.saveImage(image);
+  }
+
+  submitMatch(forceMatch:boolean = false){
+    if(!this.selectedCard){return;}
+    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    if(!image.possibleOracleIds){image.possibleOracleIds = []}
+    image.possibleOracleIds.push(this.selectedCard.id);
+
+    if(forceMatch){
+      image.possibleOracleIds = [this.selectedCard.id,this.selectedCard.id,this.selectedCard.id]
+    }
+
+    this.saveImage(image);
+  }
+
+  async saveImage(image:IMongoImage){
+    try {
+      const headers = new HttpHeaders({
+        Authorization: `Bearer ${this.password.value}`, // Replace `your-token-here` with your actual token
+      });
+
+      const data = await firstValueFrom(
+        this.http.patch<any>(`${environment.socketUrl}/classify/train/images/${image._id}`,image,{ headers } )
+      );
+
+      this.alerts.addAlert("success", "Image Saved")
+
+      this.updateSeenImages();
+      
+      this.nextImage();
+    } catch (error) {
+      console.error('Error loading images:', error);
+    }
   }
 
   // saveImage() {
