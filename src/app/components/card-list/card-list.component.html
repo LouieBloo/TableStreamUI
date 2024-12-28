@@ -2,8 +2,9 @@
     <div class="flex justify-center mb-2">
         <button class="hidden" onclick="searchModal.showModal()" id="toggleModal">hidden</button>
         <div class="join flex w-full">
-            <button class="btn btn-sm btn-outline text-white join-item rounded-none flex-1" (click)="openSearchModal()">Search Cards (ctrl + q)</button>
-            <button class="btn btn-sm btn-outline text-white join-item rounded-none" (click)="clearSearchHistory()">Clear</button>
+            <app-speech-to-text *ngIf="gameService.room.game?.transcribeActive"></app-speech-to-text>
+            <button class="btn btn-sm btn-outline text-white join-item rounded-none flex-1" (click)="openSearchModal()" appTooltip="Search cards (ctrl+q)" [tooltipDirection]="'bottom'">Search Cards</button>
+            <button class="btn btn-sm btn-outline text-white join-item rounded-none" (click)="clearSearchHistory()"><ng-icon name="bootstrapTrash3"></ng-icon></button>
         </div>
     </div>
 

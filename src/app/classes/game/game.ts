@@ -13,6 +13,7 @@ export class Game {
     name:string = "game";
 
     classifierActive:boolean = false;
+    transcribeActive:boolean = true;
 
     tokens:Token[] = [];
 

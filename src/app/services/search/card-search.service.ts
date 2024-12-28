@@ -12,6 +12,7 @@ import { Game } from '../../classes/game/game';
 export class CardSearchService {
   
   private scryfallUrl = 'https://api.scryfall.com/cards/search';
+  private scryfallNamedUrl = 'https://api.scryfall.com/cards/named';
 
   constructor(private http: HttpClient) { }
 
@@ -41,6 +42,13 @@ export class CardSearchService {
 
     const params = new HttpParams().set('q', `${searchQuery}`);
     return this.http.get<any>(this.scryfallUrl, { params });
+  }
+
+  searchNamedScryfall(query: string,format: string = 'commander'): Observable<any> {
+    let searchQuery = query;
+
+    const params = new HttpParams().set('fuzzy', `${searchQuery}`).set('format', `${format}`);
+    return this.http.get<any>(this.scryfallNamedUrl, { params });
   }
 
 
