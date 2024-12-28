@@ -24,4 +24,11 @@ export class CardIdentifierService {
 
     return this.http.post(backendUrl, formData);
   }
+
+  public transcribe(audioBlob: Blob):Observable<any>{
+    const formData = new FormData();
+    formData.append('audio', audioBlob);
+     
+    return this.http.post<{ transcript: string }>(`${environment.socketUrl}/transcribe`, formData)
+  }
 }

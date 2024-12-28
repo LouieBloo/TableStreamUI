@@ -22,6 +22,7 @@ import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-mo
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
 import { TimerComponent } from '../../timer/timer.component';
+import { SpeechToTextComponent } from '../../speech-to-text/speech-to-text.component';
 
 @Component({
   selector: 'app-game',

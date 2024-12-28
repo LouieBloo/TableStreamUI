@@ -14,13 +14,18 @@ import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { CardComponent } from '../card/card.component';
 import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner.component';
 import { CardListItemComponent } from './card-list-item/card-list-item.component';
+import { SpeechToTextComponent } from '../speech-to-text/speech-to-text.component';
+import { bootstrapTrash3 } from '@ng-icons/bootstrap-icons';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 @Component({
   selector: 'app-card-list',
   standalone: true,
-  imports: [CardComponent,NgFor,FormsModule,CardListItemComponent, NgIf, LoadingSpinnerComponent , ReactiveFormsModule, NgClass, NgStyle , SlicePipe],
+  imports: [CardComponent,NgFor,FormsModule,CardListItemComponent, NgIf, LoadingSpinnerComponent , ReactiveFormsModule, NgClass, NgStyle , SlicePipe,SpeechToTextComponent,NgIcon,TooltipDirective],
   templateUrl: './card-list.component.html',
-  styleUrl: './card-list.component.css'
+  styleUrl: './card-list.component.css',
+  viewProviders: [provideIcons({ bootstrapTrash3 })]
 })
 export class CardListComponent {
 
