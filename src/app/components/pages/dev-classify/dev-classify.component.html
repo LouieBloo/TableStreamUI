@@ -3,36 +3,46 @@
   <input name="password" type="text" class="text-black" [(ngModel)]="password.value">
   <button type="button" (click)="password.initialSubmit = true; loadImages()" class="btn ">Submit</button>
 </div>
-<div *ngIf="password.initialSubmit" class="flex">
-  
+<div *ngIf="password.initialSubmit" class="flex" >
+  <div>
+    <button type="button" (click)="clearCache()" class="btn btn-sm btn-danger mr-16">Clear Local Cache</button>
+  </div>
   <!-- Left Side: Image Display -->
-  <div class="w-1/2 p-4">
+  <div class="w-8/12 p-4 flex flex-row" style="padding-top:100px;">
+    
     <div>
-      <button type="button" (click)="clearCache()" class="btn btn-sm btn-danger mr-16">Clear Local Cache</button>
-      <button type="button" (click)="voteToDelete()" class="btn btn-sm btn-danger mr-16">Vote to delete</button>
-  
-  
+      <button type="button" (click)="imNotSure()" class="btn btn-sm btn-primary mr-2">Im not sure</button>
+      <button type="button" (click)="voteToDelete()" class="btn btn-sm btn-danger mr-8">Vote to delete</button>
+
       <button type="button" (click)="previousImage()" class="btn btn-primary mr-2">Prev</button>
       <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Next</button>
-      <button type="button" (click)="imNotSure()" class="btn btn-primary mr-2">Im not sure</button>
+      
 
-      <div class="text-right">
+      <div *ngIf="currentImage" class="text-center w-full">
+        <!-- <h2>Current Image: {{ currentImage.imageName }}</h2>
+          <h2>Url: {{ currentImage.presignedUrl }}</h2> -->
+        <img [src]="currentImage.presignedUrl" alt="Current Image" style="width:450px;" />
+      </div>
+      <div *ngIf="message">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center mr-8">
+      <div>
         <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button>
         <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch(true)" class="btn btn-primary mr-2">OVERRIDE {{selectedCard.name}}</button>
       </div>
+      
+      <div class="max-w-64" *ngIf="selectedCard">
+        <app-card class="" [card]="selectedCard" [showPopup]="false"></app-card>
+      </div>
     </div>
-    <div *ngIf="currentImage" class="text-center w-full">
-      <!-- <h2>Current Image: {{ currentImage.imageName }}</h2>
-        <h2>Url: {{ currentImage.presignedUrl }}</h2> -->
-      <img [src]="currentImage.presignedUrl" alt="Current Image" style="width:450px;" />
-    </div>
-    <div *ngIf="message">
-      <p>{{ message }}</p>
-    </div>
+
   </div>
 
   <!-- Right Side: Scryfall Search and Results -->
-  <div class="w-1/2 p-4 flex flex-row text-white">
+  <div class="w-4/12 p-4 flex flex-row text-white" style="padding-top:100px;">
     <div>
       <input type="text" [(ngModel)]="scryfallSearchQuery" (input)="onInputChange($event)"
         placeholder="Search for a card" class="input input-bordered w-full mb-4 text-black" />
@@ -51,7 +61,7 @@
     <div class="max-w-64  ml-3" *ngIf="cardBeingHovered">
       <app-card [card]="cardBeingHovered" [showPopup]="false"></app-card>
     </div>
-    
+
 
   </div>
 </div>

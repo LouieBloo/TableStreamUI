@@ -28,6 +28,8 @@ export class DevClassifyComponent {
   selectedCard: PlayingCard | null = null;
   message: string = '';
 
+  searchSubscription: Subscription | null = null;
+
   cardBeingHovered!:PlayingCard;
 
   private searchSubject = new Subject<string>();
@@ -84,9 +86,14 @@ export class DevClassifyComponent {
       return;
     }
 
+     // Cancel the previous search if it exists
+    if (this.searchSubscription) {
+      this.searchSubscription.unsubscribe();
+    }
+
     this.searching = true;
     const query = encodeURIComponent(searchTerm);
-    this.http
+    this.searchSubscription = this.http
       .get<{ data: PlayingCard[] }>(
         `https://api.scryfall.com/cards/search?q=${query}`
       )
@@ -94,10 +101,12 @@ export class DevClassifyComponent {
         (response) => {
           this.searchResults = response.data;
           this.searching = false;
+          this.searchSubscription = null;
         },
         (error) => {
           console.error(error);
           this.searching = false;
+          this.searchSubscription = null;
         }
       );
   }
