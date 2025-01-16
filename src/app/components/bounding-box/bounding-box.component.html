@@ -1,0 +1,11 @@
+<div
+    *ngIf="boundingBoxVisible"
+    class="bounding-box"
+    [ngStyle]="{
+        top: boundingBox.top + 'px',
+        left: boundingBox.left + 'px',
+        width: boundingBox.width + 'px',
+        height: boundingBox.height + 'px',
+        opacity: boxOpacity
+    }"
+></div>

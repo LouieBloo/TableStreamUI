@@ -1,0 +1,6 @@
+.bounding-box {
+    position: absolute;
+    border: 2px solid rgb(197, 193, 193);
+    pointer-events: none; /* Ensure it doesn't interfere with clicks */
+    transition: opacity 0.5s ease-out;
+}

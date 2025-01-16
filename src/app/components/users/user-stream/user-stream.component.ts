@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, NgZone, SimpleChanges, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
@@ -19,6 +19,7 @@ import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracke
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 import { TimerComponent } from '../../timer/timer.component';
 import { PlayingCard } from '../../../interfaces/scryfall';
+import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 
 @Component({
   selector: 'app-user-stream',
@@ -36,7 +37,8 @@ import { PlayingCard } from '../../../interfaces/scryfall';
     CoinFlipperComponent,
     PokemonPrizeTrackerComponent,
     ReactionsComponent,
-    TimerComponent
+    TimerComponent,
+    BoundingBoxComponent
   ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
@@ -63,11 +65,14 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
 
+  boundingBox:any;
+
   constructor(private webRTC: WebRTCService,
     public gameService: GameService,
     private cardIdentifierService:CardIdentifierService,
     private logger:LoggerService,
-    private alertService: AlertsService) {}
+    private alertService: AlertsService,
+    private ngZone: NgZone) {}
   
 
   ngAfterViewInit(){
@@ -313,14 +318,20 @@ export class UserStreamComponent {
               // Send the file and normalized click position to the classification service
               this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY).subscribe(
                   (response:any) => {
+                    this.ngZone.run(() => {
                       if(response && response.scryfall_data){
                         this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence}});
+                        this.boundingBox = response.bounding_box;
                       }
                       this.loadingCardIdentification = false;
+                    });
                   },
                   (error:any) => {
                       this.logger.error('Error classifying image:', error);
-                      this.loadingCardIdentification = false;
+                      
+                      this.ngZone.run(() => {
+                        this.loadingCardIdentification = false;
+                      });
                   }
               );
           }
