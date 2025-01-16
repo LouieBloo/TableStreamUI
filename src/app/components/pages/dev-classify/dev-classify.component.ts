@@ -200,6 +200,12 @@ export class DevClassifyComponent {
     this.saveImage(image);
   }
 
+  overrideDelete(){
+    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    image.votesToDelete = 3;
+    this.saveImage(image);
+  }
+
   imNotSure(){
     let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
     if(!image.votesNotSure){image.votesNotSure = 0}
