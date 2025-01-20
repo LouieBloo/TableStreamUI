@@ -27,10 +27,13 @@ export class DevClassifyTrainSliceComponent {
   constructor(private http: HttpClient, private alerts:AlertsService) { }
 
   ngOnInit(): void {
+    this.password.value = localStorage.getItem("dev-pw");
   }
 
   async loadImages(): Promise<void> {
     try {
+      localStorage.setItem("dev-pw", this.password.value);
+
       let params = new HttpParams();
 
       params = params.set('imageType', 'BOARD');

@@ -11,18 +11,19 @@
   <div class="w-8/12 p-4 flex flex-row" style="padding-top:100px;">
     
     <div>
-      <button type="button" (click)="imNotSure()" class="btn btn-sm btn-primary mr-2">Im not sure</button>
-      <button type="button" (click)="voteToDelete()" class="btn btn-sm btn-danger">Vote to delete</button>
-      <button type="button" (click)="overrideDelete()" class="btn btn-sm btn-danger mr-8">OVERRIDE delete</button>
+      <button type="button" (click)="imNotSure()" class="btn btn-sm btn-primary mr-2" [disabled]="loadingMoreImages">Im not sure</button>
+      <!-- <button type="button" (click)="voteToDelete()" class="btn btn-sm btn-danger">Vote to delete</button> -->
+      <button type="button" (click)="overrideDelete()" class="btn btn-sm btn-danger mr-8" [disabled]="loadingMoreImages">DELETE</button>
 
-      <button type="button" (click)="previousImage()" class="btn btn-primary mr-2">Prev</button>
-      <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Next</button>
+      <button type="button" (click)="previousImage()" class="btn btn-primary mr-2" [disabled]="loadingMoreImages || currentIndex <= 0">Prev</button>
+      <button type="button" (click)="nextImage()" class="btn btn-primary mr-4" [disabled]="loadingMoreImages">Next</button>
+
+      <button type="button" (click)="isFlipped = !isFlipped" class="btn btn-primary" [disabled]="loadingMoreImages">Flip</button>
       
-
       <div *ngIf="currentImage" class="text-center w-full">
         <!-- <h2>Current Image: {{ currentImage.imageName }}</h2>
           <h2>Url: {{ currentImage.presignedUrl }}</h2> -->
-        <img [src]="currentImage.presignedUrl" alt="Current Image" style="width:450px;" />
+        <img [src]="currentImage.presignedUrl" alt="Current Image" style="width:450px;" [style.transform]="isFlipped ? 'scale(-1, -1)' : 'scale(1, 1)'" />
       </div>
       <div *ngIf="message">
         <p>{{ message }}</p>
@@ -31,8 +32,8 @@
 
     <div class="flex flex-col items-center mr-8">
       <div>
-        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button>
-        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch(true)" class="btn btn-primary mr-2">OVERRIDE {{selectedCard.name}}</button>
+        <!-- <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button> -->
+        <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch(true)" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button>
       </div>
       
       <div class="max-w-64" *ngIf="selectedCard">
