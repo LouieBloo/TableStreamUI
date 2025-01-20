@@ -1,0 +1,5 @@
+<div *ngIf="activeMaintenanceAlert" class="fixed top-0 flex flex-col items-center w-full z-50 cursor-pointer">
+    <div class="alert transition-opacity pointer-events-auto flex justify-center rounded-none {{activeMaintenanceAlert.severity}}" (click)="removeAlert()">
+        <span class="text-lg text-slate-800 font-bold" *ngIf="activeMaintenanceAlert">{{ activeMaintenanceAlert.message }}</span><span class="text-black"><ng-icon name="bootstrapXLg"></ng-icon></span>
+    </div>
+</div>

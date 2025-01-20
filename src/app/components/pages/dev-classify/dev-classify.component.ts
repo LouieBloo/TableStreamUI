@@ -18,15 +18,17 @@ import { AlertsService } from '../../../services/alerts/alerts.service';
   styleUrl: './dev-classify.component.css'
 })
 export class DevClassifyComponent {
-  images!: IMongoImage[];
+  images: IMongoImage[] = [];
   currentImage!: IMongoImage;
-  currentIndex: number = 0;
+  currentIndex: number = -1;
 
   scryfallSearchQuery: string = '';
   searching:boolean = false;
   searchResults:PlayingCard[] = []
   selectedCard: PlayingCard | null = null;
   message: string = '';
+  loadingMoreImages:boolean = false;
+  isFlipped:boolean = false;
 
   searchSubscription: Subscription | null = null;
 
@@ -48,14 +50,20 @@ export class DevClassifyComponent {
   }
 
   ngOnInit() {
+    this.password.value = localStorage.getItem("dev-pw");
   }
 
   async loadImages(): Promise<void> {
+    this.loadingMoreImages = true;
     try {
+      localStorage.setItem("dev-pw", this.password.value);
+
       let params = new HttpParams();
 
       params = params.set('imageType', 'CARD');
       params = params.set('status', 'PENDING_CLASSIFICATION');
+      params = params.set('randomizeResults', true);
+      params = params.set('maxImages', 5);
 
       const headers = new HttpHeaders({
         Authorization: `Bearer ${this.password.value}`, // Replace `your-token-here` with your actual token
@@ -64,15 +72,15 @@ export class DevClassifyComponent {
       const data = await firstValueFrom(
         this.http.get<IMongoImage[]>(`${environment.socketUrl}/classify/train/images`, { params, headers })
       );
-      this.images = data;
 
-      if (this.images.length > 0) {
-        this.currentIndex = -1;
-        this.nextImage();
-      }
+      this.images = this.images.concat(data);
+
+      this.nextImage();
     } catch (error) {
       console.error('Error loading images:', error);
     }
+
+    this.loadingMoreImages = false;
   }
 
   onInputChange(event: Event): void {
@@ -138,13 +146,15 @@ export class DevClassifyComponent {
     }
   }
 
-  nextImage(): void {
+  nextImage(): any {
     let initialIndex = this.currentIndex;
   
     do {
       this.currentIndex++;
       if (this.currentIndex > this.images.length - 1) {
-        this.currentIndex = 0;
+        // this.currentIndex = 0;
+        this.currentIndex--;
+        return this.loadImages();
       }
       this.currentImage = this.images[this.currentIndex];
     } while (this.hasSeenImage(this.currentImage._id) && this.currentIndex !== initialIndex);

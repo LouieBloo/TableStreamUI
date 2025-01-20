@@ -278,7 +278,17 @@ export class WebRTCService {
     this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
   }
 
-  public joinRoom(playerName: any, roomId: any, password: any, gameType: any, roomName: any, userType: UserType, maxPlayers:number, reactionsEnabled:boolean, callback: any) {
+  public joinRoom(
+    playerName: any,
+    roomId: any,
+    password: any,
+    gameType: any,
+    roomName: any, 
+    userType: UserType,
+    maxPlayers:number,
+    reactionsEnabled:boolean,
+    callback: any
+    ) {
 
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
@@ -292,7 +302,7 @@ export class WebRTCService {
     this.peerConnections = {};
 
     this.amISpectator = userType == UserType.Spectator;
-
+  
     if (this.socket) {
       this.socket.emit('joinRoom', {
         playerId: localStorage.getItem("playerId"),
@@ -305,12 +315,13 @@ export class WebRTCService {
         maxPlayers: maxPlayers || 4,
         reactionsEnabled: reactionsEnabled
       },
-
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
           if (error) {
-              if(error.type === GameErrorType.InvalidPassword){
-                this._roomPasswordValid.next(false);
-              }
+            if(error.type === GameErrorType.InvalidPassword){
+              this._roomPasswordValid.next(false);
+            }else if(error.type === GameErrorType.RoomFull){
+              this.alertService.addAlert('error', error.message,5);
+            }
             return;
           }
           // Set all our game state
@@ -325,6 +336,35 @@ export class WebRTCService {
               })
             })
           }
+
+          this.socket?.on('disconnect', (reason:string) => {
+            console.log("Reason, ", reason)
+            // this is when the user disconnects on purpose
+            if(reason && reason == 'io client disconnect'){return;}
+            
+            this.alertService.addAlert("error", "Lost connection to server. Retrying connection...", 5);
+            console.warn('Socket disconnected. Attempting to reconnect...');
+
+            this.socket?.once('connect', () => {
+              console.log('Reconnected to server. Rejoining room...');
+              this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
+              this.socket?.emit('joinRoom', {
+                playerId: localStorage.getItem("playerId"),
+                roomId: room.id,
+                gameType: gameType,
+                roomName: roomName,
+                playerName: playerName,
+                password: password && password != "null" ? password : null,
+                userType: userType,
+                maxPlayers: maxPlayers || 4,
+                reactionsEnabled: reactionsEnabled
+              },
+              (newPlayer: IUser, room: IRoom, error: IGameError) => {
+                this.alertService.addAlert("success", "Successfully rejoined room", 5);
+              });
+            });
+          });
+
           callback(newPlayer, roomName, room)
         });
     }

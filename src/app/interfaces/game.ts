@@ -74,7 +74,8 @@ export enum GameErrorType{
     InvalidAction,
     NoRoomName,
     InvalidPassword,
-    GenericWarning
+    GenericWarning,
+    RoomFull
 }
 
 export interface IAlert{
