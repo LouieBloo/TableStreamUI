@@ -29,6 +29,7 @@ export class DevClassifyComponent {
   message: string = '';
   loadingMoreImages:boolean = false;
   isFlipped:boolean = false;
+  showHints:boolean = false;
 
   searchSubscription: Subscription | null = null;
 
