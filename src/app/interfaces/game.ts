@@ -84,6 +84,14 @@ export interface IAlert{
     id: number;
 }
 
+export interface ILog{
+    message:string;
+    data?:any;
+    source:string;
+    application:string;
+    severity:string;
+}
+
 export interface ICoinFlipResults{
     results:string[]
 }

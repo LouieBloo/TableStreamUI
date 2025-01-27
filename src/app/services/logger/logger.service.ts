@@ -1,22 +1,42 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { ILog } from '../../interfaces/game';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoggerService {
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
-  public error(message: string, ...args: any[]){
+  public error(message: string, ...args: any[]) {
     console.error(message, args)
+    if (environment.production && (args && args.length > 1)) {
+      this.sendToServer({
+        message: message,
+        data: args && args.length > 0 ? args[0] : null,
+        severity: "ERROR",
+        source: args && args.length > 1 ? args[1] : "Unknown",
+        application: "TABLE_STREAM_FRONT_END"
+      })
+    }
   }
 
-  public log(message: string, ...args: any[]){
-    if(environment.production){
+  public log(message: string, ...args: any[]) {
+    if (environment.production) {
       return;
     }
     console.log(message, args);
   }
-  
+
+  sendToServer(log: ILog) {
+    try {
+      this.http.post<ILog>(`${environment.socketUrl}/log`, log).subscribe({
+        error: (error) => console.log("Error logging log: ", error)
+      });
+    } catch (error) {
+      console.log("Error logging: ", error);
+    }
+  }
 }
