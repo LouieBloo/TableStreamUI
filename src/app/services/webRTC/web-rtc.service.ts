@@ -76,7 +76,7 @@ export class WebRTCService {
         this.logAspectRatio(this.localStream);
       }
        else {
-        this.logger.error("Error getting media stream:", err)
+        this.logger.error("Error getting media stream:", {error: err, constraints }, "WEB RTC initLocalStream")
         throw err;
       }
     }
@@ -497,7 +497,6 @@ export class WebRTCService {
         this.logger.log("on negotiation: ", socketId, peerConnection.signalingState)
 
         try {
-
           if (peerConnection.signalingState === 'stable') {
 
             const offer = await peerConnection.createOffer({
@@ -510,7 +509,7 @@ export class WebRTCService {
             this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
           }
         } catch (error) {
-          this.logger.error(`Error during negotiation: `, error)
+          this.logger.error(`Error during negotiation: `, {error: error, socketId, peerConnection }, "WEB RTC onnegotiationneeded")
         }
       };
 
@@ -556,7 +555,7 @@ export class WebRTCService {
         this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
       }
     }catch(error){
-      this.logger.error("createPeerConnection error", error);
+      this.logger.error("createPeerConnection error", {error: error, socketId, user }, "WEB RTC createPeerConnection");
       this.alertService.addAlert("error", "There may be an error connecting to a player. Refreshing can help fix this issue");
     }
   }
