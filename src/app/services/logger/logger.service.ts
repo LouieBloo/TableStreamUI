@@ -13,6 +13,7 @@ export class LoggerService {
   public error(message: string, ...args: any[]) {
     console.error(message, args)
     if (environment.production && (args && args.length > 1)) {
+      args[0].browser = navigator.userAgent;
       this.sendToServer({
         message: message,
         data: args && args.length > 0 ? args[0] : null,
