@@ -14,6 +14,9 @@ export class LoggerService {
     console.error(message, args)
     if (environment.production && (args && args.length > 1)) {
       args[0].browser = navigator.userAgent;
+      if(args[0].error){
+        args[0].error = this.parseJSError(args[0].error)
+      }
       this.sendToServer({
         message: message,
         data: args && args.length > 0 ? args[0] : null,
@@ -38,6 +41,15 @@ export class LoggerService {
       });
     } catch (error) {
       console.log("Error logging: ", error);
+    }
+  }
+
+  parseJSError(error:any):any{
+    if(!error){return {}}
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
     }
   }
 }
