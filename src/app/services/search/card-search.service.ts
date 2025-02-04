@@ -51,6 +51,11 @@ export class CardSearchService {
     return this.http.get<any>(this.scryfallNamedUrl, { params });
   }
 
+  searchByOracleId(oracleId: string): Observable<any> {
+    const url = `https://api.scryfall.com/cards/search?q=oracleid:${oracleId}`;
+    return this.http.get<any>(url);
+  }
+
 
   searchPokemon(name: string, format: string = 'standard'): Observable<any> {
     let searchQuery = `name:"*${name}*" legalities.${format}:Legal`;

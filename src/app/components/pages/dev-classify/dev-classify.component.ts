@@ -13,7 +13,7 @@ import { AlertsService } from '../../../services/alerts/alerts.service';
 @Component({
   selector: 'app-dev-classify',
   standalone: true,
-  imports: [ NgClass, NgIf, NgFor, FormsModule, CardComponent],
+  imports: [NgClass, NgIf, NgFor, FormsModule, CardComponent],
   templateUrl: './dev-classify.component.html',
   styleUrl: './dev-classify.component.css'
 })
@@ -23,26 +23,30 @@ export class DevClassifyComponent {
   currentIndex: number = -1;
 
   scryfallSearchQuery: string = '';
-  searching:boolean = false;
-  searchResults:PlayingCard[] = []
+  searching: boolean = false;
+  searchResults: PlayingCard[] = []
   selectedCard: PlayingCard | null = null;
   message: string = '';
-  loadingMoreImages:boolean = false;
-  isFlipped:boolean = false;
-  showHints:boolean = false;
+  loadingMoreImages: boolean = false;
+  loadingScryfallSearchById: boolean = false;
+  isFlipped: boolean = false;
+  showHints: boolean = false;
+  currentCardClassifierGuessedButtonsEnabled: boolean = false;
 
   searchSubscription: Subscription | null = null;
+  searchByIdSubscription: Subscription | null = null;
 
-  cardBeingHovered!:PlayingCard;
+  cardBeingHovered!: PlayingCard;
+  cardClassifierGuessed!:PlayingCard | null;
 
   private searchSubject = new Subject<string>();
 
-  password:any = {
-    value:"",
-    initialSubmit:false
+  password: any = {
+    value: "",
+    initialSubmit: false
   }
 
-  constructor(private http: HttpClient,private cardSearchService:CardSearchService, private alerts:AlertsService) {
+  constructor(private http: HttpClient, private cardSearchService: CardSearchService, private alerts: AlertsService) {
     // Subscribe to the search subject with debounce
     this.searchSubject.pipe(debounceTime(300)).subscribe((searchTerm) => {
       console.log('Search term:', searchTerm);
@@ -89,13 +93,13 @@ export class DevClassifyComponent {
     this.searchSubject.next(target.value); // Push value to the Subject
   }
 
-  searchScryfall(searchTerm:string) {
+  searchScryfall(searchTerm: string) {
     if (searchTerm.trim() === '') {
       this.searchResults = [];
       return;
     }
 
-     // Cancel the previous search if it exists
+    // Cancel the previous search if it exists
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
@@ -120,8 +124,29 @@ export class DevClassifyComponent {
       );
   }
 
-  onCardHover = (card: PlayingCard | null)=>{
-    if(!card){return}
+  searchScryfallById(oracleId: string) {
+    if (this.searchByIdSubscription) {
+      this.searchByIdSubscription.unsubscribe();
+    }
+
+    this.loadingScryfallSearchById = true;
+    this.searchByIdSubscription = this.cardSearchService.searchByOracleId(oracleId).subscribe({
+      next: (data) => {
+        this.cardClassifierGuessed = data && data.data && data.data.length > 0 ? data.data[0] : null;
+        this.searchByIdSubscription = null;
+        this.loadingScryfallSearchById = false;
+      },
+      error: (err) => {
+        console.error('Error fetching card:', err);
+        this.cardClassifierGuessed = null;
+        this.searchByIdSubscription = null;
+        this.loadingScryfallSearchById = false;
+      }
+    });
+  }
+
+  onCardHover = (card: PlayingCard | null) => {
+    if (!card) { return }
     this.cardBeingHovered = card;
   }
 
@@ -129,18 +154,18 @@ export class DevClassifyComponent {
     this.selectedCard = card;
   }
 
-  async deleteImage(){
+  async deleteImage() {
     try {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${this.password.value}`, // Replace `your-token-here` with your actual token
       });
 
       const data = await firstValueFrom(
-        this.http.delete<any>(`${environment.socketUrl}/classify/train/images/${this.currentImage._id}`,{headers})
+        this.http.delete<any>(`${environment.socketUrl}/classify/train/images/${this.currentImage._id}`, { headers })
       );
 
       this.alerts.addAlert("success", "Image deleted")
-      
+
       this.nextImage();
     } catch (error) {
       console.error('Error loading images:', error);
@@ -149,7 +174,7 @@ export class DevClassifyComponent {
 
   nextImage(): any {
     let initialIndex = this.currentIndex;
-  
+
     do {
       this.currentIndex++;
       if (this.currentIndex > this.images.length - 1) {
@@ -157,24 +182,38 @@ export class DevClassifyComponent {
         this.currentIndex--;
         return this.loadImages();
       }
-      this.currentImage = this.images[this.currentIndex];
+      // this.currentImage = this.images[this.currentIndex];
+      this.setCurrentImage(this.currentIndex);
     } while (this.hasSeenImage(this.currentImage._id) && this.currentIndex !== initialIndex);
-  
+
     this.selectedCard = null;
   }
-  
+
   previousImage(): void {
     let initialIndex = this.currentIndex;
-  
+
     do {
       this.currentIndex--;
       if (this.currentIndex < 0) {
         this.currentIndex = this.images.length - 1;
       }
-      this.currentImage = this.images[this.currentIndex];
+      // this.currentImage = this.images[this.currentIndex];
+      this.setCurrentImage(this.currentIndex);
     } while (this.hasSeenImage(this.currentImage._id) && this.currentIndex !== initialIndex);
-  
+
     this.selectedCard = null;
+  }
+
+  setCurrentImage = (index: number) => {
+    this.currentImage = this.images[index];
+    
+    if(this.currentImage.classifierScryfallIdGuess){
+      this.currentCardClassifierGuessedButtonsEnabled = true;
+      this.searchScryfallById(this.currentImage.classifierScryfallIdGuess);
+    }else{
+      this.currentCardClassifierGuessedButtonsEnabled = false;
+      this.cardClassifierGuessed = null;
+    }
   }
 
   private updateSeenImages(): void {
@@ -184,12 +223,12 @@ export class DevClassifyComponent {
       localStorage.setItem('seenImages', JSON.stringify(seenImages));
     }
   }
-  
+
   private getSeenImages(): string[] {
     const stored = localStorage.getItem('seenImages');
     return stored ? JSON.parse(stored) : [];
   }
-  
+
   hasSeenImage(imageId: string): boolean {
     const seenImages = this.getSeenImages();
     return seenImages.includes(imageId);
@@ -204,53 +243,61 @@ export class DevClassifyComponent {
     return `${environment.socketUrl}/image/${this.currentImage}`;
   }
 
-  voteToDelete(){
-    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
-    if(!image.votesToDelete){image.votesToDelete = 0}
+  classifierGuessedCorrectly = ()=>{
+    this.submitMatch(this.cardClassifierGuessed?.id, true)
+  }
+
+  classifierGuessedIncorrectly = ()=>{
+    this.currentCardClassifierGuessedButtonsEnabled = false;
+  }
+
+  voteToDelete() {
+    let image: IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    if (!image.votesToDelete) { image.votesToDelete = 0 }
     image.votesToDelete++;
     this.saveImage(image);
   }
 
-  overrideDelete(){
-    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+  overrideDelete() {
+    let image: IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
     image.votesToDelete = 3;
     this.saveImage(image);
   }
 
-  imNotSure(){
-    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
-    if(!image.votesNotSure){image.votesNotSure = 0}
+  imNotSure() {
+    let image: IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    if (!image.votesNotSure) { image.votesNotSure = 0 }
     image.votesNotSure++;
     this.saveImage(image);
   }
 
-  submitMatch(forceMatch:boolean = false){
-    if(!this.selectedCard){return;}
-    let image:IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
-    if(!image.possibleOracleIds){image.possibleOracleIds = []}
-    image.possibleOracleIds.push(this.selectedCard.id);
+  submitMatch(correctCardId:string | undefined, forceMatch: boolean = false) {
+    if (!correctCardId) { return; }
+    let image: IMongoImage = JSON.parse(JSON.stringify(this.currentImage));
+    if (!image.possibleOracleIds) { image.possibleOracleIds = [] }
+    image.possibleOracleIds.push(correctCardId);
 
-    if(forceMatch){
-      image.possibleOracleIds = [this.selectedCard.id,this.selectedCard.id,this.selectedCard.id]
+    if (forceMatch) {
+      image.possibleOracleIds = [correctCardId, correctCardId, correctCardId]
     }
 
     this.saveImage(image);
   }
 
-  async saveImage(image:IMongoImage){
+  async saveImage(image: IMongoImage) {
     try {
       const headers = new HttpHeaders({
         Authorization: `Bearer ${this.password.value}`, // Replace `your-token-here` with your actual token
       });
 
       const data = await firstValueFrom(
-        this.http.patch<any>(`${environment.socketUrl}/classify/train/images/${image._id}`,image,{ headers } )
+        this.http.patch<any>(`${environment.socketUrl}/classify/train/images/${image._id}`, image, { headers })
       );
 
       this.alerts.addAlert("success", "Image Saved")
 
       this.updateSeenImages();
-      
+
       this.nextImage();
     } catch (error) {
       console.error('Error loading images:', error);
