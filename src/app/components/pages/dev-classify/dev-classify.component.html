@@ -65,23 +65,36 @@
         </div>
       </div>
 
-      <div class="flex flex-col items-center mr-8">
+      <div class="flex flex-col items-center mr-8" *ngIf="!currentCardClassifierGuessedButtonsEnabled">
         <div class="w-64">
           <app-card *ngIf="selectedCard" class="" [card]="selectedCard" [showPopup]="false"></app-card>
           <div *ngIf="!selectedCard" class="text-center text-white text-3xl">No card selected</div>
         </div>
 
         <div>
-          <!-- <button *ngIf="selectedCard" id="submitButton" type="button" (click)="submitMatch()" class="btn btn-primary mr-2">Submit {{selectedCard.name}}</button> -->
-          <button  id="submitButton" type="button" (click)="submitMatch(true)"
+          <button  id="submitButton" type="button" (click)="submitMatch(selectedCard?.id, true)"
             class="btn btn-primary mr-2" [disabled]="loadingMoreImages || !selectedCard">Submit {{selectedCard?.name}}</button>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center mr-8" *ngIf="currentCardClassifierGuessedButtonsEnabled">
+        <div class="w-64">
+          <div class="text-center text-white text-3xl">{{cardClassifierGuessed ? "Classifier Guess" : "Classifier Didn't Guess"}}{{loadingScryfallSearchById ? " LOADING" : ""}}</div>
+          <app-card *ngIf="cardClassifierGuessed && !loadingScryfallSearchById" class="" [card]="cardClassifierGuessed" [showPopup]="false"></app-card>
+        </div>
+
+        <div *ngIf="cardClassifierGuessed">
+          <button type="button" (click)="classifierGuessedIncorrectly()"
+            class="btn btn-primary mr-2">Incorrect</button>
+          <button   type="button" (click)="classifierGuessedCorrectly()"
+            class="btn btn-primary mr-2">Corrrect</button>
         </div>
       </div>
 
     </div>
 
     <!-- Right Side: Scryfall Search and Results -->
-    <div class="p-4 flex flex-row text-white" style="">
+    <div class="p-4 flex flex-row text-white" style="" *ngIf="!currentCardClassifierGuessedButtonsEnabled">
       <div class=>
         <input type="text" [(ngModel)]="scryfallSearchQuery" (input)="onInputChange($event)"
           placeholder="Search for a card" class="input input-bordered w-72 mb-4 text-black bg-white" />

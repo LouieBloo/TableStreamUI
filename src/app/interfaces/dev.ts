@@ -5,6 +5,7 @@ export interface IMongoImage{
     imageType: string;
     status: string;
     presignedUrl:string;
+    classifierScryfallIdGuess?:string;
     possibleOracleIds:string[];
     votesToDelete:number;
     votesNotSure:number;
