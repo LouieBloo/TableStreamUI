@@ -22,7 +22,7 @@ import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-mo
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
 import { TimerComponent } from '../../timer/timer.component';
-import { SpeechToTextComponent } from '../../speech-to-text/speech-to-text.component';
+import { JoinRoomDto } from '../../../classes/joinRoomDto';
 
 @Component({
   selector: 'app-game',
@@ -47,23 +47,19 @@ import { SpeechToTextComponent } from '../../speech-to-text/speech-to-text.compo
   styleUrl: './game.component.css'
 })
 export class GameComponent {
-  private subscriptions: Subscription = new Subscription();
-
-  localPlayerId: string = ""
-  localPlayer!: IPlayer;
-
-  sortedPlayers: IPlayer[] = [];
-  roomId!: string;
-
-  showingHotkeys: boolean = false;
-
-  private inputSubscription!: Subscription;
 
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
   @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
   @ViewChild(PlayerTurnOrderModalComponent) playerTurnOrderModal!: PlayerTurnOrderModalComponent;
   @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
+
+  private _subscriptions: Subscription[] = [];
+  localPlayerId: string = ""
+  localPlayer!: IPlayer;
+  sortedPlayers: IPlayer[] = [];
+  roomId!: string;
+  showingHotkeys: boolean = false;
 
   constructor(
     private webRTC: WebRTCService,
@@ -105,17 +101,17 @@ export class GameComponent {
       return;
     }
 
-    this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction) => {
+    this._subscriptions.push(this.inputService.subscribe((userAction: UserInputAction) => {
       if (userAction == UserInputAction.PassTurn) {
         this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn })
       }
-    })
+    }))
 
-    this.subscriptions.add(
+    this._subscriptions.push(
       this.webRTC.userJoined.subscribe(user => this.userJoined(user))
     );
 
-    this.subscriptions.add(
+    this._subscriptions.push(
       this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
     );
 
@@ -130,7 +126,7 @@ export class GameComponent {
       return;
     }
 
-    this.gameService.checkPasswordProtection(roomId).subscribe({
+    this._subscriptions.push(this.gameService.checkPasswordProtection(roomId).subscribe({
       next: (response: PasswordCheckResponse) => {
         if (response.result === true) {
           this.passwordModal.open();
@@ -142,29 +138,33 @@ export class GameComponent {
         this.logger.error("Error joining game: ", error);
         alert('Error joining game: ' + error);
       },
-    });
+    }));
 
   }
 
   loadIntoGame(password: string|null) {
     localStorage.setItem("password", password + "");
     const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
-    const gameType = localStorage.getItem("gameType");
-    const playerName = localStorage.getItem('playerName');
-    const roomName = localStorage.getItem('roomName');
-    const maxPlayers: number = parseInt(localStorage.getItem("maxPlayers") || "4");
-    const reactionsEnabled: boolean = localStorage.getItem('reactionsEnabled') && localStorage.getItem('reactionsEnabled') == 'false' ? false : true;
 
+    const newPassword = password && password != "null" ? password : null
+    const joinRoomDto: JoinRoomDto = {
+      playerId: null,//can we get from local storage here?
+      playerName: localStorage.getItem('playerName'),
+      roomId: this.roomId,
+      password: newPassword,
+      gameType: localStorage.getItem("gameType"),
+      roomName: localStorage.getItem('roomName'),
+      userType: amISpectator ? UserType.Spectator : UserType.Player,
+      maxPlayers: parseInt(localStorage.getItem("maxPlayers") || "4"),
+      reactionsEnabled: localStorage.getItem('reactionsEnabled') && localStorage.getItem('reactionsEnabled') == 'false' ? false : true,
+      arePlayersKickable: true
+
+    }
+
+    
     this.webRTC.joinRoom(
-      playerName,
-      this.roomId,
-      password,
-      gameType,
-      roomName,
-      amISpectator ? UserType.Spectator : UserType.Player,
-      maxPlayers,
-      reactionsEnabled,
-      (me: IUser, roomName: string, room: IRoom) => {
+      joinRoomDto,
+      (me: IUser, room: IRoom) => {
       this.gameService.setRoom(room);
       this.passwordModal.close();
       this.localPlayerId = me.id;
@@ -191,18 +191,8 @@ export class GameComponent {
   }
 
 
-  test123(): void {
-    this.gameService.room.players.push(
-      { ...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length + 1 });
-    this.sortPlayers();
-  }
-
   ngOnDestroy(): void {
-    if (this.inputSubscription) {
-      this.inputSubscription.unsubscribe();
-    }
-
-    this.subscriptions.unsubscribe();
+    this._subscriptions.forEach(sub => sub.unsubscribe());
     this.sortedPlayers = [];
   }
 

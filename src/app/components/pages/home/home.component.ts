@@ -134,6 +134,7 @@ export class HomeComponent {
     localStorage.setItem('maxPlayers', this.player.maxPlayers.toString());
     localStorage.setItem('isSpectator', 'false');
     localStorage.setItem('reactionsEnabled', this.player.reactionsEnabled + "");
+    localStorage.setItem('arePlayersKickable', true.toString());//TO-DO remove?//this isnt true i dont think
     
     if (this.player.password) {
       localStorage.setItem('password', this.player.password);

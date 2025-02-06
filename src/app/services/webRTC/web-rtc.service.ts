@@ -8,6 +8,7 @@ import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
+import { JoinRoomDto } from '../../classes/joinRoomDto';
 
 @Injectable({
   providedIn: 'root'
@@ -264,32 +265,14 @@ export class WebRTCService {
     this.onStreamAdded.push(callback);
   }
 
-  //TODO unused method
-  public unSubscribeToStreamAdd(callback: any) {
-    this.onStreamAdded = this.onStreamAdded.filter((checkCallback) => { checkCallback !== callback })
-  }
-
   public subscribeToStreamRemove(callback: (id: string) => void) {
     this.onStreamRemoved.push(callback);
   }
 
-  //TODO unused method
-  public unSubscribeToStreamRemove(callback: any) {
-    this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
-  }
-
   public joinRoom(
-    playerName: any,
-    roomId: any,
-    password: any,
-    gameType: any,
-    roomName: any, 
-    userType: UserType,
-    maxPlayers:number,
-    reactionsEnabled:boolean,
+    joinRoomDto: JoinRoomDto,
     callback: any
     ) {
-
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -301,21 +284,12 @@ export class WebRTCService {
     this.remoteStreams = {};
     this.peerConnections = {};
 
-    this.amISpectator = userType == UserType.Spectator;
+    this.amISpectator = joinRoomDto.userType == UserType.Spectator;
   
+    joinRoomDto.playerId = localStorage.getItem("playerId");//Ask luke why this wasnt grabbed earlier in game.component.ts
     if (this.socket) {
-      this.socket.emit('joinRoom', {
-        playerId: localStorage.getItem("playerId"),
-        roomId: roomId,
-        gameType: gameType,
-        roomName: roomName,
-        playerName: playerName,
-        password: password && password != "null" ? password : null,
-        userType: userType,
-        maxPlayers: maxPlayers || 4,
-        reactionsEnabled: reactionsEnabled
-      },
-        (newPlayer: IUser, room: IRoom, error: IGameError) => {
+      this.socket.emit('joinRoom', joinRoomDto,
+        (newPlayer: IUser, room: IRoom, error: IGameError) => {//this is what the server responds with?
           if (error) {
             if(error.type === GameErrorType.InvalidPassword){
               this._roomPasswordValid.next(false);
@@ -348,24 +322,14 @@ export class WebRTCService {
             this.socket?.once('connect', () => {
               console.log('Reconnected to server. Rejoining room...');
               this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
-              this.socket?.emit('joinRoom', {
-                playerId: localStorage.getItem("playerId"),
-                roomId: room.id,
-                gameType: gameType,
-                roomName: roomName,
-                playerName: playerName,
-                password: password && password != "null" ? password : null,
-                userType: userType,
-                maxPlayers: maxPlayers || 4,
-                reactionsEnabled: reactionsEnabled
-              },
+              this.socket?.emit('joinRoom', joinRoomDto,
               (newPlayer: IUser, room: IRoom, error: IGameError) => {
                 this.alertService.addAlert("success", "Successfully rejoined room", 5);
               });
             });
           });
 
-          callback(newPlayer, roomName, room)
+          callback(newPlayer, room)
         });
     }
   }

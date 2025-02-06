@@ -30,7 +30,6 @@ import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component'
     NgClass,
     NgIf,
     CommonModule,
-    TitleCasePipe,
     PropertyCounterComponent,
     SetCommanderComponent,
     TooltipDirective,
@@ -55,7 +54,6 @@ export class UserStreamComponent {
 
   muted:boolean = false;
   volume: number = 1;
-
   audioInputDevices: MediaDeviceInfo[] = [];
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
@@ -64,7 +62,6 @@ export class UserStreamComponent {
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
-
   boundingBox:any;
 
   constructor(private webRTC: WebRTCService,
