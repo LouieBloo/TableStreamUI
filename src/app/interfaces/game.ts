@@ -25,7 +25,8 @@ export enum GameEvent{
     CreateToken,
     ModifyToken,
     DeleteToken,
-    RollDice
+    RollDice,
+    KickPlayer
 }
 
 //fine to change on front end only

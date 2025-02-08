@@ -19,7 +19,7 @@ import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
 })
 export class GameService {
   public room!: IRoom;
-  
+
   constructor(private http: HttpClient) { }
 
   public setRoom(room:IRoom){
@@ -38,6 +38,18 @@ export class GameService {
 
     return undefined;
   }
+
+  public removePlayer(playerId: string){
+    this.room.players = this.room.players.filter(p => p.id != playerId);
+    this.sortPlayers();
+  }
+
+  sortPlayers(): void {
+    if (this.room && this.room.players) {
+      this.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
+    }
+  }
+
 
   public isCommanderGame = ():boolean =>{
     return this.room.game?.gameType == GameType.MTGCommander || this.room.game?.gameType == GameType.MTGPauperCommander;
@@ -83,7 +95,6 @@ export class GameService {
         break;
       case GameType.PokemonStandard:
         return new PokemonStandard();
-        break;
       case GameType.MTGPauperCommander:
         return new MTGPauperCommander();
         break;

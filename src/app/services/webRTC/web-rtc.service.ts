@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/game';
@@ -31,6 +31,10 @@ export class WebRTCService {
 
   private gameEventSubject = new Subject<IGameEvent>();
   public gameEvent = this.gameEventSubject.asObservable();
+
+  public kickedPlayerEvent$ = this.gameEventSubject.pipe(
+    filter((event => event.event === GameEvent.KickPlayer))
+  )
   
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
@@ -630,7 +634,6 @@ export class WebRTCService {
     this.alertService.addAlert(error.severity == GameErrorSeverity.Error ? 'error' : 'warning', error.message);
   }
 
-  // Mute/Unmute methods
   public muteSelf(): void {
     if (this.localStream) {
       this.localStream.getAudioTracks().forEach(track => track.enabled = false);
