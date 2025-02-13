@@ -119,6 +119,7 @@ export class UserStreamComponent {
 
       //check if we have saved a mic muted preference
       this.isMutedSelf = localStorage.getItem("micMuted") && localStorage.getItem("micMuted") == 'true' ? true : false;
+
     })
   }
 
@@ -257,6 +258,15 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
+  toggleImageSharing = async()=>{
+    localStorage.setItem("isSharingImages", !this.player.isSharingImages + "");
+    let payload:IModifyPlayerProperty = {value: !this.player.isSharingImages, property: PlayerProperties.sharingImages}
+    let response = await this.webRTC.sendPrivateGameEvent({
+      event: GameEvent.ModifyPlayerProperty,
+      payload:payload
+    })
+  }
+
   modifyCommanderDamage = (playerId: string, amount: number, card: PlayingCard)=>{
     this.webRTC.sendGameEvent({event: GameEvent.ModifyPlayerCommanderDamage, payload: { damagingPlayer: this.gameService.getPlayerById(playerId), amount: amount, card: card}})
   }
@@ -316,7 +326,7 @@ export class UserStreamComponent {
               const photoFile = new File([blob], 'current_frame.jpg', { type: 'image/jpeg' });
 
               // Send the file and normalized click position to the classification service
-              this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY).subscribe(
+              this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY, this.player.id).subscribe(
                   (response:any) => {
                     this.ngZone.run(() => {
                       if(response && response.scryfall_data){

@@ -86,6 +86,9 @@
                     <li (click)="toggleVideo()" class="text-slate-800">
                         <a>{{ isVideoOff ? 'Turn On Video' : 'Turn Off Video' }}</a>
                     </li>
+                    <li *ngIf="gameService.isMagicGame()" (click)="toggleImageSharing()" class="text-slate-800 ">
+                        <a appTooltip="Share your card images to help train our ML anonymously. Toggle anytime." [tooltipDirection]="'left'" class="text-left">{{player.isSharingImages ? "Improving Card Detection" : "Not Improving Card Detection"}}</a>
+                    </li>
                     <li class="text-slate-800">
                         <div>
                             <label class="block text-sm font-medium mb-1">Video Device:</label>
@@ -120,6 +123,7 @@
                             </select>
                         </div>
                     </li>
+                    
                 </ng-container>
 
                 <!-- Remote Stream Controls -->
