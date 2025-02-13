@@ -49,7 +49,8 @@ export enum GameType{
 
 export interface IModifyPlayerProperty{
     property:PlayerProperties;
-    amountToModify:number;
+    amountToModify?:number;
+    value?:any;
 }
 
 export interface ICommanderDamage{

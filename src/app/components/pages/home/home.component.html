@@ -84,6 +84,8 @@
         </form>
       </div>
 
+      <p class="text-white text-base mt-4 text-left">By accessing and using Table Stream, you acknowledge that you have read, understood, and agree to be bound by these <strong class="cursor-pointer" (click)="privacyPolicyModal.open()">Terms of Service and Privacy Policy.</strong></p>
+
       <p class="text-white text-base mt-4 text-left"><strong>Issues and Feedback:</strong> Email any problems or feedback to
         admin&#64;table-stream.com</p>
     </div>
@@ -91,3 +93,4 @@
 </div>
 
 <app-ip-address-warning-modal (agreeClicked)="onAgreeClicked()"></app-ip-address-warning-modal>
+<app-privacy-policy-modal></app-privacy-policy-modal>

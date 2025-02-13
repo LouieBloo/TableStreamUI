@@ -1,0 +1,137 @@
+<button class="hidden" onclick="privacyPolicyModal.showModal()" id="privacyPolicyToggle">toggle</button>
+<dialog id="privacyPolicyModal" class="modal">
+
+    <div class="modal-box bg-slate-800 text-white absolute top-2">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                id="closePrivacyPolicy">✕</button>
+        </form>
+
+        <h3 class="text-lg font-bold mb-2">Terms of Service & Privacy Policy</h3>
+        <div>
+            <p class="mb-4">
+                <strong>Effective Date: 2/12/2025</strong><br>
+                
+                By accessing or using this website ("Service"), you agree to be bound by these Terms of Service and Privacy Policy (the "Agreement"). If you do not agree with any part of this Agreement, please do not use the Service.
+            </p>
+            <p class="mb-2">
+                <strong>1. Description of the Service</strong><br>
+                Our Service is a streaming platform where users can view and interact with live streams. During these streams, images capturing game boards and playing cards ("Content") may be visible. We utilize two machine learning models on these images:
+            </p>
+            <ol class="list-decimal pl-6 mb-2">
+                <li>
+                    A model to slice board images to detect playing cards.
+                </li>
+                <li>
+                    A model to classify the detected playing cards.
+                </li>
+            </ol>
+            <p class="mb-4">
+                By using our Service, you acknowledge and agree that images from your stream may be captured and used as described below.
+            </p>
+            <p class="mb-2">
+                <strong>2. User-Provided Content, License Grant, and Opt-Out Option
+                    When you stream on or interact with our Service, you agree that:</strong><br>
+            </p>
+            <ol class="list-decimal pl-6 mb-2">
+                <li>
+                    Data Collection: Images and visual data (hereafter "Images") of your game board and playing cards may be automatically collected.
+                </li>
+                <li>
+                    License to Use: You grant us a non-exclusive, worldwide, royalty-free, irrevocable license to store, process, analyze, and use these Images solely for the purpose of training, improving, and operating our machine learning models.
+                </li>
+                <li>
+                    No Personal Identification: We do not collect or associate any personally identifying information with these Images.
+                </li>
+                <li>
+                    Opt-Out Option: You may opt out of sharing your Images at any time during gameplay. If you choose to opt out, image sharing will be disabled for your stream, and any subsequent Images will not be collected or used for machine learning purposes. Please note that opting out will not affect the use of any Images that were collected prior to your opt-out action.
+                </li>
+            </ol>
+            <p class="mb-4"> 
+                If you do not consent to the use of your Images as outlined, please refrain from using the Service.
+            </p>
+            <p class="mb-4">
+                <strong>3. Data Storage and Security</strong><br>
+                All collected Images and data are stored securely using modern industry-standard security practices. While we strive to protect your data, you acknowledge that no system is entirely immune to risk.
+            </p>
+            <p class="mb-2">
+                <strong>4. Privacy Policy</strong><br>
+                a. Information We Collect
+            </p>
+            <ol class="list-decimal pl-6 mb-2">
+                <li>
+                    Images from Streams: As detailed above, Images from your live streams are captured automatically.
+                </li>
+                <li>
+                    Usage Data: We may collect technical data (e.g., browser type, operating system) and usage patterns to help improve the Service.
+                </li>
+            </ol>
+                
+            <p class="mb-2"> 
+                b. Use of Information
+            </p>
+            <ol class="list-decimal pl-6 mb-2">
+                <li>
+                    Machine Learning Training: The Images and data collected are used exclusively for training our machine learning models to detect and classify playing cards.
+                </li>
+                <li>
+                    Service Improvement: Non-identifying usage data may be used to enhance overall functionality and user experience.
+                </li>
+            </ol>
+
+            <p class="mb-2"> 
+                c. Data Sharing
+            </p>
+            <ol class="list-decimal pl-6 mb-2">
+                <li>
+                    Third Parties: We do not sell, trade, or share your Images or any data with third parties for their marketing purposes.
+                </li>
+                <li>
+                    Legal Requests: We may disclose data if required by law or in response to a valid legal request, though the Images themselves are not tied to personal identifiers.
+                </li>
+            </ol>
+
+            <p class="mb-2"> 
+                d. Opt-Out from Image Sharing
+            </p>
+            <ol class="list-decimal pl-6 mb-2">
+                <li>
+                    You have the option to opt out of sharing Images at any time during gameplay. Once you opt out, no further Images from your stream will be captured or used for machine learning purposes. This opt-out does not affect the Images collected prior to your decision to opt out.
+                </li>
+            </ol>
+                
+            <p class="mb-4">
+                <strong>5. Consent and Agreement</strong><br>
+                By using our Service, you explicitly consent to the collection, storage, and use of your Images and associated data as described in this Agreement. Your continued use of the Service constitutes acceptance of these terms. If you choose to opt out of image sharing during gameplay, your subsequent Images will not be collected, though previously collected Images may continue to be used as described.
+            </p>
+            <p class="mb-4">
+                <strong>6. Modifications</strong><br>
+                We reserve the right to update or modify this Agreement at any time. Any changes will be effective immediately upon posting on the Service. Your continued use of the Service after such modifications constitutes your acceptance of the new terms.
+            </p>
+            <p class="mb-4">
+                <strong>7. Governing Law</strong><br>
+                This Agreement is governed by and construed in accordance with the laws of the State of California, without regard to its conflict of law provisions.
+            </p>
+            <p class="mb-4">
+                <strong>8. Disclaimer and Limitation of Liability</strong><br>
+                Service Provided "As Is": The Service is provided without warranties of any kind, whether express or implied.
+                Limitation of Liability: In no event shall we be liable for any indirect, incidental, special, or consequential damages arising out of or in connection with your use of the Service.
+            </p>
+            <p class="mb-4">
+                <strong>9. Contact Information</strong><br>
+                For any questions, concerns, or requests regarding this Agreement, please contact us at:
+                Email: admin&#64;table-stream.com
+            </p>
+                
+            <div class="text-right mt-2">
+                <button (click)="close()" class="btn btn-sm btn-outline text-white py-2 px-4 rounded mt-3" >Close</button>
+            </div>
+            
+        </div>
+
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+

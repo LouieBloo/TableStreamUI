@@ -11,13 +11,14 @@ export class CardIdentifierService {
 
   constructor(private http: HttpClient, private gameService:GameService) { }
 
-  public classifyImage (photoFile:any, x:number, y:number): Observable<any> {
+  public classifyImage (photoFile:any, x:number, y:number, playerId:string): Observable<any> {
     // Prepare FormData to send the photo and click position
     const formData = new FormData();
     formData.append('file', photoFile);
     formData.append('x', x.toString());
     formData.append('y', y.toString());
     formData.append('roomId', this.gameService.room.id + "")
+    formData.append('playerId', playerId)
 
     // Replace this with your backend API endpoint
     const backendUrl = environment.cardIdentifierUrl + '/classify';

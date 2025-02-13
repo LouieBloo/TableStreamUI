@@ -20,6 +20,7 @@ export interface IPlayer extends IUser{
     totalTurnTime: number;
 
     isMonarch?:boolean;
+    isSharingImages?:boolean;
     hasCitiesBlessing?:boolean;
 
     poisonTotal:number;
@@ -49,5 +50,6 @@ export enum PlayerProperties{
     energyTotal,
     monarch,
     citiesBlessing,
-    prizeCards
+    prizeCards,
+    sharingImages
 }
