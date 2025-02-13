@@ -313,7 +313,8 @@ export class WebRTCService {
         password: password && password != "null" ? password : null,
         userType: userType,
         maxPlayers: maxPlayers || 4,
-        reactionsEnabled: reactionsEnabled
+        reactionsEnabled: reactionsEnabled,
+        isSharingImages: localStorage.getItem("isSharingImages") && localStorage.getItem("isSharingImages") == 'false' ? false : true
       },
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
           if (error) {
@@ -581,6 +582,21 @@ export class WebRTCService {
       this.socket.emit('gameEvent', event);
     }
   }
+
+  //we dont listen for these events as they are private, we wait for the callback and resolve
+  sendPrivateGameEvent = (event: IGameEvent): Promise<any> => {
+    return new Promise((resolve, reject) => {
+        if (this.socket) {
+            this.socket.emit('privateGameEvent', event, (response: any) => {
+              //safe to now call our normal handleGameEvent as we are the only person receiving the updates
+              this.handleGameEvent(response);
+              resolve(true); 
+            });
+        } else {
+            reject(new Error("Socket is not connected"));
+        }
+    });
+  };
 
   handleGameEvent = (event: IGameEvent) => {
     this.gameEventSubject.next(event);

@@ -56,7 +56,7 @@ export class AiTestComponent {
     formData.append('y', normalizedY.toString());
 
     // Send the file and normalized click position to the classification service
-    this.cardIdentifierService.classifyImage(this.photoFile, normalizedX, normalizedY).subscribe(
+    this.cardIdentifierService.classifyImage(this.photoFile, normalizedX, normalizedY,"").subscribe(
       (response:any) => {
           
       },

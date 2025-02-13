@@ -6,16 +6,20 @@ import { GAME_TYPES } from '../../../constants/game-types.constants';
 import { GameType } from '../../../interfaces/game';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { IpAddressWarningModalComponent } from '../../modals/ip-address-warning-modal/ip-address-warning-modal.component';
+import { PrivacyPolicyModalComponent } from '../../modals/privacy-policy-modal/privacy-policy-modal.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, NgClass, NgIf, NgFor, IpAddressWarningModalComponent],
+  imports: [FormsModule, NgClass, NgIf, NgFor, IpAddressWarningModalComponent, PrivacyPolicyModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
 export class HomeComponent {
   @ViewChild(IpAddressWarningModalComponent)
   ipAddressModal!: IpAddressWarningModalComponent;
+
+  @ViewChild(PrivacyPolicyModalComponent)
+  privacyPolicyModal!: PrivacyPolicyModalComponent;
 
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
