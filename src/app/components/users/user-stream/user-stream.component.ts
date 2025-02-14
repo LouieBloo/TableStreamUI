@@ -60,7 +60,7 @@ export class UserStreamComponent {
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
   selectedVideoDeviceId: string = '';
-  aspectRatio: string = '16/9';
+  videoQuality: string = localStorage.getItem("videoQuality") || '16/9-1080';
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
@@ -82,7 +82,6 @@ export class UserStreamComponent {
       this.setStream(this.webRTC.getStream(this.player.socketId))  
       
     }else {
-      
       // Local stream
       // Initialize device lists
       navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -157,7 +156,7 @@ export class UserStreamComponent {
 
   changeDevice() {
     this.webRTC
-      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId, this.aspectRatio)
+      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
       .then(() => {
         this.initLocalStream();
       }).catch((err)=>{
@@ -165,8 +164,9 @@ export class UserStreamComponent {
       });
   }
 
-  onAspectRatioChange(event: any) {
-    this.aspectRatio = event.target.value;
+  onVideoQualityChange(event: any) {
+    this.videoQuality = event.target.value;
+    localStorage.setItem("videoQuality", this.videoQuality)
     this.changeDevice();
   }
 
@@ -279,6 +279,10 @@ export class UserStreamComponent {
 
   getKeys(object:any):string[]{
     return Object.keys(object);
+  }
+
+  isFirefox(): boolean {
+    return /firefox/i.test(navigator.userAgent);
   }
 
   onVideoClick(event: MouseEvent) {

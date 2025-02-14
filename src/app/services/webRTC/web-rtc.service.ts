@@ -8,6 +8,7 @@ import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
+import { IVideoQualify } from '../../interfaces/networking';
 
 @Injectable({
   providedIn: 'root'
@@ -87,39 +88,68 @@ export class WebRTCService {
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
-  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): MediaStreamConstraints {
-    let idealWidth: number;
-    let idealHeight: number;
-    let aspectRatioValue: number;
-  
-    if (aspectRatio === '4/3') {
-      idealWidth = 1280;
-      idealHeight = 960;
-      aspectRatioValue = 4 / 3;
-    } else {
-      // Default to 16:9
-      idealWidth = 1920;
-      idealHeight = 1080;
-      aspectRatioValue = 16 / 9;
-    }
+  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string, videoQuality: string = '16/9-1080'): MediaStreamConstraints {
+    const targetVideoQuality:IVideoQualify = this.getCameraVideoQuality();
   
     return {
       video: videoDeviceId
         ? {
             deviceId: { exact: videoDeviceId },
-            width: { ideal: idealWidth },
-            height: { ideal: idealHeight },
-            aspectRatio: { ideal: aspectRatioValue },
+            width: { ideal: targetVideoQuality.idealWidth },
+            height: { ideal: targetVideoQuality.idealHeight },
+            aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
           }
         : {
-            width: { ideal: idealWidth },
-            height: { ideal: idealHeight },
-            aspectRatio: { ideal: aspectRatioValue },
+            width: { ideal: targetVideoQuality.idealWidth },
+            height: { ideal: targetVideoQuality.idealHeight },
+            aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
           },
       audio: audioDeviceId
         ? { deviceId: { exact: audioDeviceId } }
         : true,
     };
+  }
+
+  /**
+   * Given a video quality stream return the ideal width, height, and aspect ratio.
+   * Ex videoQuality: '16/9-1080', '16/9-2k', '4/3-960', '4/3-25'
+   * @param videoQuality 
+   * @returns 
+   */
+  private getCameraVideoQuality():IVideoQualify{
+    const videoQuality = localStorage.getItem("videoQuality") || '16/9-1080';
+    const [ratio, quality] = videoQuality.split('-');
+    let idealWidth: number;
+    let idealHeight: number;
+    let idealAspectRatio: number;
+  
+    if (ratio === '4/3') {
+      idealAspectRatio = 4 / 3;
+      if (quality === '2k') {
+        idealWidth = 1600;
+        idealHeight = 1200;
+      } else {
+        // Default for 4:3
+        idealWidth = 1280;
+        idealHeight = 960;
+      }
+    } else {
+      idealAspectRatio = 16 / 9;
+      if (quality === '2k') {
+        idealWidth = 2560;
+        idealHeight = 1440;
+      } else {
+        // Default 1080p for 16:9
+        idealWidth = 1920;
+        idealHeight = 1080;
+      }
+    }
+
+    return {
+      idealAspectRatio,
+      idealWidth,
+      idealHeight
+    }
   }
 
   private async getUserMediaWithoutAudio(constraints: MediaStreamConstraints) {
@@ -136,11 +166,10 @@ export class WebRTCService {
   public async changeDevice(
     videoDeviceId?: string,
     audioDeviceId?: string,
-    aspectRatio: string = '16/9'
   ): Promise<void> {
     if (!this.localStream) {
       // No existing stream, initialize it
-      const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
+      const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId);
       this.localStream = await this.getUserMedia(constraints);
       await this.updatePeerConnections();
       return;
@@ -155,14 +184,16 @@ export class WebRTCService {
   
     const videoDeviceChanged = videoDeviceId && videoDeviceId !== currentVideoDeviceId;
     const audioDeviceChanged = audioDeviceId && audioDeviceId !== currentAudioDeviceId;
+
+    const targetVideoQuality:IVideoQualify = this.getCameraVideoQuality();
   
     // Apply new constraints to existing video track if device hasn't changed
     if (!videoDeviceChanged && currentVideoTrack) {
       try {
         await currentVideoTrack.applyConstraints({
-          width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
-          height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
-          aspectRatio: { ideal: aspectRatio === '16/9' ? 16/9 : 4/3 },
+          width: { ideal: targetVideoQuality.idealWidth },
+          height: { ideal: targetVideoQuality.idealHeight },
+          aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
         });
       } catch (err) {
         console.error('Error applying constraints to video track:', err);
@@ -178,9 +209,9 @@ export class WebRTCService {
         video: videoDeviceChanged
           ? {
               deviceId: { exact: videoDeviceId },
-              width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
-              height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
-              aspectRatio: { ideal: aspectRatio === '16/9' ? 16 / 9 : 4 / 3 },
+              width: { ideal: targetVideoQuality.idealWidth },
+              height: { ideal: targetVideoQuality.idealHeight },
+              aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
             }
           : false,
         audio: audioDeviceChanged
