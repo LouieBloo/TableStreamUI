@@ -61,6 +61,7 @@ export class GameService {
 
   public removePlayer(playerId: string){
     this.room.players = this.room.players.filter(p => p.id != playerId);
+    this.room.game?.removeTokensByPlayerId(playerId);
     this.sortPlayers();
   }
 

@@ -44,4 +44,8 @@ export class Game {
         this.tokens = this.tokens.filter(token => token.id != removedToken.id);
     }
 
+    removeTokensByPlayerId(playerId: string){
+        this.tokens = this.tokens.filter(token => token.ownerId != playerId)
+    }
+
 }
