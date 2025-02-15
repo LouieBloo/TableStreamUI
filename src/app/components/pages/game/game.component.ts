@@ -22,7 +22,7 @@ import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-mo
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
 import { TimerComponent } from '../../timer/timer.component';
-import { SpeechToTextComponent } from '../../speech-to-text/speech-to-text.component';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-game',
@@ -72,7 +72,8 @@ export class GameComponent {
     private router: Router,
     private route: ActivatedRoute,
     private alertService: AlertsService,
-    private logger: LoggerService) {
+    private logger: LoggerService,
+    private localStorageService: LocalStorageService) {
     this.gameService.room = {
       name: "temp",
       players: [],
@@ -83,16 +84,16 @@ export class GameComponent {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
-    let previousRoomId = localStorage.getItem('roomId');
-    let hasSetSpectator = localStorage.getItem("isSpectator") == 'false' || localStorage.getItem("isSpectator") == 'true';
+    let previousRoomId = this.localStorageService.roomId;
+    let hasSetSpectator = this.localStorageService.hasSetSpectator;
 
-    if (!localStorage.getItem('hasPlayedBefore')) {
+    if (!this.localStorageService.hasPlayedBefore) {
       this.showingHotkeys = true;
-      localStorage.setItem('hasPlayedBefore', 'true');
+      this.localStorageService.setHasPlayedBefore("true");
       setTimeout(() => { this.showingHotkeys = false }, 1000 * 60 * 5)
     }
     
-    if (!localStorage.getItem('playerName') || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)) {
+    if (!this.localStorageService.playerName || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)) {
       if (this.roomId) {
         this.router.navigate(['/join'], {
           queryParams: { id: this.roomId },
@@ -123,7 +124,7 @@ export class GameComponent {
   }
 
   checkPasswordProtection = async (roomId: string) => {
-    const storedPassword = localStorage.getItem("password");
+    const storedPassword = this.localStorageService.password;
 
     if (storedPassword) {
       this.loadIntoGame(storedPassword);
@@ -147,30 +148,18 @@ export class GameComponent {
   }
 
   loadIntoGame(password: string|null) {
-    localStorage.setItem("password", password + "");
-    const amISpectator = localStorage.getItem("isSpectator") && localStorage.getItem("isSpectator") == 'true';
-    const gameType = localStorage.getItem("gameType");
-    const playerName = localStorage.getItem('playerName');
-    const roomName = localStorage.getItem('roomName');
-    const maxPlayers: number = parseInt(localStorage.getItem("maxPlayers") || "4");
-    const reactionsEnabled: boolean = localStorage.getItem('reactionsEnabled') && localStorage.getItem('reactionsEnabled') == 'false' ? false : true;
+    this.localStorageService.setPassword(password + "");
 
     this.webRTC.joinRoom(
-      playerName,
       this.roomId,
       password,
-      gameType,
-      roomName,
-      amISpectator ? UserType.Spectator : UserType.Player,
-      maxPlayers,
-      reactionsEnabled,
       (me: IUser, roomName: string, room: IRoom) => {
       this.gameService.setRoom(room);
       this.passwordModal.close();
       this.localPlayerId = me.id;
 
-      localStorage.setItem('roomId', room.id + "")
-      localStorage.setItem("playerId", me.id);
+      this.localStorageService.setRoomId(room.id + "");
+      this.localStorageService.setPlayerId(me.id);
       this.router.navigate([], {
         queryParams: { id: room.id },
         queryParamsHandling: 'merge', // This merges with any existing query params

@@ -7,6 +7,7 @@ import { GameType } from '../../../interfaces/game';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { IpAddressWarningModalComponent } from '../../modals/ip-address-warning-modal/ip-address-warning-modal.component';
 import { PrivacyPolicyModalComponent } from '../../modals/privacy-policy-modal/privacy-policy-modal.component';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -24,7 +25,7 @@ export class HomeComponent {
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
   isCreateGame: boolean = false;
-  player = {
+  player = { // what is this?
     name: '',
     roomName: '',
     isSpectator: false,
@@ -38,7 +39,8 @@ export class HomeComponent {
   constructor(
     private router: Router,
     private webRTC: WebRTCService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private localStorageService: LocalStorageService
   ) {}
 
   ngOnInit() {
@@ -49,16 +51,10 @@ export class HomeComponent {
     }
 
     this.webRTC.disconnect();
-    localStorage.removeItem('roomName');
-    localStorage.removeItem('gameType');
-    localStorage.removeItem('maxPlayers');
-    localStorage.removeItem('isSpectator');
-    localStorage.removeItem('password');
-    localStorage.removeItem('roomId');
-    localStorage.removeItem('reactionsEnabled');
+    this.localStorageService.removeStorageOnHomeLoad();
 
-    if (localStorage.getItem('playerName')) {
-      this.player.name = localStorage.getItem('playerName')!;
+    if (this.localStorageService.playerName) {
+      this.player.name = this.localStorageService.playerName!;
     }
   }
 
@@ -69,8 +65,8 @@ export class HomeComponent {
   onCreateGame() {
     this.isCreateGame = true;
 
-    if (this.agreedToDisclaimer()) {
-      this.setLocalStorageForCreate();
+    if (this.localStorageService.agreedToDisclaimer === 'true') {
+      this.localStorageService.setLocalStorageForCreateGame(this.player);
       this.router.navigate(['/game']);
       return;
     }
@@ -81,7 +77,7 @@ export class HomeComponent {
   onJoinGame(): void {
     this.isCreateGame = false;
 
-    if (this.agreedToDisclaimer()) {
+    if (this.localStorageService.agreedToDisclaimer === 'true') {
       this.setLocalStorageForJoin();
       this.navigateOnJoin();
       return;
@@ -91,7 +87,7 @@ export class HomeComponent {
 
   onAgreeClicked(): void {
     if (this.isCreateGame) {
-      this.setLocalStorageForCreate();
+      this.localStorageService.setLocalStorageForCreateGame(this.player);
       this.router.navigate(['/game']);
     } else {
       this.setLocalStorageForJoin();
@@ -115,13 +111,9 @@ export class HomeComponent {
     return this.player.gameType != GameType.YuGiOhStandard;
   };
 
-  private agreedToDisclaimer(): boolean {
-    return localStorage.getItem('agreeToDisclaimer') === 'true';
-  }
-
   private setLocalStorageForJoin(): void {
-    localStorage.setItem('playerName', this.player.name);
-    localStorage.setItem('isSpectator', String(this.player.isSpectator));
+    this.localStorageService.setPlayerName(this.player.name);
+    this.localStorageService.setIsSpectator(this.player.isSpectator.toString())
   }
 
   private navigateOnJoin() {
@@ -130,20 +122,6 @@ export class HomeComponent {
       queryParamsHandling: 'merge',
     });
   }
-
-  private setLocalStorageForCreate(): void {
-    localStorage.setItem('playerName', this.player.name);
-    localStorage.setItem('roomName', this.player.roomName);
-    localStorage.setItem('gameType', this.player.gameType.toString());
-    localStorage.setItem('maxPlayers', this.player.maxPlayers.toString());
-    localStorage.setItem('isSpectator', 'false');
-    localStorage.setItem('reactionsEnabled', this.player.reactionsEnabled + "");
-    
-    if (this.player.password) {
-      localStorage.setItem('password', this.player.password);
-    }
-  }
-
 
   get backgroundImage():string{
     if(this.player.gameType == GameType.PokemonStandard){
