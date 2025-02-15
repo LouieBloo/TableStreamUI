@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IRoom, PasswordCheckResponse } from '../../interfaces/room';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../interfaces/room';
 import { IPlayer } from '../../interfaces/player';
 import { GameType, IGameEvent } from '../../interfaces/game';
 import { MTGCommander } from '../../classes/game/MTGCommander';
@@ -21,26 +21,8 @@ import { WebRTCService } from '../webRTC/web-rtc.service';
 export class GameService {
   public room!: IRoom;
 
-  constructor(private http: HttpClient, private webRtc: WebRTCService) {
-    webRtc.kickedPlayerEvent$.subscribe((response: IGameEvent) =>{
-        this.removePlayer(response.response.playerId);
-        if(this.isCommanderGame()){
-          this.removeCommanderDamagesFromPlayer(response);
-        }
-    })
-   }
-
-   public removeCommanderDamagesFromPlayer = (gameEvent: IGameEvent) => {
-    const playerIdToRemove = gameEvent.payload.playerId;
-    this.room.players.forEach((player: IPlayer) => {
-        if (player.id !== playerIdToRemove) {
-            if (player.commanderDamages[playerIdToRemove]) {
-                delete player.commanderDamages[playerIdToRemove]
-            }
-        }
-    });
-
-}
+  constructor(private http: HttpClient) {
+  }
 
   public setRoom(room:IRoom){
     if(room.game?.gameType){
@@ -61,7 +43,6 @@ export class GameService {
 
   public removePlayer(playerId: string){
     this.room.players = this.room.players.filter(p => p.id != playerId);
-    this.room.game?.removeTokensByPlayerId(playerId);
     this.sortPlayers();
   }
 

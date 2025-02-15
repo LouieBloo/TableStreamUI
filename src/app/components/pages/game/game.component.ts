@@ -6,7 +6,7 @@ import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/game';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/player';
-import { IRoom, PasswordCheckResponse } from '../../../interfaces/room';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/room';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
@@ -23,6 +23,7 @@ import { TimerComponent } from '../../timer/timer.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
+import { Token } from '../../../interfaces/scryfall';
 
 @Component({
   selector: 'app-game',
@@ -157,13 +158,13 @@ export class GameComponent {
         this.passwordModal.close();
         this.localPlayerId = me.id;
 
-      this.localStorageService.setRoomId(room.id + "");
-      this.localStorageService.setPlayerId(me.id);
-      this.router.navigate([], {
-        queryParams: { id: room.id },
-        queryParamsHandling: 'merge', // This merges with any existing query params
-        replaceUrl: true // Replace the current URL in history
-      });
+        this.localStorageService.setRoomId(room.id + "");
+        this.localStorageService.setPlayerId(me.id);
+        this.router.navigate([], {
+          queryParams: { id: room.id },
+          queryParamsHandling: 'merge', // This merges with any existing query params
+          replaceUrl: true // Replace the current URL in history
+        });
 
         if (me.type == UserType.Player) {
           this.localPlayer = me as IPlayer;
@@ -236,6 +237,19 @@ export class GameComponent {
         if (this.gameService.room.game) {
           this.gameService.room.game.removeToken(event.response);
         }
+        break;
+      case GameEvent.KickPlayer:
+        const kickedResponse:IKickPlayerResponse = event.response
+        //remove all tokens
+        kickedResponse.removedTokens.forEach((token:Token)=>{
+          this.gameService.room.game?.removeToken(token);
+        })
+
+        //remove player
+        this.gameService.removePlayer(kickedResponse.kickedPlayer?.id);
+
+        //update players (turn order, commander damages)
+        this.updatePlayers(kickedResponse.players);
         break;
     }
   };

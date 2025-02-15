@@ -373,7 +373,7 @@ export class WebRTCService {
               console.log('Reconnected to server. Rejoining room...');
               this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
               this.socket?.emit('joinRoom', {
-                playerId: playerId,
+                playerId: this.localStorageService.playerId,
                 roomId: room.id,
                 gameType: gameType,
                 roomName: roomName,

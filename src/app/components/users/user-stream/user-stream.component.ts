@@ -23,6 +23,7 @@ import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component'
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { IKickPlayerResponse } from '../../../interfaces/room';
 
 @Component({
   selector: 'app-user-stream',
@@ -90,15 +91,15 @@ export class UserStreamComponent {
   subscribeToKickedPlayerEvent() {
     this.subscriptions.add(
       this.webRTC.kickedPlayerEvent$.subscribe((event) => {
-        if (this.imKicked(event)) {
+        if (this.imKicked(event.response)) {
           this.router.navigate(['/join']);
         }
       })
     );
   }
 
-  imKicked(event: IGameEvent){
-    return this.player.id == event.response.playerId && this.localStream
+  imKicked(kickedEvent: IKickPlayerResponse){
+    return this.player.id == kickedEvent.kickedPlayer?.id && this.localStream
   }
 
   ngAfterViewInit() {
