@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IRoom, PasswordCheckResponse } from '../../interfaces/room';
 import { IPlayer } from '../../interfaces/player';
-import { GameType } from '../../interfaces/game';
+import { GameType, IGameEvent } from '../../interfaces/game';
 import { MTGCommander } from '../../classes/game/MTGCommander';
 import { MTGStandard } from '../../classes/game/MTGStandard';
 import { MTGModern } from '../../classes/game/MTGModern';
@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { PokemonStandard } from '../../classes/game/PokemonStandard';
 import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
+import { WebRTCService } from '../webRTC/web-rtc.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,26 @@ import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
 export class GameService {
   public room!: IRoom;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private webRtc: WebRTCService) {
+    webRtc.kickedPlayerEvent$.subscribe((response: IGameEvent) =>{
+        this.removePlayer(response.response.playerId);
+        if(this.isCommanderGame()){
+          this.removeCommanderDamagesFromPlayer(response);
+        }
+    })
+   }
+
+   public removeCommanderDamagesFromPlayer = (gameEvent: IGameEvent) => {
+    const playerIdToRemove = gameEvent.payload.playerId;
+    this.room.players.forEach((player: IPlayer) => {
+        if (player.id !== playerIdToRemove) {
+            if (player.commanderDamages[playerIdToRemove]) {
+                delete player.commanderDamages[playerIdToRemove]
+            }
+        }
+    });
+
+}
 
   public setRoom(room:IRoom){
     if(room.game?.gameType){
@@ -80,24 +100,18 @@ export class GameService {
     switch (gameType) {
       case GameType.MTGCommander:
         return new MTGCommander();
-        break;
       case GameType.MTGStandard:
         return new MTGStandard();
-        break;
       case GameType.MTGModern:
         return new MTGModern();
-        break;
       case GameType.MTGLegacy:
         return new MTGLegacy();
-        break;
       case GameType.MTGVintage:
         return new MTGVintage();
-        break;
       case GameType.PokemonStandard:
         return new PokemonStandard();
       case GameType.MTGPauperCommander:
         return new MTGPauperCommander();
-        break;
     }
 
     return new MTGCommander();

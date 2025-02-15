@@ -117,12 +117,6 @@ export class GameComponent {
       this.webRTC.gameEvent.subscribe((event) => this.handleGameEvent(event))
     );
 
-    this.subscriptions.add(
-      this.webRTC.kickedPlayerEvent$.subscribe((event) =>
-        this.gameService.removePlayer(event.response.playerId)
-      )
-    );
-
     this.checkPasswordProtection(this.roomId);
   }
 
