@@ -9,11 +9,12 @@ import { IMongoImage } from '../../../interfaces/dev';
 import { CardSearchService } from '../../../services/search/card-search.service';
 import { CardComponent } from '../../card/card.component';
 import { AlertsService } from '../../../services/alerts/alerts.service';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-dev-classify',
   standalone: true,
-  imports: [NgClass, NgIf, NgFor, FormsModule, CardComponent],
+  imports: [NgIf, NgFor, FormsModule, CardComponent],
   templateUrl: './dev-classify.component.html',
   styleUrl: './dev-classify.component.css'
 })
@@ -46,8 +47,7 @@ export class DevClassifyComponent {
     initialSubmit: false
   }
 
-  constructor(private http: HttpClient, private cardSearchService: CardSearchService, private alerts: AlertsService) {
-    // Subscribe to the search subject with debounce
+  constructor(private http: HttpClient, private cardSearchService: CardSearchService, private alerts: AlertsService, private localStorageService: LocalStorageService) {
     this.searchSubject.pipe(debounceTime(300)).subscribe((searchTerm) => {
       console.log('Search term:', searchTerm);
       this.searchScryfall(searchTerm);
@@ -55,14 +55,13 @@ export class DevClassifyComponent {
   }
 
   ngOnInit() {
-    this.password.value = localStorage.getItem("dev-pw");
+    this.password.value = this.localStorageService.password;
   }
 
   async loadImages(): Promise<void> {
     this.loadingMoreImages = true;
     try {
-      localStorage.setItem("dev-pw", this.password.value);
-
+      this.localStorageService.setPassword(this.password.value);
       let params = new HttpParams();
 
       params = params.set('imageType', 'CARD');
@@ -220,23 +219,23 @@ export class DevClassifyComponent {
     const seenImages = this.getSeenImages();
     if (!seenImages.includes(this.currentImage._id)) {
       seenImages.push(this.currentImage._id);
-      localStorage.setItem('seenImages', JSON.stringify(seenImages));
+      this.localStorageService.setSeenImages(JSON.stringify(seenImages))
     }
   }
 
   private getSeenImages(): string[] {
-    const stored = localStorage.getItem('seenImages');
+    const stored = this.localStorageService.seenImages;
     return stored ? JSON.parse(stored) : [];
   }
 
+  
   hasSeenImage(imageId: string): boolean {
     const seenImages = this.getSeenImages();
     return seenImages.includes(imageId);
   }
 
-  clearCache(): void {
-    localStorage.removeItem('seenImages');
-    console.log('Seen images cache cleared.');
+  removeSeenImagesFromStorage(): void {
+    this.localStorageService.removeSeenImages();
   }
 
   getCurrentImageUrl(): string {

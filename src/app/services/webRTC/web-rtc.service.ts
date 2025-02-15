@@ -9,6 +9,7 @@ import { IRoom } from '../../interfaces/room';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
 import { IVideoQualify } from '../../interfaces/networking';
+import { LocalStorageService } from '../local-storage/local-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +41,7 @@ export class WebRTCService {
     return this._roomPasswordValid.asObservable();
   }
   
-  constructor(private alertService: AlertsService, private logger: LoggerService) {}
+  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService) {}
 
   //adding this just for testing
   private logAspectRatio(stream: any): void {
@@ -117,7 +118,7 @@ export class WebRTCService {
    * @returns 
    */
   private getCameraVideoQuality():IVideoQualify{
-    const videoQuality = localStorage.getItem("videoQuality") || '16/9-1080';
+    const videoQuality = this.localStorageService.videoQuality || '16/9-1080';
     const [ratio, quality] = videoQuality.split('-');
     let idealWidth: number;
     let idealHeight: number;
@@ -295,31 +296,18 @@ export class WebRTCService {
     this.onStreamAdded.push(callback);
   }
 
-  //TODO unused method
-  public unSubscribeToStreamAdd(callback: any) {
-    this.onStreamAdded = this.onStreamAdded.filter((checkCallback) => { checkCallback !== callback })
-  }
-
   public subscribeToStreamRemove(callback: (id: string) => void) {
     this.onStreamRemoved.push(callback);
   }
 
-  //TODO unused method
-  public unSubscribeToStreamRemove(callback: any) {
-    this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
-  }
-
-  public joinRoom(
-    playerName: any,
-    roomId: any,
-    password: any,
-    gameType: any,
-    roomName: any, 
-    userType: UserType,
-    maxPlayers:number,
-    reactionsEnabled:boolean,
-    callback: any
-    ) {
+  public joinRoom(roomId: any, password: any, callback: any) {
+    const playerId = this.localStorageService.playerId;
+    const userType = this.localStorageService.amISpectator ? UserType.Spectator : UserType.Player
+    const gameType = this.localStorageService.gameType;
+    const playerName = this.localStorageService.playerName;
+    const roomName = this.localStorageService.roomName;
+    const maxPlayers: number = parseInt(this.localStorageService.maxPlayers || "4");
+    const reactionsEnabled: boolean = this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true;
 
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
@@ -336,7 +324,7 @@ export class WebRTCService {
   
     if (this.socket) {
       this.socket.emit('joinRoom', {
-        playerId: localStorage.getItem("playerId"),
+        playerId: playerId,
         roomId: roomId,
         gameType: gameType,
         roomName: roomName,
@@ -345,7 +333,7 @@ export class WebRTCService {
         userType: userType,
         maxPlayers: maxPlayers || 4,
         reactionsEnabled: reactionsEnabled,
-        isSharingImages: localStorage.getItem("isSharingImages") && localStorage.getItem("isSharingImages") == 'false' ? false : true
+        isSharingImages: this.localStorageService.isSharingImages && this.localStorageService.isSharingImages == 'false' ? false : true
       },
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
           if (error) {
@@ -381,7 +369,7 @@ export class WebRTCService {
               console.log('Reconnected to server. Rejoining room...');
               this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
               this.socket?.emit('joinRoom', {
-                playerId: localStorage.getItem("playerId"),
+                playerId: playerId,
                 roomId: room.id,
                 gameType: gameType,
                 roomName: roomName,
@@ -553,7 +541,8 @@ export class WebRTCService {
             this.logger.log("adding tracks for: ", socketId);
             this.logger.log("track: ", track)
             if(track.kind == 'audio'){
-              const startMuted = localStorage.getItem("micMuted") && localStorage.getItem("micMuted") == 'true' ? true : false;
+              const micMuted = this.localStorageService.isMicMuted;
+              const startMuted = micMuted && micMuted == 'true' ? true : false;
               if(startMuted){
                 track.enabled = false;
               }
@@ -673,6 +662,5 @@ export class WebRTCService {
   public resetRoomPasswordInvalid(){
     this._roomPasswordValid.next(null);
   }
-
 
 }

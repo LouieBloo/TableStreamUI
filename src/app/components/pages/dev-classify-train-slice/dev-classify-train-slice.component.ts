@@ -2,15 +2,16 @@ import { Component } from '@angular/core';
 import { IMongoImage } from '../../../interfaces/dev';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { Observable, tap, catchError, of, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { AlertsService } from '../../../services/alerts/alerts.service';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-dev-classify-train-slice',
   standalone: true,
-  imports: [NgIf, FormsModule, AsyncPipe, NgForOf],
+  imports: [NgIf, FormsModule],
   templateUrl: './dev-classify-train-slice.component.html',
   styleUrl: './dev-classify-train-slice.component.css'
 })
@@ -24,15 +25,15 @@ export class DevClassifyTrainSliceComponent {
     value:""
   }
 
-  constructor(private http: HttpClient, private alerts:AlertsService) { }
+  constructor(private http: HttpClient, private alerts:AlertsService, private localStorageService: LocalStorageService) { }
 
   ngOnInit(): void {
-    this.password.value = localStorage.getItem("dev-pw");
+    this.password.value = this.localStorageService.password;
   }
 
   async loadImages(): Promise<void> {
     try {
-      localStorage.setItem("dev-pw", this.password.value);
+      this.localStorageService.setPassword(this.password.value);
 
       let params = new HttpParams();
 

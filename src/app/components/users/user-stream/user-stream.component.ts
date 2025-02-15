@@ -20,6 +20,7 @@ import { ReactionsComponent } from '../../effects/reactions/reactions.component'
 import { TimerComponent } from '../../timer/timer.component';
 import { PlayingCard } from '../../../interfaces/scryfall';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-user-stream',
@@ -60,7 +61,7 @@ export class UserStreamComponent {
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
   selectedVideoDeviceId: string = '';
-  videoQuality: string = localStorage.getItem("videoQuality") || '16/9-1080';
+  videoQuality: string;
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
   loadingCardIdentification:boolean = false;
@@ -72,7 +73,10 @@ export class UserStreamComponent {
     private cardIdentifierService:CardIdentifierService,
     private logger:LoggerService,
     private alertService: AlertsService,
-    private ngZone: NgZone) {}
+    private ngZone: NgZone,
+    private localStorageService: LocalStorageService) {
+      this.videoQuality = localStorageService.videoQuality || '16/9-1080'
+    }
   
 
   ngAfterViewInit(){
@@ -117,8 +121,8 @@ export class UserStreamComponent {
       });
 
       //check if we have saved a mic muted preference
-      this.isMutedSelf = localStorage.getItem("micMuted") && localStorage.getItem("micMuted") == 'true' ? true : false;
-
+      const isMicMuted = this.localStorageService.isMicMuted
+      this.isMutedSelf = isMicMuted && isMicMuted == 'true' ? true: false;
     })
   }
 
@@ -166,13 +170,13 @@ export class UserStreamComponent {
 
   onVideoQualityChange(event: any) {
     this.videoQuality = event.target.value;
-    localStorage.setItem("videoQuality", this.videoQuality)
+    this.localStorageService.setVideoQuality(this.videoQuality);
     this.changeDevice();
   }
 
   toggleMuteSelf() {
     this.isMutedSelf = !this.isMutedSelf;
-    localStorage.setItem("micMuted", this.isMutedSelf + "");
+    this.localStorageService.setMicMuted(this.isMutedSelf + "");
     if (this.isMutedSelf) {
       this.webRTC.muteSelf();
     } else {
@@ -259,7 +263,7 @@ export class UserStreamComponent {
   }
 
   toggleImageSharing = async()=>{
-    localStorage.setItem("isSharingImages", !this.player.isSharingImages + "");
+    this.localStorageService.setIsSharingImages(!this.player.isSharingImages + "");
     let payload:IModifyPlayerProperty = {value: !this.player.isSharingImages, property: PlayerProperties.sharingImages}
     let response = await this.webRTC.sendPrivateGameEvent({
       event: GameEvent.ModifyPlayerProperty,
