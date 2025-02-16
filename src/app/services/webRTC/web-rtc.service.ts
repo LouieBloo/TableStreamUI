@@ -10,6 +10,7 @@ import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
 import { IVideoQualify } from '../../interfaces/networking';
 import { LocalStorageService } from '../local-storage/local-storage.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -44,8 +45,8 @@ export class WebRTCService {
   get roomPasswordValid(): Observable<boolean|null>{
     return this._roomPasswordValid.asObservable();
   }
-  
-  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService) {}
+
+  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService, private router: Router) {}
 
   //adding this just for testing
   private logAspectRatio(stream: any): void {
@@ -344,6 +345,9 @@ export class WebRTCService {
             if(error.type === GameErrorType.InvalidPassword){
               this._roomPasswordValid.next(false);
             }else if(error.type === GameErrorType.RoomFull){
+              this.alertService.addAlert('error', error.message,5);
+            } else if (error.type === GameErrorType.EnteringBannedRoom){
+              this.router.navigate(['/join']);
               this.alertService.addAlert('error', error.message,5);
             }
             return;
