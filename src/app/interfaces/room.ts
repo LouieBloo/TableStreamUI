@@ -11,6 +11,7 @@ export interface IRoom {
     game?: Game;
     maxPlayers?:number;
     reactionsEnabled?:boolean;
+    allowPlayerKicking?:boolean;
 }
 
 export interface PasswordCheckResponse {
