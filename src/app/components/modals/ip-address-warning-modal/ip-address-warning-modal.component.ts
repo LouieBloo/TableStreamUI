@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-ip-address-warning-modal',
@@ -8,6 +9,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
   styleUrl: './ip-address-warning-modal.component.css'
 })
 export class IpAddressWarningModalComponent {
+  constructor(private localStorageService: LocalStorageService){}
 
   @Output() agreeClicked: EventEmitter<any> = new EventEmitter<any>();
 
@@ -19,7 +21,7 @@ export class IpAddressWarningModalComponent {
   }
 
   iAgree(){
-    localStorage.setItem("agreeToDisclaimer", 'true');
+    this.localStorageService.setDisclaimer("true");
     this.agreeClicked.emit();
   }
 

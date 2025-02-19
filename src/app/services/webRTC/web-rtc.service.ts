@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/game';
@@ -8,6 +8,9 @@ import { IUser, UserType } from '../../interfaces/player';
 import { IRoom } from '../../interfaces/room';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
+import { IVideoQualify } from '../../interfaces/networking';
+import { LocalStorageService } from '../local-storage/local-storage.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +32,10 @@ export class WebRTCService {
 
   private gameEventSubject = new Subject<IGameEvent>();
   public gameEvent = this.gameEventSubject.asObservable();
+
+  public kickedPlayerEvent$ = this.gameEventSubject.pipe(
+    filter((event => event.event === GameEvent.KickPlayer))
+  )
   
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
@@ -38,8 +45,8 @@ export class WebRTCService {
   get roomPasswordValid(): Observable<boolean|null>{
     return this._roomPasswordValid.asObservable();
   }
-  
-  constructor(private alertService: AlertsService, private logger: LoggerService) {}
+
+  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService, private router: Router) {}
 
   //adding this just for testing
   private logAspectRatio(stream: any): void {
@@ -87,39 +94,68 @@ export class WebRTCService {
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
-  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): MediaStreamConstraints {
-    let idealWidth: number;
-    let idealHeight: number;
-    let aspectRatioValue: number;
-  
-    if (aspectRatio === '4/3') {
-      idealWidth = 1280;
-      idealHeight = 960;
-      aspectRatioValue = 4 / 3;
-    } else {
-      // Default to 16:9
-      idealWidth = 1920;
-      idealHeight = 1080;
-      aspectRatioValue = 16 / 9;
-    }
+  private getMediaConstraints(videoDeviceId?: string, audioDeviceId?: string, videoQuality: string = '16/9-1080'): MediaStreamConstraints {
+    const targetVideoQuality:IVideoQualify = this.getCameraVideoQuality();
   
     return {
       video: videoDeviceId
         ? {
             deviceId: { exact: videoDeviceId },
-            width: { ideal: idealWidth },
-            height: { ideal: idealHeight },
-            aspectRatio: { ideal: aspectRatioValue },
+            width: { ideal: targetVideoQuality.idealWidth },
+            height: { ideal: targetVideoQuality.idealHeight },
+            aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
           }
         : {
-            width: { ideal: idealWidth },
-            height: { ideal: idealHeight },
-            aspectRatio: { ideal: aspectRatioValue },
+            width: { ideal: targetVideoQuality.idealWidth },
+            height: { ideal: targetVideoQuality.idealHeight },
+            aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
           },
       audio: audioDeviceId
         ? { deviceId: { exact: audioDeviceId } }
         : true,
     };
+  }
+
+  /**
+   * Given a video quality stream return the ideal width, height, and aspect ratio.
+   * Ex videoQuality: '16/9-1080', '16/9-2k', '4/3-960', '4/3-25'
+   * @param videoQuality 
+   * @returns 
+   */
+  private getCameraVideoQuality():IVideoQualify{
+    const videoQuality = this.localStorageService.videoQuality || '16/9-1080';
+    const [ratio, quality] = videoQuality.split('-');
+    let idealWidth: number;
+    let idealHeight: number;
+    let idealAspectRatio: number;
+  
+    if (ratio === '4/3') {
+      idealAspectRatio = 4 / 3;
+      if (quality === '2k') {
+        idealWidth = 1600;
+        idealHeight = 1200;
+      } else {
+        // Default for 4:3
+        idealWidth = 1280;
+        idealHeight = 960;
+      }
+    } else {
+      idealAspectRatio = 16 / 9;
+      if (quality === '2k') {
+        idealWidth = 2560;
+        idealHeight = 1440;
+      } else {
+        // Default 1080p for 16:9
+        idealWidth = 1920;
+        idealHeight = 1080;
+      }
+    }
+
+    return {
+      idealAspectRatio,
+      idealWidth,
+      idealHeight
+    }
   }
 
   private async getUserMediaWithoutAudio(constraints: MediaStreamConstraints) {
@@ -136,11 +172,10 @@ export class WebRTCService {
   public async changeDevice(
     videoDeviceId?: string,
     audioDeviceId?: string,
-    aspectRatio: string = '16/9'
   ): Promise<void> {
     if (!this.localStream) {
       // No existing stream, initialize it
-      const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
+      const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId);
       this.localStream = await this.getUserMedia(constraints);
       await this.updatePeerConnections();
       return;
@@ -155,14 +190,16 @@ export class WebRTCService {
   
     const videoDeviceChanged = videoDeviceId && videoDeviceId !== currentVideoDeviceId;
     const audioDeviceChanged = audioDeviceId && audioDeviceId !== currentAudioDeviceId;
+
+    const targetVideoQuality:IVideoQualify = this.getCameraVideoQuality();
   
     // Apply new constraints to existing video track if device hasn't changed
     if (!videoDeviceChanged && currentVideoTrack) {
       try {
         await currentVideoTrack.applyConstraints({
-          width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
-          height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
-          aspectRatio: { ideal: aspectRatio === '16/9' ? 16/9 : 4/3 },
+          width: { ideal: targetVideoQuality.idealWidth },
+          height: { ideal: targetVideoQuality.idealHeight },
+          aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
         });
       } catch (err) {
         console.error('Error applying constraints to video track:', err);
@@ -178,9 +215,9 @@ export class WebRTCService {
         video: videoDeviceChanged
           ? {
               deviceId: { exact: videoDeviceId },
-              width: { ideal: aspectRatio === '16/9' ? 1920 : 1280 },
-              height: { ideal: aspectRatio === '16/9' ? 1080 : 960 },
-              aspectRatio: { ideal: aspectRatio === '16/9' ? 16 / 9 : 4 / 3 },
+              width: { ideal: targetVideoQuality.idealWidth },
+              height: { ideal: targetVideoQuality.idealHeight },
+              aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
             }
           : false,
         audio: audioDeviceChanged
@@ -264,31 +301,18 @@ export class WebRTCService {
     this.onStreamAdded.push(callback);
   }
 
-  //TODO unused method
-  public unSubscribeToStreamAdd(callback: any) {
-    this.onStreamAdded = this.onStreamAdded.filter((checkCallback) => { checkCallback !== callback })
-  }
-
   public subscribeToStreamRemove(callback: (id: string) => void) {
     this.onStreamRemoved.push(callback);
   }
 
-  //TODO unused method
-  public unSubscribeToStreamRemove(callback: any) {
-    this.onStreamRemoved = this.onStreamRemoved.filter((checkCallback) => { checkCallback !== callback })
-  }
-
-  public joinRoom(
-    playerName: any,
-    roomId: any,
-    password: any,
-    gameType: any,
-    roomName: any, 
-    userType: UserType,
-    maxPlayers:number,
-    reactionsEnabled:boolean,
-    callback: any
-    ) {
+  public joinRoom(roomId: any, password: any, callback: any) {
+    const playerId = this.localStorageService.playerId;
+    const userType = this.localStorageService.amISpectator ? UserType.Spectator : UserType.Player
+    const gameType = this.localStorageService.gameType;
+    const playerName = this.localStorageService.playerName;
+    const roomName = this.localStorageService.roomName;
+    const maxPlayers: number = parseInt(this.localStorageService.maxPlayers || "4");
+    const reactionsEnabled: boolean = this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true;
 
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
@@ -305,7 +329,7 @@ export class WebRTCService {
   
     if (this.socket) {
       this.socket.emit('joinRoom', {
-        playerId: localStorage.getItem("playerId"),
+        playerId: playerId,
         roomId: roomId,
         gameType: gameType,
         roomName: roomName,
@@ -314,13 +338,16 @@ export class WebRTCService {
         userType: userType,
         maxPlayers: maxPlayers || 4,
         reactionsEnabled: reactionsEnabled,
-        isSharingImages: localStorage.getItem("isSharingImages") && localStorage.getItem("isSharingImages") == 'false' ? false : true
+        isSharingImages: this.localStorageService.isSharingImages && this.localStorageService.isSharingImages == 'false' ? false : true
       },
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
           if (error) {
             if(error.type === GameErrorType.InvalidPassword){
               this._roomPasswordValid.next(false);
             }else if(error.type === GameErrorType.RoomFull){
+              this.alertService.addAlert('error', error.message,5);
+            } else if (error.type === GameErrorType.EnteringBannedRoom){
+              this.router.navigate(['/join']);
               this.alertService.addAlert('error', error.message,5);
             }
             return;
@@ -350,7 +377,7 @@ export class WebRTCService {
               console.log('Reconnected to server. Rejoining room...');
               this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
               this.socket?.emit('joinRoom', {
-                playerId: localStorage.getItem("playerId"),
+                playerId: this.localStorageService.playerId,
                 roomId: room.id,
                 gameType: gameType,
                 roomName: roomName,
@@ -522,7 +549,8 @@ export class WebRTCService {
             this.logger.log("adding tracks for: ", socketId);
             this.logger.log("track: ", track)
             if(track.kind == 'audio'){
-              const startMuted = localStorage.getItem("micMuted") && localStorage.getItem("micMuted") == 'true' ? true : false;
+              const micMuted = this.localStorageService.isMicMuted;
+              const startMuted = micMuted && micMuted == 'true' ? true : false;
               if(startMuted){
                 track.enabled = false;
               }
@@ -610,7 +638,6 @@ export class WebRTCService {
     this.alertService.addAlert(error.severity == GameErrorSeverity.Error ? 'error' : 'warning', error.message);
   }
 
-  // Mute/Unmute methods
   public muteSelf(): void {
     if (this.localStream) {
       this.localStream.getAudioTracks().forEach(track => track.enabled = false);
@@ -642,6 +669,5 @@ export class WebRTCService {
   public resetRoomPasswordInvalid(){
     this._roomPasswordValid.next(null);
   }
-
 
 }

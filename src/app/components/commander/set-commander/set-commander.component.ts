@@ -1,18 +1,19 @@
 import { Component, input, Input } from '@angular/core';
-import { IPlayer } from '../../../interfaces/player';
+import { IPlayer, PlayerProperties } from '../../../interfaces/player';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
 import { PlayingCard } from '../../../interfaces/scryfall';
 import { NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent } from '../../../interfaces/game';
+import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapPencilSquare, bootstrapTrash3 } from '@ng-icons/bootstrap-icons';
 import { CardComponent } from '../../card/card.component';
+import { TooltipDirective } from '../../../directives/tooltip.directive';
 
 @Component({
   selector: 'app-set-commander',
   standalone: true,
-  imports: [NgIf,NgIconComponent, CardComponent],
+  imports: [NgIf,NgIconComponent, CardComponent, TooltipDirective],
   templateUrl: './set-commander.component.html',
   styleUrl: './set-commander.component.css',
   viewProviders: [provideIcons({ bootstrapPencilSquare, bootstrapTrash3 })]
@@ -44,6 +45,14 @@ export class SetCommanderComponent {
 
   clearCommander = ()=>{
     this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: {card: null, index: this.index}});
+  }
+
+  modifyCommanderCastAmount = (amount:number)=>{
+    let payload: IModifyPlayerProperty = {
+      property: PlayerProperties.commanderCastAmount,
+      amountToModify: amount
+    }
+    this.webRtc.sendGameEvent({event: GameEvent.ModifyPlayerProperty, payload: {...payload, commander: this.commander}})
   }
 
   imageUrl = ()=>{

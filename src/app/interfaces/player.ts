@@ -51,5 +51,6 @@ export enum PlayerProperties{
     monarch,
     citiesBlessing,
     prizeCards,
-    sharingImages
+    sharingImages,
+    commanderCastAmount
 }

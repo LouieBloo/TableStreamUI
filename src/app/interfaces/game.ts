@@ -25,7 +25,8 @@ export enum GameEvent{
     CreateToken,
     ModifyToken,
     DeleteToken,
-    RollDice
+    RollDice,
+    KickPlayer
 }
 
 //fine to change on front end only
@@ -76,7 +77,8 @@ export enum GameErrorType{
     NoRoomName,
     InvalidPassword,
     GenericWarning,
-    RoomFull
+    RoomFull,
+    EnteringBannedRoom
 }
 
 export interface IAlert{

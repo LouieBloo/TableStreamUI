@@ -15,6 +15,7 @@ export class TooltipDirective {
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit() {
+    if(!this.tooltipText){return;}
     // Add Daisy UI tooltip classes
     this.renderer.addClass(this.el.nativeElement, 'tooltip');
     this.renderer.setAttribute(this.el.nativeElement, 'data-tip', this.tooltipText);
@@ -31,6 +32,7 @@ export class TooltipDirective {
 
   @HostListener('mouseover')
   onMouseOver() {
+    if(!this.tooltipText){return;}
     if (!this.hasHovered) {
       // Remove the initial open state after the first hover
       this.renderer.removeClass(this.el.nativeElement, 'tooltip-open');

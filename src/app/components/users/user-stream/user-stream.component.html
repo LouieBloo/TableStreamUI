@@ -39,6 +39,7 @@
                     <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
                     [total]="player.commanderDamages[playerId][cardId].damage"
                     [totalString]="gameService.getPlayerById(playerId)!.commanders.length > 1 ? (player.commanderDamages[playerId][cardId].card.name | slice:0:6) + '... ' : ''"
+                    [tooltip]="'Commander damage taken'"
                     [modifyCallback]="getModifyCommanderDamageCallback(playerId, player.commanderDamages[playerId][cardId].card)" [joined]="localStream" [fullWidth]="true" [buttonClass]="'rounded-t-none rounded-b-none'" class="">
                     </app-property-counter>
                 </ng-container>
@@ -78,6 +79,8 @@
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
+                <li *ngIf="!localStream && gameService.room.allowPlayerKicking" (click)="kickPlayer(player.id)" class="text-slate-800"><a>Kick player ({{player.name}})</a></li>
+
                 <!-- Local Stream Controls -->
                 <ng-container *ngIf="localStream">
                     <li (click)="toggleMuteSelf()" class="text-slate-800">
@@ -103,14 +106,19 @@
                     </li>
                     <li class="text-slate-800">
                         <div>
-                          <label class="block text-sm font-medium mb-1">Aspect Ratio:</label>
-                          <select (change)="onAspectRatioChange($event)"
+                          <label class="block text-sm font-medium mb-1">Video Quality:</label>
+                          <select (change)="onVideoQualityChange($event)"
                               class="select select-bordered w-full max-w-xs bg-white">
-                            <option value="16/9" [selected]="aspectRatio === '16/9'">16:9</option>
-                            <option value="4/3" [selected]="aspectRatio === '4/3'">4:3</option>
+                            <!-- For 16:9 -->
+                            <option value="16/9-1080" [selected]="videoQuality === '16/9-1080'">16:9 - 1080p</option>
+                            <option value="16/9-2k" [selected]="videoQuality === '16/9-2k'">16:9 - 2K</option>
+                            <!-- For 4:3 -->
+                            <option value="4/3-960" [selected]="videoQuality === '4/3-960'">4:3 - Standard</option>
+                            <option value="4/3-2k" [selected]="videoQuality === '4/3-2k'">4:3 - 2K</option>
                           </select>
                         </div>
-                      </li>
+                        <p *ngIf="isFirefox()" class="text-xs text-center text-red-500">Firefox may not support aspect ratio changing</p>
+                    </li>
                     <li class="text-slate-800 text-red-600">
                         <div>
                             <label class="block text-sm font-medium mb-1">Audio Device:</label>

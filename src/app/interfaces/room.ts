@@ -1,6 +1,7 @@
 import { Game } from '../classes/game/game';
 import { IMessage } from './message';
 import {IPlayer} from './player';
+import { Token } from './scryfall';
 
 export interface IRoom {
     id?:string;
@@ -10,8 +11,15 @@ export interface IRoom {
     game?: Game;
     maxPlayers?:number;
     reactionsEnabled?:boolean;
+    allowPlayerKicking?:boolean;
 }
 
 export interface PasswordCheckResponse {
     result: boolean;
+}
+
+export interface IKickPlayerResponse {
+    kickedPlayer:IPlayer;
+    players: IPlayer[];
+    removedTokens: Token[];
 }

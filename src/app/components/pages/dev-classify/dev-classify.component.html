@@ -6,7 +6,7 @@
 <div *ngIf="password.initialSubmit" class="flex flex-col">
   <div>
     <div>
-      <button type="button" (click)="clearCache()" class="btn btn-sm btn-danger mr-2">Clear Local Cache</button>
+      <button type="button" (click)="removeSeenImagesFromStorage()" class="btn btn-sm btn-danger mr-2">Clear Local Cache</button>
       <button type="button" (click)="showHints = !showHints;" class="btn btn-sm btn-primary">Toggle Rules</button>
     </div>
     <div *ngIf="showHints">

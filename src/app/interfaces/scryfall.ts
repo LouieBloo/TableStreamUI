@@ -43,7 +43,7 @@ export interface PlayingCard {
     collector_number: string;           // The collector number of the card within its set
     digital: boolean;                   // Whether the card is available digitally (MTGO)
     classificationConfidence: number;
-
+    castAmount?:number;
     card_faces?:PlayingCard[]
   }
   
