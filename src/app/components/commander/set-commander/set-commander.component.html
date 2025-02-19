@@ -1,18 +1,29 @@
 <div *ngIf="index == 0 || (index==1 && editable && player.commanders.length > 0) || (index==1 && !editable && player.commanders.length == 2)">
     <div *ngIf="editable && !commander" class="">
-        <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch()">Commander <ng-icon class="ml-1" name="bootstrapPencilSquare"></ng-icon></button>
+        <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch()"><ng-icon class="mr-1" name="bootstrapPencilSquare"></ng-icon> Commander</button>
     </div>
-    
-    <div *ngIf="commander" class="relative group " (mouseover)="onMouseOver($event)" >
-        <div class="flex">
-            <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch(); flipped = !flipped;">{{commander.name}} <ng-icon *ngIf="editable" class="ml-1" name="bootstrapPencilSquare"></ng-icon></p>
-            <p *ngIf="editable && index == 1" class="text-sm flex items-center cursor-pointer text-pop" (click)="clearCommander()"><ng-icon class="ml-1" name="bootstrapTrash3"></ng-icon></p>
-        </div>
-        <!-- Popup content -->
-        <div class="fixed hidden group-hover:block z-10">
-            <div class="">
-                <img [src]="imageUrl()" alt="Card Image" class="cardHoverImg w-full rounded-xl" [style.top.px]="popoverPosition.top" [style.left.px]="popoverPosition.left">
+
+    <div *ngIf="commander" class="flex flex-row items-center" >
+        <div (mouseover)="onMouseOver($event)" class="relative group ">
+            <div class="flex">
+                <p *ngIf="editable && index == 1" class="text-sm flex items-center cursor-pointer text-pop" (click)="clearCommander()"><ng-icon class="mr-1" name="bootstrapTrash3"></ng-icon></p>
+                <p class="text-sm flex items-center cursor-pointer text-pop" (click)="openSearch(); flipped = !flipped;"><ng-icon *ngIf="editable" class="mr-1" name="bootstrapPencilSquare"></ng-icon> {{commander.name}}</p>
+
+            </div>
+            <!-- Popup content -->
+            <div class="fixed hidden group-hover:block z-10">
+                <div class="">
+                    <img [src]="imageUrl()" alt="Card Image" class="cardHoverImg w-full rounded-xl" [style.top.px]="popoverPosition.top" [style.left.px]="popoverPosition.left">
+                </div>
             </div>
         </div>
+    
+        <div class="flex flex-row items-center ml-2 text-pop" appTooltip="Times Cast" [tooltipDirection]="'right'">
+            <button *ngIf="editable" type="button" (click)="modifyCommanderCastAmount(-1)" class="text-sm mr-1">-</button>
+            <p class="text-sm mb-0" >{{commander.castAmount}}</p>
+            <button *ngIf="editable" type="button" (click)="modifyCommanderCastAmount(1)" class="text-sm ml-1">+</button>
+        </div>
     </div>
+    
+    
 </div>

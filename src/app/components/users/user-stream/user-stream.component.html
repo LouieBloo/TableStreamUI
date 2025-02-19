@@ -39,6 +39,7 @@
                     <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
                     [total]="player.commanderDamages[playerId][cardId].damage"
                     [totalString]="gameService.getPlayerById(playerId)!.commanders.length > 1 ? (player.commanderDamages[playerId][cardId].card.name | slice:0:6) + '... ' : ''"
+                    [tooltip]="'Commander damage taken'"
                     [modifyCallback]="getModifyCommanderDamageCallback(playerId, player.commanderDamages[playerId][cardId].card)" [joined]="localStream" [fullWidth]="true" [buttonClass]="'rounded-t-none rounded-b-none'" class="">
                     </app-property-counter>
                 </ng-container>
