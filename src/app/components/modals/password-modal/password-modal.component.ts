@@ -1,7 +1,7 @@
 import { AsyncPipe, NgIf } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { of, tap } from 'rxjs';
+import { of } from 'rxjs';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 
 @Component({
@@ -20,11 +20,7 @@ export class PasswordModalComponent {
   roomPasswordValid = of<boolean|null>(null);
   
   constructor(public webRtcService: WebRTCService){
-    this.roomPasswordValid = webRtcService.roomPasswordValid.pipe(
-      tap((value)=> {
-        //console.log(value);
-      })
-    )
+    this.roomPasswordValid = webRtcService.roomPasswordValid;
   }
   
   open() {

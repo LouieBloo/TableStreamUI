@@ -3,67 +3,64 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
-import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
+import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/game';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/player';
-import { IRoom, PasswordCheckResponse } from '../../../interfaces/room';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/room';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
+import { LoggerService } from '../../../services/logger/logger.service';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { CardListComponent } from '../../card-list/card-list.component';
 import { MessengerComponent } from '../../messaging/messenger/messenger.component';
 import { PasswordModalComponent } from '../../modals/password-modal/password-modal.component';
-import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
-import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
-import { LoggerService } from '../../../services/logger/logger.service';
-import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
-import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
+import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
+import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
 import { TimerComponent } from '../../timer/timer.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
+import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
+import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
+import { Token } from '../../../interfaces/scryfall';
 
 @Component({
   selector: 'app-game',
   standalone: true,
   imports: [
-    NgFor, 
-    UserStreamComponent, 
-    MessengerComponent, 
-    NgIf, 
-    NgClass, 
-    CardListComponent, 
-    ReportModalComponent, 
+    NgFor,
+    UserStreamComponent,
+    MessengerComponent,
+    NgIf,
+    NgClass,
+    CardListComponent,
+    ReportModalComponent,
     PasswordModalComponent,
-    TooltipDirective, 
+    TooltipDirective,
     SoundEffectModalComponent,
-    PlayerTurnOrderModalComponent, 
+    PlayerTurnOrderModalComponent,
     CardTokenComponent,
     TokenModalComponent,
-    TimerComponent
+    TimerComponent,
   ],
   templateUrl: './game.component.html',
-  styleUrl: './game.component.css'
+  styleUrl: './game.component.css',
 })
 export class GameComponent {
-  private subscriptions: Subscription = new Subscription();
-
-  localPlayerId: string = ""
-  localPlayer!: IPlayer;
-
-  sortedPlayers: IPlayer[] = [];
-  roomId!: string;
-
-  showingHotkeys: boolean = false;
-
-  private inputSubscription!: Subscription;
-
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
   @ViewChild(PasswordModalComponent) passwordModal!: PasswordModalComponent;
-  @ViewChild(SoundEffectModalComponent) soundEffectModal!: SoundEffectModalComponent;
-  @ViewChild(PlayerTurnOrderModalComponent) playerTurnOrderModal!: PlayerTurnOrderModalComponent;
+  @ViewChild(SoundEffectModalComponent)
+  soundEffectModal!: SoundEffectModalComponent;
+  @ViewChild(PlayerTurnOrderModalComponent)
+  playerTurnOrderModal!: PlayerTurnOrderModalComponent;
   @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
+
+  private subscriptions: Subscription = new Subscription();
+  localPlayerId: string = '';
+  localPlayer!: IPlayer;
+  roomId!: string;
+  showingHotkeys: boolean = false;
 
   constructor(
     private webRTC: WebRTCService,
@@ -75,12 +72,11 @@ export class GameComponent {
     private logger: LoggerService,
     private localStorageService: LocalStorageService) {
     this.gameService.room = {
-      name: "temp",
+      name: 'temp',
       players: [],
-      messages: []
-    }
+      messages: [],
+    };
   }
-
 
   ngOnInit() {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
@@ -106,18 +102,20 @@ export class GameComponent {
       return;
     }
 
-    this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction) => {
-      if (userAction == UserInputAction.PassTurn) {
-        this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn })
-      }
-    })
-
     this.subscriptions.add(
-      this.webRTC.userJoined.subscribe(user => this.userJoined(user))
+      this.inputService.subscribe((userAction: UserInputAction) => {
+        if (userAction == UserInputAction.PassTurn) {
+          this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn });
+        }
+      })
     );
 
     this.subscriptions.add(
-      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+      this.webRTC.userJoined.subscribe((user) => this.userJoined(user))
+    );
+
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe((event) => this.handleGameEvent(event))
     );
 
     this.checkPasswordProtection(this.roomId);
@@ -131,21 +129,23 @@ export class GameComponent {
       return;
     }
 
-    this.gameService.checkPasswordProtection(roomId).subscribe({
-      next: (response: PasswordCheckResponse) => {
-        if (response.result === true) {
-          this.passwordModal.open();
-        } else {
-          this.loadIntoGame(null);
-        }
-      },
-      error: (error: any) => {
-        this.logger.error("Error joining game: ", error);
-        alert('Error joining game: ' + error);
-      },
-    });
+    this.subscriptions.add(
+      this.gameService.checkPasswordProtection(roomId).subscribe({
+        next: (response: PasswordCheckResponse) => {
+          if (response.result === true) {
+            this.passwordModal.open();
+          } else {
+            this.loadIntoGame(null);
+          }
+        },
+        error: (error: any) => {
+          this.logger.error('Error joining game: ', error);
+          alert('Error joining game: ' + error);
+        },
+      })
+    );
+  };
 
-  }
 
   loadIntoGame(password: string|null) {
     this.localStorageService.setPassword(password + "");
@@ -154,77 +154,61 @@ export class GameComponent {
       this.roomId,
       password,
       (me: IUser, roomName: string, room: IRoom) => {
-      this.gameService.setRoom(room);
-      this.passwordModal.close();
-      this.localPlayerId = me.id;
+        this.gameService.setRoom(room);
+        this.passwordModal.close();
+        this.localPlayerId = me.id;
 
-      this.localStorageService.setRoomId(room.id + "");
-      this.localStorageService.setPlayerId(me.id);
-      this.router.navigate([], {
-        queryParams: { id: room.id },
-        queryParamsHandling: 'merge', // This merges with any existing query params
-        replaceUrl: true // Replace the current URL in history
-      });
+        this.localStorageService.setRoomId(room.id + "");
+        this.localStorageService.setPlayerId(me.id);
+        this.router.navigate([], {
+          queryParams: { id: room.id },
+          queryParamsHandling: 'merge', // This merges with any existing query params
+          replaceUrl: true // Replace the current URL in history
+        });
 
-      if (me.type == UserType.Player) {
-        this.localPlayer = me as IPlayer;
-        this.addPlayer(me as IPlayer);
-      }
-
-      room.players.forEach((p: IPlayer) => {
-        if (p.id != me.id) {
-          this.addPlayer(p)
+        if (me.type == UserType.Player) {
+          this.localPlayer = me as IPlayer;
+          this.addPlayer(me as IPlayer);
         }
-      })
-    });
-  }
 
-
-  test123(): void {
-    this.gameService.room.players.push(
-      { ...this.localPlayer, name: "BS-" + this.gameService.room.players.length, turnOrder: this.gameService.room.players.length + 1 });
-    this.sortPlayers();
+        room.players.forEach((p: IPlayer) => {
+          if (p.id != me.id) {
+            this.addPlayer(p);
+          }
+        });
+      }
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.inputSubscription) {
-      this.inputSubscription.unsubscribe();
-    }
-
     this.subscriptions.unsubscribe();
-    this.sortedPlayers = [];
   }
 
-
-  userJoined = ({ id, user }: { id: string, user: IUser }) => {
+  userJoined = ({ id, user }: { id: string; user: IUser }) => {
     if (user.type === UserType.Player) {
       this.addPlayer(user as IPlayer);
     }
   };
 
-  streamRemoved = (id: string) => {
-    // this.remoteSocketIds = this.remoteSocketIds.filter((userId) => userId !== id)
-  }
-
   handleGameEvent = (event: IGameEvent) => {
-    this.logger.log("handling event: ", event)
+    this.logger.log('handling event: ', event);
     switch (event.event) {
       case GameEvent.RandomizePlayerOrder:
         this.updatePlayers(event.response);
-        this.sortPlayers();
+        this.gameService.sortPlayers();
         break;
       case GameEvent.ModifyPlayerProperty:
         this.updatePlayers([event.response]);
         break;
       case GameEvent.StartGame:
         this.updatePlayers(event.response.players);
-        if(this.gameService.room.game){
+        if (this.gameService.room.game) {
           this.gameService.room.game.startedAt = event.response.game.startedAt;
         }
         break;
       case GameEvent.ResetGame:
         this.updatePlayers(event.response.players);
-        if(this.gameService.room.game){
+        if (this.gameService.room.game) {
           this.gameService.room.game.startedAt = event.response.game.startedAt;
         }
         break;
@@ -242,23 +226,36 @@ export class GameComponent {
         break;
       case GameEvent.SetPlayerTurnOrders:
         this.updatePlayers(event.response);
-        this.sortPlayers ();
+        this.gameService.sortPlayers();
         break;
       case GameEvent.CreateToken:
-        if(this.gameService.room.game){
-          this.gameService.room.game.createToken(event.response)
+        if (this.gameService.room.game) {
+          this.gameService.room.game.createToken(event.response);
         }
         break;
       case GameEvent.DeleteToken:
-        if(this.gameService.room.game){
-          this.gameService.room.game.removeToken(event.response)
+        if (this.gameService.room.game) {
+          this.gameService.room.game.removeToken(event.response);
         }
         break;
+      case GameEvent.KickPlayer:
+        const kickedResponse:IKickPlayerResponse = event.response
+        //remove all tokens
+        kickedResponse.removedTokens.forEach((token:Token)=>{
+          this.gameService.room.game?.removeToken(token);
+        })
+
+        //remove player
+        this.gameService.removePlayer(kickedResponse.kickedPlayer?.id);
+
+        //update players (turn order, commander damages)
+        this.updatePlayers(kickedResponse.players);
+        break;
     }
-  }
+  };
 
   addPlayer = (newPlayer: IPlayer) => {
-    let foundPlayer = this.getPlayer(newPlayer.id)
+    let foundPlayer = this.getPlayer(newPlayer.id);
 
     if (!foundPlayer) {
       this.gameService.room.players.push(newPlayer);
@@ -267,16 +264,18 @@ export class GameComponent {
       foundPlayer.socketId = newPlayer.socketId;
     }
 
-    this.sortPlayers();
+    this.gameService.sortPlayers();
 
     return foundPlayer;
-  }
+  };
 
   updatePlayers(newPlayers: IPlayer[]): void {
     if (!newPlayers) { return; }
 
-    newPlayers.forEach(newPlayer => {
-      const existingPlayer = this.gameService.room.players.find(p => p.id === newPlayer.id);
+    newPlayers.forEach((newPlayer) => {
+      const existingPlayer = this.gameService.room.players.find(
+        (p) => p.id === newPlayer.id
+      );
       if (existingPlayer) {
         Object.assign(existingPlayer, newPlayer); // This updates only the fields that have changed
       }
@@ -284,64 +283,59 @@ export class GameComponent {
   }
 
   getPlayer = (id: string) => {
-    return this.gameService.room.players.find(p => p.id === id);
-  }
-
-  sortPlayers = () => {
-    if (this.gameService.room && this.gameService.room.players) {
-      this.sortedPlayers = this.gameService.room.players.sort((a, b) => a.turnOrder - b.turnOrder);
-    }
-  }
+    return this.gameService.room.players.find((p) => p.id === id);
+  };
 
   get topRowPlayers() {
-    switch (this.sortedPlayers.length) {
+    switch (this.gameService.room.players.length) {
       case 1:
-        return this.sortedPlayers;
+        return this.gameService.room.players;
       case 2:
-        return this.sortedPlayers;
+        return this.gameService.room.players;
       case 3:
-        return this.sortedPlayers.slice(0, 2);
+        return this.gameService.room.players.slice(0, 2);
       case 4:
-        return this.sortedPlayers.slice(0, 2);
+        return this.gameService.room.players.slice(0, 2);
       case 5:
-        return this.sortedPlayers.slice(0, 3);
+        return this.gameService.room.players.slice(0, 3);
       case 6:
-        return this.sortedPlayers.slice(0, 3);
+        return this.gameService.room.players.slice(0, 3);
     }
 
-    return []
+    return [];
   }
 
   get bottomRowPlayers() {
-    switch (this.sortedPlayers.length) {
+    switch (this.gameService.room.players.length) {
       case 1:
         return [];
       case 2:
         return [];
       case 3:
-        return [this.sortedPlayers[2]];
+        return [this.gameService.room.players[2]];
       case 4:
         //notice the change in order, always clockwise rotation
-        return [this.sortedPlayers[3], this.sortedPlayers[2]];
+        return [this.gameService.room.players[3], this.gameService.room.players[2]];
       case 5:
-        return [this.sortedPlayers[4], this.sortedPlayers[3]];
+        return [this.gameService.room.players[4], this.gameService.room.players[3]];
       case 6:
-        return [this.sortedPlayers[5], this.sortedPlayers[4], this.sortedPlayers[3]];
+        return [
+          this.gameService.room.players[5], this.gameService.room.players[4], this.gameService.room.players[3]];
     }
 
-    return []
+    return [];
   }
 
   startGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.StartGame });
-  }
+  };
 
   resetGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.ResetGame });
-  }
+  };
 
   copyUrl() {
-    const currentUrl = window.location.href; // Get the current URL
+    const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
       this.alertService.addAlert('success', 'URL copied to clipboard!');
     }).catch(err => {
@@ -349,22 +343,22 @@ export class GameComponent {
     });
   }
 
-  goBack(){
+  goBack() {
     this.router.navigate(['/join']);
   }
 
-  flipCoins = (coinsToFlip:number)=>{
+  flipCoins = (coinsToFlip: number) => {
     this.webRTC.handleLocalGameEvent({
       event: LocalGameEvent.FlipCoins,
       callingPlayer: this.localPlayer,
-      payload: {coinsToFlip: coinsToFlip}
-    })
-  }
+      payload: { coinsToFlip: coinsToFlip },
+    });
+  };
 
-  rollDice = (dicesToRoll:Number, sidedDice:number)=>{
+  rollDice = (dicesToRoll: Number, sidedDice: number) => {
     this.webRTC.sendGameEvent({
       event: GameEvent.RollDice,
-      payload: {dicesToRoll: dicesToRoll, sidedDice: sidedDice}
-    })
-  }
+      payload: { dicesToRoll: dicesToRoll, sidedDice: sidedDice },
+    });
+  };
 }

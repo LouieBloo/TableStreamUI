@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ISound } from '../../../interfaces/effects';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
@@ -13,7 +13,7 @@ import { SettingsService } from '../../../services/settings/settings.service';
 @Component({
   selector: 'app-sound-effect-modal',
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule],
+  imports: [NgFor, FormsModule],
   templateUrl: './sound-effect-modal.component.html',
   styleUrl: './sound-effect-modal.component.css'
 })

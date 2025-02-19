@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/game';
@@ -10,6 +10,7 @@ import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
 import { IVideoQualify } from '../../interfaces/networking';
 import { LocalStorageService } from '../local-storage/local-storage.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,10 @@ export class WebRTCService {
 
   private gameEventSubject = new Subject<IGameEvent>();
   public gameEvent = this.gameEventSubject.asObservable();
+
+  public kickedPlayerEvent$ = this.gameEventSubject.pipe(
+    filter((event => event.event === GameEvent.KickPlayer))
+  )
   
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
@@ -40,8 +45,8 @@ export class WebRTCService {
   get roomPasswordValid(): Observable<boolean|null>{
     return this._roomPasswordValid.asObservable();
   }
-  
-  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService) {}
+
+  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService, private router: Router) {}
 
   //adding this just for testing
   private logAspectRatio(stream: any): void {
@@ -341,6 +346,9 @@ export class WebRTCService {
               this._roomPasswordValid.next(false);
             }else if(error.type === GameErrorType.RoomFull){
               this.alertService.addAlert('error', error.message,5);
+            } else if (error.type === GameErrorType.EnteringBannedRoom){
+              this.router.navigate(['/join']);
+              this.alertService.addAlert('error', error.message,5);
             }
             return;
           }
@@ -369,7 +377,7 @@ export class WebRTCService {
               console.log('Reconnected to server. Rejoining room...');
               this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
               this.socket?.emit('joinRoom', {
-                playerId: playerId,
+                playerId: this.localStorageService.playerId,
                 roomId: room.id,
                 gameType: gameType,
                 roomName: roomName,
@@ -630,7 +638,6 @@ export class WebRTCService {
     this.alertService.addAlert(error.severity == GameErrorSeverity.Error ? 'error' : 'warning', error.message);
   }
 
-  // Mute/Unmute methods
   public muteSelf(): void {
     if (this.localStream) {
       this.localStream.getAudioTracks().forEach(track => track.enabled = false);
