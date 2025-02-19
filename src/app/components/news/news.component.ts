@@ -68,7 +68,7 @@ export class NewsComponent {
     } else if (startTime.getTime() - now.getTime() <= this.hoursBeforeWarningShows * 60 * 60 * 1000) {
       // console.log("Close to start time");
       if (!this.seenAlerts[incomingServerMaintenance.id]) {
-        incomingServerMaintenance.message = `Server maintenance scheduled at ${startTime} for 30 minutes. Games might become responsive during this time`
+        incomingServerMaintenance.message = `Server maintenance scheduled at ${startTime} for 30 minutes. Games might become unresponsive during this time.`
         this.activeMaintenanceAlert = incomingServerMaintenance;
         this.activeMaintenanceAlert.severity = 'alert-warning'
       }
