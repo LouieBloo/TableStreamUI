@@ -79,7 +79,7 @@
         <div class="absolute inset-x-0 bottom-0 top-0 overflow-y-auto" id="scrollableDiv">
 
             @if(sharedCards && sharedCards.length > 0){
-                <app-card [card]="sharedCards[0]" ></app-card>
+                <app-card [card]="sharedCards[0]" (deleteClicked)="deleteCardFromSearchHistory(sharedCards[0])" [maximumRightMargin]="260" ></app-card>
             }
 
             <div class="flex justify-center" *ngIf="sharedCards != null && sharedCards.length > 1">
@@ -89,7 +89,7 @@
 
             <div class="relative">
                 @for (card of sharedCards | slice:1; track card; let  i = $index) {    
-                    <app-card [card]="card" [ngClass]="{'cascadingCard': i > 0 }" [ngStyle]="{'top.px': (i * 50)}"></app-card>
+                    <app-card [card]="card" (deleteClicked)="deleteCardFromSearchHistory(card)" [maximumRightMargin]="260" [ngClass]="{'cascadingCard': i > 0 }" [ngStyle]="{'top.px': (i * 50)}"></app-card>
                 }
             </div>
             

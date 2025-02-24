@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, output, Output } from '@angular/core';
 import { PlayingCard } from '../../interfaces/scryfall';
 import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 
@@ -11,10 +11,11 @@ import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 })
 export class CardComponent {
   @Input() card!:PlayingCard | null;
-
   @Input() showPopup:boolean = true;
-
+  @Input() maximumRightMargin:number = 0;
   @Input() hoverMinDistance:number = 50;
+
+  @Output() deleteClicked = new EventEmitter<void>();
 
   popupStyle: any = {};
 
@@ -55,6 +56,10 @@ export class CardComponent {
       left = mouseX - popupWidth - xOffset;
     }
 
+    // Ensure left is not within maximumRightMargin px of the right side if the number is set
+    if (this.maximumRightMargin > 0 && (left + popupWidth) > (viewportWidth - this.maximumRightMargin)) {
+      left = viewportWidth - popupWidth - this.maximumRightMargin;
+    }
 
     let top = (mouseY - (popupHeight/2));//pretend the click is a bit lower than it is so the card is right in the middle
     //cursor is at bottom of screen
@@ -77,5 +82,13 @@ export class CardComponent {
 
   onImageLoad(): void {
     this.loadingCard = false;
+  }
+
+  onDeleteClicked() {
+    this.deleteClicked.emit();
+  }
+
+  get hasDeleteHandler(): boolean {
+    return this.deleteClicked.observed;
   }
 }
