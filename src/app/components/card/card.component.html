@@ -6,6 +6,7 @@
       <div *ngIf="loadingCard" class="cardLoad">
         <p class="text-center">Loading image...</p>
       </div>
+      <div *ngIf="hasDeleteHandler" class="absolute right-0 bg-slate-900 hidden group-hover:block"><button type="button" class="text-white pl-1 pr-1" (click)="onDeleteClicked()">✕</button></div>
       <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl" (load)="onImageLoad()" [ngClass]="{'hidden': loadingCard}">
       <div *ngIf="card && card.classificationConfidence > 0" id="classificationMatch" class="absolute text-white bg-black bg-opacity-50">
         {{ card.classificationConfidence * 100.0 | number : '1.2-2'}}% Match

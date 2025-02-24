@@ -201,4 +201,8 @@ export class CardListComponent {
   clearSearchHistory = ()=>{
     this.sharedCards = []
   }
+
+  deleteCardFromSearchHistory = (cardToDelete:PlayingCard)=>{
+    this.sharedCards = this.sharedCards.filter((card:PlayingCard)=> card != cardToDelete)
+  }
 }
