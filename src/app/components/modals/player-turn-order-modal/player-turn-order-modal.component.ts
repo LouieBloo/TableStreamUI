@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgFor, NgIf } from '@angular/common';
 import { GameService } from '../../../services/game/game.service';
-import { IPlayer, UserType } from '../../../interfaces/player';
-import { GameEvent } from '../../../interfaces/game';
+import { IPlayer, UserType } from '../../../interfaces/IPlayer';
+import { GameEvent } from '../../../interfaces/IGame';
 
 @Component({
   selector: 'app-player-turn-order-modal',

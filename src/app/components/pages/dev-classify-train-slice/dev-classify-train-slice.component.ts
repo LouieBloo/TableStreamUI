@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IMongoImage } from '../../../interfaces/dev';
+import { IMongoImage } from '../../../interfaces/IDev';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { firstValueFrom } from 'rxjs';

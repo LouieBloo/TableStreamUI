@@ -1,21 +1,21 @@
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
-import { Component, input, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { bootstrapSuitHeartFill } from '@ng-icons/bootstrap-icons';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
-import { IPlayer, PlayerProperties } from '../../interfaces/player';
-import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/game';
 import { PropertyCounterComponent } from '../property-counter/property-counter.component';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 import { GameService } from '../../services/game/game.service';
+import { IPlayer, PlayerProperties } from '../../interfaces/IPlayer';
+import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/IGame';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgIconComponent,NgClass,NgIf,TitleCasePipe,PropertyCounterComponent,TooltipDirective],
+  imports: [NgClass,NgIf,TitleCasePipe,PropertyCounterComponent,TooltipDirective],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
   viewProviders: [provideIcons({ bootstrapSuitHeartFill })]

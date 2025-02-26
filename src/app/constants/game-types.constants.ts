@@ -1,4 +1,4 @@
-import { GameType } from "../interfaces/game";
+import { GameType } from "../interfaces/IGame";
 
 export const GAME_TYPES = [
   { value: GameType.MTGCommander, label: "MTG Commander", defaultMaxPlayers: 4 },

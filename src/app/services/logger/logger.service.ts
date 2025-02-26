@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { ILog } from '../../interfaces/game';
+import { ILog } from '../../interfaces/IGame';
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({

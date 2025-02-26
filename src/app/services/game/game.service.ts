@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../interfaces/room';
-import { IPlayer } from '../../interfaces/player';
-import { GameType, IGameEvent } from '../../interfaces/game';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../interfaces/IRoom';
+import { IPlayer } from '../../interfaces/IPlayer';
+import { GameType, IGameEvent } from '../../interfaces/IGame';
 import { MTGCommander } from '../../classes/game/MTGCommander';
 import { MTGStandard } from '../../classes/game/MTGStandard';
 import { MTGModern } from '../../classes/game/MTGModern';

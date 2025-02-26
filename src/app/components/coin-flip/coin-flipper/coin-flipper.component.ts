@@ -2,7 +2,7 @@ import { Component, Input, Output } from '@angular/core';
 import { CoinFlipComponent } from '../coin-flip/coin-flip.component';
 import { NgFor, NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent, ICoinFlipResults, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
+import { GameEvent, ICoinFlipResults, IGameEvent, LocalGameEvent } from '../../../interfaces/IGame';
 import { Subscription } from 'rxjs';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { SoundService } from '../../../services/sounds/sound.service';

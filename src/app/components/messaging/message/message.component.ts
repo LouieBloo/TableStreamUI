@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IMessage } from '../../../interfaces/message';
+import { IMessage } from '../../../interfaces/IMessage';
 
 @Component({
   selector: 'app-message',

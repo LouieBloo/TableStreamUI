@@ -1,10 +1,10 @@
 import { Component, input, Input } from '@angular/core';
-import { IPlayer, PlayerProperties } from '../../../interfaces/player';
+import { IPlayer, PlayerProperties } from '../../../interfaces/IPlayer';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
-import { PlayingCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/IScryfall';
 import { NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
+import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/IGame';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapPencilSquare, bootstrapTrash3 } from '@ng-icons/bootstrap-icons';
 import { CardComponent } from '../../card/card.component';

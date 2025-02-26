@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { IAnimoji } from '../../../interfaces/effects';
+import { IAnimoji } from '../../../interfaces/IEffects';
 import { Subscription } from 'rxjs';
-import { IGameEvent, LocalGameEvent } from '../../../interfaces/game';
+import { IGameEvent, LocalGameEvent } from '../../../interfaces/IGame';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { IPlayer } from '../../../interfaces/player';
+import { IPlayer } from '../../../interfaces/IPlayer';
 import { NgIf } from '@angular/common';
 
 @Component({

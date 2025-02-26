@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NewsService } from '../../services/news/news.service';
-import { IMaintenanceAlert, INews } from '../../interfaces/app';
+import { IMaintenanceAlert, INews } from '../../interfaces/IApp';
 import { LoggerService } from '../../services/logger/logger.service';
 import { NgIf } from '@angular/common';
 import { bootstrapXLg } from '@ng-icons/bootstrap-icons';

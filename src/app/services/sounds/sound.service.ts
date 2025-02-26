@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Howl } from 'howler';
-import { ISound } from '../../interfaces/effects';
+import { ISound } from '../../interfaces/IEffects';
 import { SettingsService } from '../settings/settings.service';
 
 @Injectable({
