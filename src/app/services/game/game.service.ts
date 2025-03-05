@@ -78,6 +78,11 @@ export class GameService {
     return this.room.game as PokemonStandard;
   }
 
+  // most games will not have day/night so we "assume" its night which is default css coloring (Dark)
+  get isDay() : boolean{
+    return this.room.game?.dayNightCycle && this.room.game?.dayNightCycle == 'DAY' ? true : false;
+  }
+
   static createGame(gameType: GameType) : Game {
     switch (gameType) {
       case GameType.MTGCommander:

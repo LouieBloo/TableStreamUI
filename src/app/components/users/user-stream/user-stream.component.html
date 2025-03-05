@@ -57,6 +57,10 @@
             <div *ngIf="player.lifeTotal <= 0">
                 <p class="text-center text-4xl"  appTooltip="This player is dead" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">💀</p>
             </div>
+            <div *ngIf="gameService.room.game?.dayNightCycle != ''">
+                <p *ngIf="gameService.isDay" class="text-center text-4xl"  appTooltip="Daytime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">☀️</p>
+                <p *ngIf="!gameService.isDay" class="text-center text-4xl"  appTooltip="Nighttime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">🌑</p>
+            </div>
         </div>
         <!-- Pokemon -->
         <div *ngIf="gameService.isPokemonGame()">

@@ -200,6 +200,9 @@ export class GameComponent {
       case GameEvent.ModifyPlayerProperty:
         this.updatePlayers([event.response]);
         break;
+      case GameEvent.ModifyGameProperty:
+        this.gameService.room.game?.modifyProperty(event.response);
+        break;
       case GameEvent.StartGame:
         this.updatePlayers(event.response.players);
         if (this.gameService.room.game) {

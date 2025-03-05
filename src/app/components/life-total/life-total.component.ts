@@ -6,7 +6,7 @@ import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
 import { IPlayer, PlayerProperties } from '../../interfaces/player';
-import { GameEvent, IModifyPlayerProperty } from '../../interfaces/game';
+import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/game';
 import { PropertyCounterComponent } from '../property-counter/property-counter.component';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../directives/tooltip.directive';
@@ -70,6 +70,14 @@ export class LifeTotalComponent {
       amountToModify: 1
     }
     this.webRtc.sendGameEvent({event: GameEvent.ModifyPlayerProperty, payload: payload });
+  }
+
+  toggleDayNightCycle = ()=>{
+    let payload: IModifyGameProperty = {
+      property: GameProperties.DayNightCycle,
+      value: this.gameService.isDay ? "NIGHT" : "DAY"
+    }
+    this.webRtc.sendGameEvent({event: GameEvent.ModifyGameProperty, payload: payload });
   }
 
 }
