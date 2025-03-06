@@ -4,7 +4,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LocalStorageService {
-  private readonly PASSWORD = 'dev-pw';
+  private readonly PASSWORD = 'pw';
+  private readonly DEV_PASSWORD = 'dev-pw';
   private readonly AGREED_TO_DISCLAIMER = 'agreedToDisclaimer';
   private readonly SEEN_IMAGES = 'seenImages';
   private readonly PLAYER_NAME = 'playerName';
@@ -46,6 +47,10 @@ export class LocalStorageService {
 
   get password() {
     return this.getItem(this.PASSWORD);
+  }
+
+  get devPassword(){
+    return this.getItem(this.DEV_PASSWORD);
   }
 
   get hasPlayedBefore() {
@@ -104,9 +109,12 @@ export class LocalStorageService {
     this.setItem(this.AGREED_TO_DISCLAIMER, agreedToDisclaimer);
   }
 
-
   setPassword(password: string): void {
     return this.setItem(this.PASSWORD, password);
+  }
+
+  setDevPassword(password: string): void {
+    return this.setItem(this.DEV_PASSWORD, password);
   }
 
   removeSeenImages() {
@@ -163,7 +171,7 @@ export class LocalStorageService {
     this.setReactionsEnabled(player.reactionsEnabled + '');
 
     if (player.password)
-      this.setPlayerId(player.password);
+      this.setPassword(player.password);
   }
 
   removeStorageOnHomeLoad() {

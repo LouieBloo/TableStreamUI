@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { PlayingCard } from '../../interfaces/scryfall';
-import { GameType } from '../../interfaces/game';
+import { PlayingCard } from '../../interfaces/IScryfall';
+import { GameType } from '../../interfaces/IGame';
 import { environment } from '../../../environments/environment';
 import { Game } from '../../classes/game/game';
 

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IMongoImage } from '../../../interfaces/dev';
+import { IMongoImage } from '../../../interfaces/IDev';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
@@ -28,12 +28,12 @@ export class DevClassifyTrainSliceComponent {
   constructor(private http: HttpClient, private alerts:AlertsService, private localStorageService: LocalStorageService) { }
 
   ngOnInit(): void {
-    this.password.value = this.localStorageService.password;
+    this.password.value = this.localStorageService.devPassword;
   }
 
   async loadImages(): Promise<void> {
     try {
-      this.localStorageService.setPassword(this.password.value);
+      this.localStorageService.setDevPassword(this.password.value);
 
       let params = new HttpParams();
 

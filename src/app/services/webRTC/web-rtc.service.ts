@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
-import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/game';
-import { IMessage } from '../../interfaces/message';
-import { IUser, UserType } from '../../interfaces/player';
-import { IRoom } from '../../interfaces/room';
+import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/IGame';
+import { IMessage } from '../../interfaces/IMessage';
+import { IUser, UserType } from '../../interfaces/IPlayer';
+import { IRoom } from '../../interfaces/IRoom';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
-import { IVideoQualify } from '../../interfaces/networking';
+import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { Router } from '@angular/router';
 

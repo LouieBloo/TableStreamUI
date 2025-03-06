@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IPlayer } from '../../interfaces/player';
+import { IPlayer } from '../../interfaces/IPlayer';
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 

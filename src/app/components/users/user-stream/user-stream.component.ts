@@ -2,8 +2,8 @@ import { Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
-import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/player';
-import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/game';
+import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/IPlayer';
+import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/IGame';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
@@ -18,12 +18,12 @@ import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.
 import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 import { TimerComponent } from '../../timer/timer.component';
-import { PlayingCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/IScryfall';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IKickPlayerResponse } from '../../../interfaces/room';
+import { IKickPlayerResponse } from '../../../interfaces/IRoom';
 
 @Component({
   selector: 'app-user-stream',

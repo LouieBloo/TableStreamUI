@@ -1,5 +1,5 @@
-import { IPlayer, PlayerProperties } from "./player";
-import { PlayingCard } from "./scryfall";
+import { IPlayer, PlayerProperties } from "./IPlayer";
+import { PlayingCard } from "./IScryfall";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;

@@ -1,4 +1,4 @@
-import { IPlayer } from "./player";
+import { IPlayer } from "./IPlayer";
 
 export interface IMessage {
     text: string;

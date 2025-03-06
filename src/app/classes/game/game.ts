@@ -1,5 +1,5 @@
-import { PlayingCard, Token } from "../../interfaces/scryfall";
-import {GameProperties, GameType, IModifyGameProperty} from "../../interfaces/game";
+import { PlayingCard, Token } from "../../interfaces/IScryfall";
+import {GameType} from "../../interfaces/IGame";
 export class Game {
 
     startingLifeTotal = 20;

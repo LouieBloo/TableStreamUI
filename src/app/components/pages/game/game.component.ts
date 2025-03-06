@@ -3,10 +3,10 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
-import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/game';
+import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
-import { IPlayer, IUser, UserType } from '../../../interfaces/player';
-import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/room';
+import { IPlayer, IUser, UserType } from '../../../interfaces/IPlayer';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/IRoom';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
@@ -23,7 +23,7 @@ import { TimerComponent } from '../../timer/timer.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
-import { Token } from '../../../interfaces/scryfall';
+import { Token } from '../../../interfaces/IScryfall';
 
 @Component({
   selector: 'app-game',

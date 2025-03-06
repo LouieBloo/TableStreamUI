@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { ISound } from '../../../interfaces/effects';
+import { ISound } from '../../../interfaces/IEffects';
 import { NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/game';
-import { IPlayer } from '../../../interfaces/player';
+import { GameEvent, IGameEvent, LocalGameEvent } from '../../../interfaces/IGame';
+import { IPlayer } from '../../../interfaces/IPlayer';
 import { GameService } from '../../../services/game/game.service';
 import { SoundService } from '../../../services/sounds/sound.service';
 import { Subscription } from 'rxjs';

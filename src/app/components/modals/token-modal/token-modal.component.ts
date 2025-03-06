@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { GameService } from '../../../services/game/game.service';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent } from '../../../interfaces/game';
+import { GameEvent } from '../../../interfaces/IGame';
 import { SettingsService } from '../../../services/settings/settings.service';
 import { FormsModule } from '@angular/forms';
 
