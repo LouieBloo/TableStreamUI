@@ -28,12 +28,12 @@ export class DevClassifyTrainSliceComponent {
   constructor(private http: HttpClient, private alerts:AlertsService, private localStorageService: LocalStorageService) { }
 
   ngOnInit(): void {
-    this.password.value = this.localStorageService.password;
+    this.password.value = this.localStorageService.devPassword;
   }
 
   async loadImages(): Promise<void> {
     try {
-      this.localStorageService.setPassword(this.password.value);
+      this.localStorageService.setDevPassword(this.password.value);
 
       let params = new HttpParams();
 

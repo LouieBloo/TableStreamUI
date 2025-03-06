@@ -55,13 +55,13 @@ export class DevClassifyComponent {
   }
 
   ngOnInit() {
-    this.password.value = this.localStorageService.password;
+    this.password.value = this.localStorageService.devPassword;
   }
 
   async loadImages(): Promise<void> {
     this.loadingMoreImages = true;
     try {
-      this.localStorageService.setPassword(this.password.value);
+      this.localStorageService.setDevPassword(this.password.value);
       let params = new HttpParams();
 
       params = params.set('imageType', 'CARD');

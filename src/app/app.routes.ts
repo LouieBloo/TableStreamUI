@@ -8,7 +8,7 @@ import { DevClassifyTrainSliceComponent } from './components/pages/dev-classify-
 import { SpeechToTextComponent } from './components/speech-to-text/speech-to-text.component';
 import { DashboardComponent } from './components/pages/dashboard/dashboard.component';
 import { dashboardGuard } from './guard/dashboard.guard';
-import { CheckPasswordComponent } from './components/check-password/check-password.component';
+import { CheckPasswordComponent } from './components/pages/check-password/check-password.component';
 
 export const routes: Routes = [
     {
