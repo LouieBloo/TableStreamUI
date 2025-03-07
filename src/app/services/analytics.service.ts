@@ -94,11 +94,11 @@ export class AnalyticsService {
   get numberOfRooms$() {
     return this.analytic$.pipe(
       map((analytic) => {
-        let numberOfPlayers: number[] = [];
+        let numberOfRooms: number[] = [];
         analytic?.mongoAnalytics.forEach((ma) =>
-          numberOfPlayers.push(ma.totalPlayers)
+          numberOfRooms.push(ma.roomCount)
         );
-        return numberOfPlayers;
+        return numberOfRooms;
       })
     );
   }
