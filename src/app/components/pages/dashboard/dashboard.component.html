@@ -1,19 +1,29 @@
 <div *ngIf="isAnalyticLoaded$ | async" class="ps-4" style="background-color: white">
   <div class="text-4xl pb-2" style="color: rgb(243, 18, 175)">Analytics</div>
-  <div class="grid grid-cols-2 gap-4 pt-4" style="width: 1800px">
-    <div class="grid-cols-2">
-      <app-stat [title]="'Active players now'" [value]="activePlayers$ | async" class="me-3"></app-stat>
-      <app-stat [title]="'Active rooms now'" [value]="activeRooms$ | async"></app-stat>
+  <div class="gap-4 pt-4">
+    <app-stat [title]="'Active players now'" [value]="activePlayers$ | async" class="me-3"></app-stat>
+    <app-stat [title]="'Active rooms now'" [value]="activeRooms$ | async" class="me-3"></app-stat>
+    <app-stat [title]="'Total rooms today'" [value]="totalRoomsToday$ | async" class="me-3"></app-stat>
+    <app-stat [title]="'Total players today'" [value]="totalPlayersToday$ | async"></app-stat>
+  </div>
+  <div class="grid grid-cols-2 gap-4 pt-4" style="width: 2000px">
+    <div class="p-4">
+      <app-bar-graph
+        [yAxis]="numberOfRoomsPerGameType$ | async"
+        [xAxis]="gameTypes$ | async"
+        [seriesName]="'Total Games per type'"
+        [id]="'totalGamePerType'">
+      </app-bar-graph>
     </div>
-    <div class="mb-4">
+    <div class="p-4">
       <app-bar-graph
         [yAxis]="numberOfPlayers$ | async"
         [xAxis]="timeFrames$ | async"
         [seriesName]="'Total Players'"
-        [id]="'totalPlayers'"
-      ></app-bar-graph>
+        [id]="'totalPlayers'">
+      </app-bar-graph>
     </div>
-    <div class="mb-4">
+    <div class="p-4">
       <app-bar-graph
         [yAxis]="numberOfRooms$ | async"
         [xAxis]="timeFrames$ | async"
@@ -21,7 +31,7 @@
         [id]="'totalRooms'">
       </app-bar-graph>
     </div>
-    <div class="mb-4">
+    <div class="p-4">
       <app-bar-graph
         [yAxis]="roomDurationMinutes$ | async"
         [xAxis]="timeFrames$ | async"

@@ -1,8 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { IAnalytic } from '../interfaces/IAnalytic';
+import { environment } from '../../../environments/environment';
+import { IAnalytic } from '../../interfaces/IAnalytic';
+import { GameType } from '../../interfaces/IGame';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +46,7 @@ export class AnalyticsService {
     return this.analytic$.pipe(
       map((analytic) => {
         let timeframes: string[] = [];
-        analytic?.mongoAnalytics.forEach((ma) => {
+        analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) => {
           const startDate = ma.startDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -68,7 +69,7 @@ export class AnalyticsService {
     return this.analytic$.pipe(
       map((analytic) => {
         let roomDurationInMinutes: number[] = [];
-        analytic?.mongoAnalytics.forEach((ma) => {
+        analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) => {
           const formattedDuration = parseFloat(
             ma.averageRoomDurationInMinutes.toFixed()
           );
@@ -83,7 +84,7 @@ export class AnalyticsService {
     return this.analytic$.pipe(
       map((analytic) => {
         let numberOfPlayers: number[] = [];
-        analytic?.mongoAnalytics.forEach((ma) =>
+        analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) =>
           numberOfPlayers.push(ma.totalPlayers)
         );
         return numberOfPlayers;
@@ -95,13 +96,51 @@ export class AnalyticsService {
     return this.analytic$.pipe(
       map((analytic) => {
         let numberOfRooms: number[] = [];
-        analytic?.mongoAnalytics.forEach((ma) =>
+        analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) =>
           numberOfRooms.push(ma.roomCount)
         );
         return numberOfRooms;
       })
     );
   }
+
+  get totalPlayersToday$(): Observable<number|null> {
+    return this.analytic$.pipe(
+      map((analytic)=> {
+        return analytic?.mongoAnalytic.totalPlayersToday ?? null;
+      })
+    )
+  }
+
+  get totalRoomsToday$(): Observable<number|null> {
+    return this.analytic$.pipe(
+      map((analytic)=> {
+        return analytic?.mongoAnalytic.totalRoomsToday ?? null
+      })
+    )
+  }
+
+  get numberOfRoomsPerGameType$(): Observable<number[]> {
+    return this.analytic$.pipe(
+      map((analytic) => {
+        return analytic?.mongoAnalytic.gameAnalytics.map(gameAnalytic => gameAnalytic.numberOfRooms) ?? [];
+      })
+    );
+  }
+
+
+  get gameTypes$(): Observable<string[]> {
+    return this.analytic$.pipe(
+      map((analytic) => {
+        return analytic?.mongoAnalytic.gameAnalytics
+          .map(gameAnalytic => {
+            const enumValue = GameType[gameAnalytic.gameType as keyof typeof GameType];
+            return enumValue.toString()
+          }) ?? [];
+      })
+    );
+  }
+  
 
   constructor(private http: HttpClient) {}
 
@@ -113,7 +152,7 @@ export class AnalyticsService {
       .get<IAnalytic>(environment.socketUrl + '/analytics', { headers })
       .pipe(
         tap((response: IAnalytic) => {
-          response.mongoAnalytics.forEach((ma) => {
+          response.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) => {
             ma.startDate = new Date(ma.startDate);
             ma.endDate = new Date(ma.endDate);
           });

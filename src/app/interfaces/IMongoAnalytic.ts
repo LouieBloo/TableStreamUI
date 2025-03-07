@@ -1,8 +1,9 @@
+import { IGameAnalytic } from "./IGameAnalytic";
+import { IMongoAnalyticByDate } from "./IMongoAnalyticByDate";
+
 export interface IMongoAnalytic {
-    startDate: Date,
-    endDate: Date,
-    roomCount: number;
-    totalPlayers: number;
-    averagePlayers: number;
-    averageRoomDurationInMinutes: number;
+    totalPlayersToday: number;
+    totalRoomsToday: number;
+    mongoAnalyticsByDate: IMongoAnalyticByDate[];
+    gameAnalytics: IGameAnalytic[];
 }

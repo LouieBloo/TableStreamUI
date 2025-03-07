@@ -1,7 +1,7 @@
 import { CanActivateFn } from '@angular/router';
 import { Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { AnalyticsService } from '../services/analytics.service';
+import { AnalyticsService } from '../services/analytics/analytics.service';
 
 export const dashboardGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
