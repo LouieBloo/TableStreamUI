@@ -2,7 +2,7 @@ import { AsyncPipe, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { Observable, of, shareReplay } from 'rxjs';
 import { BarGraphComponent } from '../../bar-graph/bar-graph.component';
-import { AnalyticsService } from '../../../services/analytics.service';
+import { AnalyticsService } from '../../../services/analytics/analytics.service';
 import { StatComponent } from '../../stat/stat.component';
 
 @Component({
@@ -20,6 +20,10 @@ export class DashboardComponent {
   activePlayers$: Observable<number> = of();
   activeRooms$: Observable<number> = of();
   isAnalyticLoaded$: Observable<boolean> = of(false);
+  totalPlayersToday$: Observable<number|null> = of();
+  totalRoomsToday$: Observable<number|null> = of();
+  gameTypes$: Observable<string[]> = of();
+  numberOfRoomsPerGameType$: Observable<number[]> = of();
 
 
   constructor(private analyticsService: AnalyticsService) {
@@ -30,7 +34,10 @@ export class DashboardComponent {
     this.activePlayers$ = this.analyticsService.activePlayers$;
     this.activeRooms$ = this.analyticsService.activeRooms$;
     this.isAnalyticLoaded$ = this.analyticsService.isAnalyticLoaded$;
-    
+    this.totalPlayersToday$ = this.analyticsService.totalPlayersToday$;
+    this.totalRoomsToday$ = this.analyticsService.totalRoomsToday$;
+    this.gameTypes$ = this.analyticsService.gameTypes$;
+    this.numberOfRoomsPerGameType$ = this.analyticsService.numberOfRoomsPerGameType$;
   }
 
 }

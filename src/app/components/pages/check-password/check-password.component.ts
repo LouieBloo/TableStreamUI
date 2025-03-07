@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AnalyticsService } from '../../../services/analytics.service';
+import { AnalyticsService } from '../../../services/analytics/analytics.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
