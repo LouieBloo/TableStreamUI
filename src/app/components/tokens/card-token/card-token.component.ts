@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
-import { PlayingCard, Token } from '../../../interfaces/IScryfall';
+import { IPlayingCard, Token } from '../../../interfaces/IPlayingCard';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../../interfaces/IGame';
 import { CardComponent } from '../../card/card.component';
@@ -107,7 +107,7 @@ export class CardTokenComponent implements OnInit {
     this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
   }
 
-  cardSelected = (card:PlayingCard)=>{
+  cardSelected = (card:IPlayingCard)=>{
     if(card != null){
       this.token.card = card;
       this.updateToken();

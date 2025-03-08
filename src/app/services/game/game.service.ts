@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { PokemonStandard } from '../../classes/game/PokemonStandard';
 import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
-import { WebRTCService } from '../webRTC/web-rtc.service';
+import { YugiohStandard } from '../../classes/game/YugiohStandard';
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +55,16 @@ export class GameService {
 
   public isCommanderGame = ():boolean =>{
     return this.room.game?.gameType == GameType.MTGCommander || this.room.game?.gameType == GameType.MTGPauperCommander;
+  }
+
+  public isYugiohGame = (): boolean => {
+    if(!this.room.game?.gameType)
+      return false
+    
+    if(this.room.game.gameType === GameType.YugiohStandard)
+      return true
+
+    return false
   }
 
   public isMagicGame = (): boolean => {
@@ -99,6 +109,8 @@ export class GameService {
         return new PokemonStandard();
       case GameType.MTGPauperCommander:
         return new MTGPauperCommander();
+      case GameType.YugiohStandard:
+        return new YugiohStandard();
     }
 
     return new MTGCommander();

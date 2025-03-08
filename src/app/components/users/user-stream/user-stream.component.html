@@ -1,5 +1,4 @@
 <div class="relative h-full glow" [ngClass]="{'glow':  player.isTakingTurn}">
-
     <div class="flex justify-center h-full">
         <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 
             [muted]="localStream || muted"></video>
@@ -9,18 +8,31 @@
             [videoElement]="videoElement"
           ></app-bounding-box>
     </div>
-
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
-        <div *ngIf="gameService.isMagicGame()">
-            <app-life-total [player]="player" [modifyCallback]="modifyLifeTotal" [editable]="localStream"
-                [modifyPoisonCallback]="modifyPoisonTotal" [modifyEnergyCallback]="modifyEnergyTotal" [toggleCommanderDamages]="toggleCommanderDamages"></app-life-total>
-        </div>
-        <div *ngIf="gameService.isPokemonGame()">
-            <app-pokemon-prize-tracker [player]="player" [modifyPrizeCardsCallback]="modifyPrizeCardTotal" [editable]="localStream"></app-pokemon-prize-tracker>
-        </div>
+        <app-life-total
+          *ngIf="gameService.isMagicGame()"
+          [player]="player"
+          [modifyCallback]="modifyLifeTotal"
+          [editable]="localStream"
+          [modifyPoisonCallback]="modifyPoisonTotal"
+          [modifyEnergyCallback]="modifyEnergyTotal"
+          [toggleCommanderDamages]="toggleCommanderDamages">
+        </app-life-total>
+        <app-pokemon-prize-tracker
+          *ngIf="gameService.isPokemonGame()"
+          [player]="player"
+          [modifyPrizeCardsCallback]="modifyPrizeCardTotal"
+          [editable]="localStream">
+        </app-pokemon-prize-tracker>
+        <app-life-total *ngIf="gameService.isYugiohGame()"
+          [player]="player"
+          [modifyCallback]="modifyLifeTotal"
+          [editable]="localStream"
+          [modifyPoisonCallback]="modifyPoisonTotal"
+          [modifyEnergyCallback]="modifyEnergyTotal"
+          [toggleCommanderDamages]="toggleCommanderDamages">
+        </app-life-total>
     </div>
-
-
     <div class="absolute left-2 text-white flex flex-col leftPanel">
         <div class="text-xs">
             <p>Turn: <app-timer [date]="player.currentTurnStartTime"></app-timer></p>

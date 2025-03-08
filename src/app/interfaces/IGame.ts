@@ -1,5 +1,5 @@
 import { IPlayer, PlayerProperties } from "./IPlayer";
-import { PlayingCard } from "./IScryfall";
+import { IPlayingCard } from "./IPlayingCard";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
@@ -47,7 +47,7 @@ export enum GameType{
     MTGVintage,
     PokemonStandard,
     MTGPauperCommander,
-    YuGiOhStandard
+    YugiohStandard
 }
 
 export enum GameProperties{
@@ -68,7 +68,7 @@ export interface IModifyPlayerProperty{
 export interface ICommanderDamage{
     playerId:string;
     damage:number;
-    card:PlayingCard;
+    card:IPlayingCard;
 }
 
 export interface IGameError {

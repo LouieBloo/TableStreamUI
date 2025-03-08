@@ -1,7 +1,7 @@
 import { Game } from '../classes/game/game';
 import { IMessage } from './IMessage';
 import {IPlayer} from './IPlayer';
-import { Token } from './IScryfall';
+import { Token } from './IPlayingCard';
 
 export interface IRoom {
     id?:string;

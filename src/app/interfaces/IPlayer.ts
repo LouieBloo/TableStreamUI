@@ -1,5 +1,5 @@
 import { ICommanderDamage } from "./IGame";
-import { PlayingCard } from "./IScryfall";
+import { IPlayingCard } from "./IPlayingCard";
 
 export interface IUser{
     name:string;
@@ -28,7 +28,7 @@ export interface IPlayer extends IUser{
 
     commanderDamages: { [playerId: string]: { [cardId: string]: ICommanderDamage } };
 
-    commanders: PlayingCard[];
+    commanders: IPlayingCard[];
 
     prizeCards:number;
 

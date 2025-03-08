@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { PlayingCard } from '../../interfaces/IScryfall';
+import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { GameType } from '../../interfaces/IGame';
 import { environment } from '../../../environments/environment';
 import { Game } from '../../classes/game/game';
@@ -16,14 +16,15 @@ export class CardSearchService {
 
   constructor(private http: HttpClient) { }
 
-  searchCards(query: string, fuzzy: boolean = true, game:Game, options:any): Observable<any> {
-    if(game.gameType == GameType.PokemonStandard){
+  searchCards(query: string, fuzzy: boolean = true, game:Game, options:any): Observable<IPlayingCard> {
+    if(game.gameType == GameType.PokemonStandard)
       return this.searchPokemon(query, game.searchTag);
-    }else{
-      return this.searchScryfall(query,fuzzy,game.searchTag, options);
-    }
-  }
 
+    if(game.gameType == GameType.YugiohStandard)
+      return this.searchYugioh(query)
+
+    return this.searchScryfall(query,fuzzy,game.searchTag, options);
+  }
 
   searchScryfall(query: string, fuzzy: boolean = true, format: string = 'commander', options:any={}): Observable<any> {
     let searchQuery = query;
@@ -61,5 +62,10 @@ export class CardSearchService {
     let searchQuery = `name:"*${name}*" legalities.${format}:Legal`;
     const params = new HttpParams().set('query', searchQuery);
     return this.http.get<any>(environment.socketUrl + "/pokemon-cards", { params });
+  }
+
+  searchYugioh(name: string): Observable<any> {
+    const params = new HttpParams().set('fname', name);
+    return this.http.get<IPlayingCard>(environment.socketUrl + "/yugioh-cards", { params });
   }
 }

@@ -108,10 +108,6 @@ export class HomeComponent {
     }
   }
 
-  isValidGameType = (): boolean => {
-    return this.player.gameType != GameType.YuGiOhStandard;
-  };
-
   private setLocalStorageForJoin(): void {
     this.localStorageService.setPlayerName(this.player.name);
     this.localStorageService.setIsSpectator(this.player.isSpectator.toString())

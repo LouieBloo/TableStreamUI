@@ -6,7 +6,7 @@ import { GameEvent, GameType } from '../../interfaces/IGame';
 import { Game } from '../../classes/game/game';
 import { CardComponent } from '../card/card.component';
 import { NgIf } from '@angular/common';
-import { PlayingCard } from '../../interfaces/IScryfall';
+import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { bootstrapRecord, bootstrapRecordFill, bootstrapClockHistory } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { GameService } from '../../services/game/game.service';
