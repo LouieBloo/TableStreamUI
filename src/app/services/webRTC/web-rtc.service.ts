@@ -134,6 +134,9 @@ export class WebRTCService {
       if (quality === '2k') {
         idealWidth = 1600;
         idealHeight = 1200;
+      }else if(quality === '720'){
+        idealWidth = 960;
+        idealHeight = 720;
       } else {
         // Default for 4:3
         idealWidth = 1280;
@@ -144,7 +147,10 @@ export class WebRTCService {
       if (quality === '2k') {
         idealWidth = 2560;
         idealHeight = 1440;
-      } else {
+      }else if(quality === '720'){
+        idealWidth = 1280;
+        idealHeight = 720;
+      }else {
         // Default 1080p for 16:9
         idealWidth = 1920;
         idealHeight = 1080;
