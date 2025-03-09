@@ -112,3 +112,11 @@
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>
 </div>
+
+<div *ngIf="!localStorageService.hasUserInteractedWithSite" id="splashScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
+    <div class="text-white text-center">
+        <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
+            Rejoin Game
+        </button>
+    </div>
+</div>

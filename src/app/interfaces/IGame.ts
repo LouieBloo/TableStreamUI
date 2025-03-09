@@ -33,7 +33,8 @@ export enum GameEvent{
 //fine to change on front end only
 export enum LocalGameEvent{
     FlipCoins,
-    PlayReaction
+    PlayReaction,
+    RejoinGame 
 }
 
 

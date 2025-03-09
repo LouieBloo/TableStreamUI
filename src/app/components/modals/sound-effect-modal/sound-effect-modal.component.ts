@@ -122,7 +122,7 @@ export class SoundEffectModalComponent {
     if(!localIncomingPlayer.reactionsMuted){
       this.soundService.playSound(sound);
 
-      this.webRTC.handleLocalGameEvent({
+      this.webRTC.sendLocalGameEvent({
         event: LocalGameEvent.PlayReaction,
         callingPlayer: localIncomingPlayer,
         payload: {animojiId: sound.animojiId}

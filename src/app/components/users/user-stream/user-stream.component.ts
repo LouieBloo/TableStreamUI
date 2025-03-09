@@ -3,7 +3,7 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/IPlayer';
-import { GameEvent, IGameEvent, IModifyPlayerProperty } from '../../../interfaces/IGame';
+import { GameEvent, IGameEvent, IModifyPlayerProperty, LocalGameEvent } from '../../../interfaces/IGame';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
@@ -81,18 +81,29 @@ export class UserStreamComponent {
     private router: Router
   ) {
     this.videoQuality = localStorageService.videoQuality || '16/9-1080'
-    this.subscribeToKickedPlayerEvent();
+    this.subscribeToEvents();
   }
 
   ngOnDestroy(){
     this.subscriptions.unsubscribe();
   }
 
-  subscribeToKickedPlayerEvent() {
+  subscribeToEvents() {
     this.subscriptions.add(
       this.webRTC.kickedPlayerEvent$.subscribe((event) => {
         if (this.imKicked(event.response)) {
           this.router.navigate(['/join']);
+        }
+      })
+    );
+
+    //local events
+    this.subscriptions.add(
+      this.webRTC.localGameEvent.subscribe((localGameEvent:IGameEvent)=>{
+        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.localStream) {
+          this.video.nativeElement.play().catch((err) => {
+            console.error('Error auto-playing:', err)
+          });
         }
       })
     );

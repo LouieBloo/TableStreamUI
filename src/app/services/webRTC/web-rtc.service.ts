@@ -636,7 +636,7 @@ export class WebRTCService {
     this.gameEventSubject.next(event);
   }
 
-  handleLocalGameEvent = (event: IGameEvent) => {
+  sendLocalGameEvent = (event: IGameEvent) => {
     this.localGameEventSubject.next(event);
   }
 
