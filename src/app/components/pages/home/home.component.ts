@@ -52,6 +52,7 @@ export class HomeComponent {
 
     this.webRTC.disconnect();
     this.localStorageService.removeStorageOnHomeLoad();
+    this.localStorageService.setUserInteractedWithSite(true);
 
     if (this.localStorageService.playerName) {
       this.player.name = this.localStorageService.playerName!;

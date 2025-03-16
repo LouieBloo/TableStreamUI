@@ -21,6 +21,8 @@ export class LocalStorageService {
   private readonly MIC_MUTED = 'micMuted';
   private readonly IS_SHARING_IMAGES = 'isSharingImages';
 
+  private userInteractedWithSite:boolean = false;
+
   get playerName() {
     return this.getItem(this.PLAYER_NAME);
   }
@@ -93,6 +95,10 @@ export class LocalStorageService {
     return this.getItem(this.MIC_MUTED);
   }
 
+  get hasUserInteractedWithSite(){
+    return this.userInteractedWithSite;
+  }
+
   setVideoQuality(videoQuality: string) {
     this.setItem(this.VIDEO_QUALITY, videoQuality);
   }
@@ -160,6 +166,10 @@ export class LocalStorageService {
 
   setReactionsEnabled(reactionsEnabled: string) {
     this.setItem(this.REACTIONS_ENABLED, reactionsEnabled);
+  }
+
+  setUserInteractedWithSite = (userInteractedWithSite:boolean)=>{
+    this.userInteractedWithSite = userInteractedWithSite
   }
 
   setLocalStorageForCreateGame(player: any) {

@@ -70,7 +70,7 @@ export class GameComponent {
     private route: ActivatedRoute,
     private alertService: AlertsService,
     private logger: LoggerService,
-    private localStorageService: LocalStorageService) {
+    public localStorageService: LocalStorageService) {
     this.gameService.room = {
       name: 'temp',
       players: [],
@@ -337,6 +337,15 @@ export class GameComponent {
     this.webRTC.sendGameEvent({ event: GameEvent.ResetGame });
   };
 
+  // This is purely for the chrome autoplay policy, user needs to interact with the page before we can auto play the video streams
+  rejoinGame = ()=>{
+    this.webRTC.sendLocalGameEvent({
+      event: LocalGameEvent.RejoinGame
+    });
+
+    this.localStorageService.setUserInteractedWithSite(true);
+  }
+
   copyUrl() {
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
@@ -351,7 +360,7 @@ export class GameComponent {
   }
 
   flipCoins = (coinsToFlip: number) => {
-    this.webRTC.handleLocalGameEvent({
+    this.webRTC.sendLocalGameEvent({
       event: LocalGameEvent.FlipCoins,
       callingPlayer: this.localPlayer,
       payload: { coinsToFlip: coinsToFlip },
