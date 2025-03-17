@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { GameService } from '../../../services/game/game.service';
 import { NgIf, TitleCasePipe } from '@angular/common';
-import { IPlayer } from '../../../interfaces/player';
+import { IPlayer } from '../../../interfaces/IPlayer';
 
 @Component({
   selector: 'app-pokemon-prize-tracker',

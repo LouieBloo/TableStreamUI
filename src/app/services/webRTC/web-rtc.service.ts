@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
-import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/game';
-import { IMessage } from '../../interfaces/message';
-import { IUser, UserType } from '../../interfaces/player';
-import { IRoom } from '../../interfaces/room';
+import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/IGame';
+import { IMessage } from '../../interfaces/IMessage';
+import { IUser, UserType } from '../../interfaces/IPlayer';
+import { IRoom } from '../../interfaces/IRoom';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
-import { IVideoQualify } from '../../interfaces/networking';
+import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { Router } from '@angular/router';
 
@@ -134,6 +134,9 @@ export class WebRTCService {
       if (quality === '2k') {
         idealWidth = 1600;
         idealHeight = 1200;
+      }else if(quality === '720'){
+        idealWidth = 960;
+        idealHeight = 720;
       } else {
         // Default for 4:3
         idealWidth = 1280;
@@ -144,7 +147,10 @@ export class WebRTCService {
       if (quality === '2k') {
         idealWidth = 2560;
         idealHeight = 1440;
-      } else {
+      }else if(quality === '720'){
+        idealWidth = 1280;
+        idealHeight = 720;
+      }else {
         // Default 1080p for 16:9
         idealWidth = 1920;
         idealHeight = 1080;
@@ -630,7 +636,7 @@ export class WebRTCService {
     this.gameEventSubject.next(event);
   }
 
-  handleLocalGameEvent = (event: IGameEvent) => {
+  sendLocalGameEvent = (event: IGameEvent) => {
     this.localGameEventSubject.next(event);
   }
 

@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { IMessage } from '../../../interfaces/message';
+import { IMessage } from '../../../interfaces/IMessage';
 import { FormsModule } from '@angular/forms';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgFor } from '@angular/common';

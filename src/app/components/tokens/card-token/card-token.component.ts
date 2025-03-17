@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
-import { PlayingCard, Token } from '../../../interfaces/scryfall';
+import { PlayingCard, Token } from '../../../interfaces/IScryfall';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { GameEvent, IGameEvent } from '../../../interfaces/game';
+import { GameEvent, IGameEvent } from '../../../interfaces/IGame';
 import { CardComponent } from '../../card/card.component';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
 import { bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill, bootstrapEyeSlashFill, bootstrapEyeFill, bootstrapCopy, bootstrapArrowClockwise } from '@ng-icons/bootstrap-icons';

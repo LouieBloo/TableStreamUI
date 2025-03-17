@@ -4,7 +4,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class LocalStorageService {
-  private readonly PASSWORD = 'dev-pw';
+  private readonly PASSWORD = 'pw';
+  private readonly DEV_PASSWORD = 'dev-pw';
   private readonly AGREED_TO_DISCLAIMER = 'agreedToDisclaimer';
   private readonly SEEN_IMAGES = 'seenImages';
   private readonly PLAYER_NAME = 'playerName';
@@ -19,6 +20,8 @@ export class LocalStorageService {
   private readonly VIDEO_QUALITY = 'videoQuality';
   private readonly MIC_MUTED = 'micMuted';
   private readonly IS_SHARING_IMAGES = 'isSharingImages';
+
+  private userInteractedWithSite:boolean = false;
 
   get playerName() {
     return this.getItem(this.PLAYER_NAME);
@@ -46,6 +49,10 @@ export class LocalStorageService {
 
   get password() {
     return this.getItem(this.PASSWORD);
+  }
+
+  get devPassword(){
+    return this.getItem(this.DEV_PASSWORD);
   }
 
   get hasPlayedBefore() {
@@ -88,6 +95,10 @@ export class LocalStorageService {
     return this.getItem(this.MIC_MUTED);
   }
 
+  get hasUserInteractedWithSite(){
+    return this.userInteractedWithSite;
+  }
+
   setVideoQuality(videoQuality: string) {
     this.setItem(this.VIDEO_QUALITY, videoQuality);
   }
@@ -104,9 +115,12 @@ export class LocalStorageService {
     this.setItem(this.AGREED_TO_DISCLAIMER, agreedToDisclaimer);
   }
 
-
   setPassword(password: string): void {
     return this.setItem(this.PASSWORD, password);
+  }
+
+  setDevPassword(password: string): void {
+    return this.setItem(this.DEV_PASSWORD, password);
   }
 
   removeSeenImages() {
@@ -154,6 +168,10 @@ export class LocalStorageService {
     this.setItem(this.REACTIONS_ENABLED, reactionsEnabled);
   }
 
+  setUserInteractedWithSite = (userInteractedWithSite:boolean)=>{
+    this.userInteractedWithSite = userInteractedWithSite
+  }
+
   setLocalStorageForCreateGame(player: any) {
     this.setPlayerName(player.name);
     this.setRoomName(player.roomName);
@@ -163,7 +181,7 @@ export class LocalStorageService {
     this.setReactionsEnabled(player.reactionsEnabled + '');
 
     if (player.password)
-      this.setPlayerId(player.password);
+      this.setPassword(player.password);
   }
 
   removeStorageOnHomeLoad() {

@@ -1,5 +1,5 @@
-import { IPlayer, PlayerProperties } from "./player";
-import { PlayingCard } from "./scryfall";
+import { IPlayer, PlayerProperties } from "./IPlayer";
+import { PlayingCard } from "./IScryfall";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;
@@ -26,13 +26,15 @@ export enum GameEvent{
     ModifyToken,
     DeleteToken,
     RollDice,
-    KickPlayer
+    KickPlayer,
+    ModifyGameProperty
 }
 
 //fine to change on front end only
 export enum LocalGameEvent{
     FlipCoins,
-    PlayReaction
+    PlayReaction,
+    RejoinGame 
 }
 
 
@@ -46,6 +48,15 @@ export enum GameType{
     PokemonStandard,
     MTGPauperCommander,
     YuGiOhStandard
+}
+
+export enum GameProperties{
+    DayNightCycle
+}
+
+export interface IModifyGameProperty{
+    property:GameProperties;
+    value?:any;
 }
 
 export interface IModifyPlayerProperty{

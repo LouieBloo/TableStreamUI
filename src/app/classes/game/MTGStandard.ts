@@ -1,4 +1,4 @@
-import { GameType} from "../../interfaces/game";
+import { GameType} from "../../interfaces/IGame";
 import { Game } from "./game";
 
 export class MTGStandard extends Game {

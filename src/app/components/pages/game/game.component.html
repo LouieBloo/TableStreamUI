@@ -8,14 +8,14 @@
             <div class="flex-grow" id="userStreams">
                 <!-- Top row -->
                 <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
-                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800" [ngClass]="bottomRowPlayers.length < 1 ? 'full-height' : 'half-height'">
+                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800 bgTransition" [ngClass]="{'full-height': bottomRowPlayers.length < 1,'half-height': bottomRowPlayers.length >= 1,'bgDayLight': gameService.isDay}" >
                         <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
                 </div>
             
                 <!-- Bottom row -->
                 <div class="grid" [ngClass]="{'grid-cols-1': bottomRowPlayers.length === 1,'grid-cols-2': bottomRowPlayers.length === 2, 'grid-cols-3': bottomRowPlayers.length > 2}">
-                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height">
+                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height bgTransition" [ngClass]="{'bgDayLight': gameService.isDay}">
                         <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
                 </div>
@@ -27,8 +27,7 @@
                 </div>
             </div>
 
-            <div class="flex flex-col p-1 bg-slate-900 min-w-64 max-w-64 pl-2 pr-2">
-
+            <div class="flex flex-col p-1  min-w-64 max-w-64 pl-2 pr-2 bg-slate-900 bgTransition" [ngClass]="{'bgDay': gameService.isDay}">
                 <div class="">
                     <h3 class="text-white">Room Name: <span class="text-pop">{{gameService.room.name}}</span></h3>
                     <h3 class="text-white">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.name}}</span></h3>
@@ -112,4 +111,12 @@
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>
+</div>
+
+<div *ngIf="!localStorageService.hasUserInteractedWithSite" id="splashScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
+    <div class="text-white text-center">
+        <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
+            Rejoin Game
+        </button>
+    </div>
 </div>

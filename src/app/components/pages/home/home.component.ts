@@ -3,7 +3,7 @@ import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GAME_TYPES } from '../../../constants/game-types.constants';
-import { GameType } from '../../../interfaces/game';
+import { GameType } from '../../../interfaces/IGame';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { IpAddressWarningModalComponent } from '../../modals/ip-address-warning-modal/ip-address-warning-modal.component';
 import { PrivacyPolicyModalComponent } from '../../modals/privacy-policy-modal/privacy-policy-modal.component';
@@ -52,6 +52,7 @@ export class HomeComponent {
 
     this.webRTC.disconnect();
     this.localStorageService.removeStorageOnHomeLoad();
+    this.localStorageService.setUserInteractedWithSite(true);
 
     if (this.localStorageService.playerName) {
       this.player.name = this.localStorageService.playerName!;

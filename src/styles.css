@@ -6,6 +6,18 @@
 @tailwind utilities;
 
 
+.bgDay{
+    background-color: #3d43f9;
+}
+
+.bgDayLight{
+    background-color: rgb(137, 200, 238)
+}
+
+.bgTransition{
+    transition: background-color 2s ease-in-out;
+}
+
 body{
     background-color: rgb(71 85 105);
 }

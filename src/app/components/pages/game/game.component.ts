@@ -3,10 +3,10 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
-import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/game';
+import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
-import { IPlayer, IUser, UserType } from '../../../interfaces/player';
-import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/room';
+import { IPlayer, IUser, UserType } from '../../../interfaces/IPlayer';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/IRoom';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
@@ -23,7 +23,7 @@ import { TimerComponent } from '../../timer/timer.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
-import { Token } from '../../../interfaces/scryfall';
+import { Token } from '../../../interfaces/IScryfall';
 
 @Component({
   selector: 'app-game',
@@ -70,7 +70,7 @@ export class GameComponent {
     private route: ActivatedRoute,
     private alertService: AlertsService,
     private logger: LoggerService,
-    private localStorageService: LocalStorageService) {
+    public localStorageService: LocalStorageService) {
     this.gameService.room = {
       name: 'temp',
       players: [],
@@ -199,6 +199,9 @@ export class GameComponent {
         break;
       case GameEvent.ModifyPlayerProperty:
         this.updatePlayers([event.response]);
+        break;
+      case GameEvent.ModifyGameProperty:
+        this.gameService.room.game?.modifyProperty(event.response);
         break;
       case GameEvent.StartGame:
         this.updatePlayers(event.response.players);
@@ -334,6 +337,15 @@ export class GameComponent {
     this.webRTC.sendGameEvent({ event: GameEvent.ResetGame });
   };
 
+  // This is purely for the chrome autoplay policy, user needs to interact with the page before we can auto play the video streams
+  rejoinGame = ()=>{
+    this.webRTC.sendLocalGameEvent({
+      event: LocalGameEvent.RejoinGame
+    });
+
+    this.localStorageService.setUserInteractedWithSite(true);
+  }
+
   copyUrl() {
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
@@ -348,7 +360,7 @@ export class GameComponent {
   }
 
   flipCoins = (coinsToFlip: number) => {
-    this.webRTC.handleLocalGameEvent({
+    this.webRTC.sendLocalGameEvent({
       event: LocalGameEvent.FlipCoins,
       callingPlayer: this.localPlayer,
       payload: { coinsToFlip: coinsToFlip },

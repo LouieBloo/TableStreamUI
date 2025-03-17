@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, output, Output } from '@angular/core';
-import { PlayingCard } from '../../interfaces/scryfall';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { PlayingCard } from '../../interfaces/IScryfall';
 import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 
 @Component({

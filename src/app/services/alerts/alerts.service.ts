@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IAlert } from '../../interfaces/game';
+import { IAlert } from '../../interfaces/IGame';
 
 @Injectable({
   providedIn: 'root'

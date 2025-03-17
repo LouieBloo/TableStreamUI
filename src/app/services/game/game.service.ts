@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../interfaces/room';
-import { IPlayer } from '../../interfaces/player';
-import { GameType, IGameEvent } from '../../interfaces/game';
+import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../interfaces/IRoom';
+import { IPlayer } from '../../interfaces/IPlayer';
+import { GameType, IGameEvent } from '../../interfaces/IGame';
 import { MTGCommander } from '../../classes/game/MTGCommander';
 import { MTGStandard } from '../../classes/game/MTGStandard';
 import { MTGModern } from '../../classes/game/MTGModern';
@@ -76,6 +76,11 @@ export class GameService {
 
   get pokemonGame():PokemonStandard{
     return this.room.game as PokemonStandard;
+  }
+
+  // most games will not have day/night so we "assume" its night which is default css coloring (Dark)
+  get isDay() : boolean{
+    return this.room.game?.dayNightCycle && this.room.game?.dayNightCycle == 'DAY' ? true : false;
   }
 
   static createGame(gameType: GameType) : Game {

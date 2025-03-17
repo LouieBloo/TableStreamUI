@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { PlayingCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/IScryfall';
 
 @Component({
   selector: 'app-card-list-item',

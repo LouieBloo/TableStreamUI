@@ -28,6 +28,7 @@
                     <li *ngIf="editable" (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
                     <li *ngIf="editable" (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
                     <li *ngIf="editable" (click)="toggleCitiesBlessing()"><a>Toggle Cities Blessing</a></li>
+                    <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleDayNightCycle()"><a>Become {{gameService.isDay ? "Night" : "Day"}}</a></li>
                 </ul>
             </div>
     

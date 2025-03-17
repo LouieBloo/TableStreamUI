@@ -1,11 +1,11 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { PlayingCard } from '../../../interfaces/scryfall';
+import { PlayingCard } from '../../../interfaces/IScryfall';
 import { FormsModule, NgModel } from '@angular/forms';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 import { debounceTime, firstValueFrom, Subject, Subscription } from 'rxjs';
-import { IMongoImage } from '../../../interfaces/dev';
+import { IMongoImage } from '../../../interfaces/IDev';
 import { CardSearchService } from '../../../services/search/card-search.service';
 import { CardComponent } from '../../card/card.component';
 import { AlertsService } from '../../../services/alerts/alerts.service';
@@ -55,13 +55,13 @@ export class DevClassifyComponent {
   }
 
   ngOnInit() {
-    this.password.value = this.localStorageService.password;
+    this.password.value = this.localStorageService.devPassword;
   }
 
   async loadImages(): Promise<void> {
     this.loadingMoreImages = true;
     try {
-      this.localStorageService.setPassword(this.password.value);
+      this.localStorageService.setDevPassword(this.password.value);
       let params = new HttpParams();
 
       params = params.set('imageType', 'CARD');

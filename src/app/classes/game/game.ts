@@ -1,5 +1,5 @@
-import { PlayingCard, Token } from "../../interfaces/scryfall";
-import {GameType} from "../../interfaces/game";
+import { PlayingCard, Token } from "../../interfaces/IScryfall";
+import {GameType} from "../../interfaces/IGame";
 export class Game {
 
     startingLifeTotal = 20;
@@ -11,6 +11,7 @@ export class Game {
     searchTag:string = "game";
     coinImagePathPrefix:string = "magic"
     name:string = "game";
+    dayNightCycle:string = "";
 
     classifierActive:boolean = false;
     transcribeActive:boolean = true;
@@ -39,6 +40,11 @@ export class Game {
     // setTokens = (newTokens:Token[])=>{
     //     this.tokens = newTokens;
     // }
+
+    //not sure if we need to manually do this but keeping for now
+    modifyProperty = (game:Game)=>{
+        this.dayNightCycle = game.dayNightCycle;
+    }
 
     removeToken = (removedToken:Token)=>{
         this.tokens = this.tokens.filter(token => token.id != removedToken.id);
