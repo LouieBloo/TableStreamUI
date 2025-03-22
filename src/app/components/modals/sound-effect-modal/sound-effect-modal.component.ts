@@ -64,9 +64,19 @@ export class SoundEffectModalComponent {
       name: 'Right Baby', url: '/assets/sounds/thatsRightBaby.mp3', animojiId: "Kissing-heart", icon: "😘"
     },{
       name: 'Thats Right', url: '/assets/sounds/yeahThatsRight.mp3', animojiId: "Sunglasses", icon: "😎"
+    }],
+    "Pokémon": [{
+      name: 'Who?', url: '/assets/sounds/pokemon-who.mp3', animojiId: "PokemonWho", icon: "🐣"
+    },{
+      name: 'Handshake', url: '/assets/sounds/pokemon-handshake.mp3', animojiId: "PokemonHandshake", icon: "🤝"
+    }],
+    "Yu-Gi-Oh!": [{
+      name: 'Yugi Cards', url: '/assets/sounds/yugioh-pathetic-cards.mp3', animojiId: "YugiohPatheticCards", icon: "🙂"
+    },{
+      name: 'Challenge Me!', url: '/assets/sounds/yugioh-challenge.mp3', animojiId: "YugiohChallengeMe", icon: "💪"
     }]
   };
-
+  
   soundListKeys:string[]
 
 

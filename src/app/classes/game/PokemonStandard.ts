@@ -7,7 +7,6 @@ export class PokemonStandard extends Game {
     override searchTag:string = "standard";
     override name:string = "Standard";
     override coinImagePathPrefix:string = "mew"
-    override transcribeActive:boolean = false;
 
     //this cant be a getter as it is set when instantiating rooms
     prizeCardsToWin:number = 6;

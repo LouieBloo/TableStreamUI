@@ -25,7 +25,7 @@ export class HomeComponent {
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
   isCreateGame: boolean = false;
-  player = { // what is this?
+  player = {
     name: '',
     roomName: '',
     isSpectator: false,
@@ -134,7 +134,9 @@ export class HomeComponent {
     }else if(this.player.gameType == GameType.MTGVintage){
       return "mana-vault"
     }else if(this.player.gameType == GameType.MTGPauperCommander){
-      return "magic"
+      return "pauper"
+    }else if(this.player.gameType == GameType.YugiohStandard){
+      return "yugioh"
     }
         
     return "magic"

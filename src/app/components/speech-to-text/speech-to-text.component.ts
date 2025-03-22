@@ -113,18 +113,20 @@ export class SpeechToTextComponent {
 
     this.cardIdentifierService.transcribe(audioBlob).subscribe((response: any) => {
 
-      if (response.transcript) {
+      if (response.transcript && this.gameService.room.game) {
         this.alertsService.addAlert("info",`Searching for card name '${response.transcript}'`)
-        this.searchService.searchNamedScryfall(
+        this.searchService.searchCards(
           response.transcript,
-          searchTag
+          true,
+          this.gameService.room.game,
+          null
         )
           .subscribe(
             (response: any) => {
               this.ngZone.run(() => {
                 console.log(response)
-                if (response) {
-                  this.webRTC.sendGameEvent({ event: GameEvent.ShareCard, payload: response });
+                if (response && response.data) {
+                  this.webRTC.sendGameEvent({ event: GameEvent.ShareCard, payload: response.data[0] });
                 }
                 this.status = 'IDLE';
               });
