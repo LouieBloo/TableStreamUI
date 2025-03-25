@@ -71,6 +71,18 @@ export class ReactionsComponent {
       alt: "😡",
       lifeTimeInMS: 3000
     },
+    "PokemonWho": {
+      webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f423/512.webp",
+      gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f423/512.gif",
+      alt: "🐣",
+      lifeTimeInMS: 2500
+    },
+    "PokemonHandshake": {
+      webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f91d/512.webp",
+      gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f91d/512.gif",
+      alt: "🤝",
+      lifeTimeInMS: 2500
+    },
     "Salute": {
       webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1fae1/512.webp",
       gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1fae1/512.gif",
@@ -118,9 +130,21 @@ export class ReactionsComponent {
       gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f974/512.gif",
       alt: "🥴",
       lifeTimeInMS: 1500
+    },
+    "YugiohPatheticCards": {
+      webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f642_200d_2194_fe0f/512.webp",
+      gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f642_200d_2194_fe0f/512.gif",
+      alt: "🙂",
+      lifeTimeInMS: 4000
+    },
+    "YugiohChallengeMe": {
+      webpSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f4aa/512.webp",
+      gifSrc: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f4aa/512.gif",
+      alt: "💪",
+      lifeTimeInMS: 3200
     }
   };
-
+  
   selectedAnimoji!:IAnimoji;
   showing:boolean = false;
   showingTimeout:any;
