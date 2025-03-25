@@ -1,7 +1,7 @@
 import { NgClass, NgFor, NgIf, NgStyle, SlicePipe } from '@angular/common';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BehaviorSubject, catchError, debounceTime, filter, of, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, debounceTime, EMPTY, filter, of, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { GameEvent, IGameEvent } from '../../interfaces/IGame';
 import { UserInputAction } from '../../interfaces/inputs';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
@@ -79,18 +79,27 @@ export class CardListComponent {
     this.subscribeToSearch();
   }
 
-  subscribeToSearch(){
-    this.subscriptions.add(this.searchSubject.pipe(
-      filter((searchString: string|null)=> !!searchString),
-      debounceTime(420),
-      switchMap(() =>{
-        return this.cardSearchService.searchCards(
-          this.searchString, 
-          true, 
-          this.gameService.room.game!, 
-          { includeOption: this.includeOption }
-        )
-      }),
+  subscribeToSearch() {
+    this.subscriptions.add(
+      this.searchSubject.pipe(
+        filter((searchString: string | null) => !!searchString),
+        debounceTime(420),
+        switchMap(() => {
+          return this.cardSearchService.searchCards(
+            this.searchString,
+            true,
+            this.gameService.room.game!,
+            { includeOption: this.includeOption }
+          ).pipe(
+            catchError((error: any) => {
+              this.logger.error('Error fetching cards: ', error);
+              this.searchResults = [];
+              this.hasSearched = true;
+              this.searching = false;
+              return EMPTY;
+            })
+          );
+        }),
         tap((response: any) => {
           this.searchResults = response.data;
           this.hasSearched = true;
@@ -99,15 +108,11 @@ export class CardListComponent {
           if (this.searchResults.length > 0) {
             this.onCardHover(this.searchResults[0]);
           }
-        }),
-        catchError((error: any) => {
-          this.logger.error('Error fetching cards: ', error);
-          this.searchResults = [];
-          this.hasSearched = true;
-          this.searching = false;
-          return of([]);
-        })).subscribe());
+        })
+      ).subscribe()
+    );
   }
+  
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -118,6 +123,9 @@ export class CardListComponent {
   }
 
   searchStringChanged(value: string): void {
+    if(value.length < 3){
+      return;
+    }
     this.searchSubject.next(value);
   }
 
