@@ -1,23 +1,18 @@
-import { PlayingCard, Token } from "../../interfaces/IScryfall";
+import { IPlayingCard, Token } from "../../interfaces/IPlayingCard";
 import {GameType} from "../../interfaces/IGame";
 export class Game {
 
     startingLifeTotal = 20;
     active:boolean = false;
-
-    sharedCards:PlayingCard[] = [];
-
+    sharedCards:IPlayingCard[] = [];
     gameType: GameType = GameType.Game;
     searchTag:string = "game";
     coinImagePathPrefix:string = "magic"
     name:string = "game";
     dayNightCycle:string = "";
-
     classifierActive:boolean = false;
     transcribeActive:boolean = true;
-
     tokens:Token[] = [];
-
     startedAt!:Date;
 
     createToken = (newToken:Token)=>{

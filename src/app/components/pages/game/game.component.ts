@@ -23,7 +23,7 @@ import { TimerComponent } from '../../timer/timer.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
-import { Token } from '../../../interfaces/IScryfall';
+import { Token } from '../../../interfaces/IPlayingCard';
 
 @Component({
   selector: 'app-game',
@@ -102,6 +102,25 @@ export class GameComponent {
       return;
     }
 
+    this.subscribeToPassTurn();
+    this.subscribeToUserJoined();
+    this.subscribeToGameEvent();
+    this.checkPasswordProtection(this.roomId);
+  }
+
+  subscribeToGameEvent(){
+    this.subscriptions.add(
+      this.webRTC.gameEvent.subscribe((event) => this.handleGameEvent(event))
+    );
+  }
+
+  subscribeToUserJoined(){
+    this.subscriptions.add(
+      this.webRTC.userJoined.subscribe((user) => this.userJoined(user))
+    );
+  }
+  
+  subscribeToPassTurn(){
     this.subscriptions.add(
       this.inputService.subscribe((userAction: UserInputAction) => {
         if (userAction == UserInputAction.PassTurn) {
@@ -109,16 +128,6 @@ export class GameComponent {
         }
       })
     );
-
-    this.subscriptions.add(
-      this.webRTC.userJoined.subscribe((user) => this.userJoined(user))
-    );
-
-    this.subscriptions.add(
-      this.webRTC.gameEvent.subscribe((event) => this.handleGameEvent(event))
-    );
-
-    this.checkPasswordProtection(this.roomId);
   }
 
   checkPasswordProtection = async (roomId: string) => {

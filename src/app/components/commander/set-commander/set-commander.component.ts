@@ -1,7 +1,7 @@
 import { Component, input, Input } from '@angular/core';
 import { IPlayer, PlayerProperties } from '../../../interfaces/IPlayer';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
-import { PlayingCard } from '../../../interfaces/IScryfall';
+import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IModifyPlayerProperty } from '../../../interfaces/IGame';
@@ -23,7 +23,7 @@ export class SetCommanderComponent {
   @Input() player!: IPlayer;
   @Input() editable!: boolean;
   @Input() index!: number;
-  @Input() commander!:PlayingCard;
+  @Input() commander!:IPlayingCard;
   
   popoverPosition: { top: number, left: number } = { top: 0, left: 0 };
   flipped:boolean = false;
@@ -37,7 +37,7 @@ export class SetCommanderComponent {
     this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
   }
 
-  cardSelected = (card:PlayingCard)=>{
+  cardSelected = (card:IPlayingCard)=>{
     if(card != null){
       this.webRtc.sendGameEvent({event: GameEvent.SetCommander,payload: {card: card, index: this.index}});
     }

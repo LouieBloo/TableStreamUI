@@ -34,7 +34,6 @@ export class LifeTotalComponent {
   private inputSubscription!: Subscription;
 
   constructor(private inputService: InputService, private webRtc: WebRTCService, public gameService:GameService){
-    
   }
 
 

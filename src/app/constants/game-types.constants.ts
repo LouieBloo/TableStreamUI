@@ -8,5 +8,5 @@ export const GAME_TYPES = [
   { value: GameType.MTGPauperCommander, label: "MTG Pauper Commander", defaultMaxPlayers: 4 },
   { value: GameType.MTGVintage, label: "MTG Vintage", defaultMaxPlayers: 2 },
   { value: GameType.PokemonStandard, label: "Pokémon Standard", defaultMaxPlayers: 2 },
-  { value: GameType.YuGiOhStandard, label: "Yu-Gi-Oh! (coming soon)", defaultMaxPlayers: 2 }
+  { value: GameType.YugiohStandard, label: "Yu-Gi-Oh!", defaultMaxPlayers: 2 }
 ];

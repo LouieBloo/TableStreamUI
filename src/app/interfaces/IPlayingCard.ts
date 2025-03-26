@@ -1,4 +1,4 @@
-export interface PlayingCard {
+export interface IPlayingCard {
     id: string;                         // The unique UUID of the card
     name: string;                       // The name of the card
     mana_cost: string;                  // The mana cost of the card
@@ -44,14 +44,14 @@ export interface PlayingCard {
     digital: boolean;                   // Whether the card is available digitally (MTGO)
     classificationConfidence: number;
     castAmount?:number;
-    card_faces?:PlayingCard[]
+    card_faces?:IPlayingCard[]
   }
   
 export interface Token{
   id?:string;
   ownerId?:string;
   name?:string;
-  card?:PlayingCard;
+  card?:IPlayingCard;
   xPosition:number;
   yPosition:number;
   tapped?:boolean;
