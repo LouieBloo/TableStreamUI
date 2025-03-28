@@ -27,7 +27,8 @@ export enum GameEvent{
     DeleteToken,
     RollDice,
     KickPlayer,
-    ModifyGameProperty
+    ModifyGameProperty,
+    ToggleInitiative
 }
 
 //fine to change on front end only

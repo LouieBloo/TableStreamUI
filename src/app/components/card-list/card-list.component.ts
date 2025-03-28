@@ -85,6 +85,7 @@ export class CardListComponent {
         filter((searchString: string | null) => !!searchString),
         debounceTime(420),
         switchMap(() => {
+          this.searching = true;
           return this.cardSearchService.searchCards(
             this.searchString,
             true,
