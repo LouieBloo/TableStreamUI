@@ -230,6 +230,9 @@ export class GameComponent {
       case GameEvent.ToggleMonarch:
         this.updatePlayers(event.response);
         break;
+      case GameEvent.ToggleInitiative:
+        this.updatePlayers(event.response);
+        break;
       case GameEvent.ModifyPlayerCommanderDamage:
         this.updatePlayers([event.response]);
         break;

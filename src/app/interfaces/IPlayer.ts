@@ -22,6 +22,7 @@ export interface IPlayer extends IUser{
     isMonarch?:boolean;
     isSharingImages?:boolean;
     hasCitiesBlessing?:boolean;
+    hasInitiative?:boolean;
 
     poisonTotal:number;
     energyTotal:number;
@@ -52,5 +53,6 @@ export enum PlayerProperties{
     citiesBlessing,
     prizeCards,
     sharingImages,
-    commanderCastAmount
+    commanderCastAmount,
+    initiative
 }

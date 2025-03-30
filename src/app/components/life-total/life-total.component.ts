@@ -63,6 +63,10 @@ export class LifeTotalComponent {
     this.webRtc.sendGameEvent({event: GameEvent.ToggleMonarch});
   }
 
+  toggleInitiative = ()=>{
+    this.webRtc.sendGameEvent({event: GameEvent.ToggleInitiative});
+  }
+
   toggleCitiesBlessing = ()=>{
     let payload: IModifyPlayerProperty = {
       property: PlayerProperties.citiesBlessing,
