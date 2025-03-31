@@ -11,6 +11,7 @@ import { LoggerService } from '../logger/logger.service';
 import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { Router } from '@angular/router';
+import { TwilioService } from '../twilio/twilio.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,8 @@ export class WebRTCService {
   localStream: MediaStream | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {};
+
+  private iceServerList:any = null;
 
   private userJoinedSubject = new Subject<{ id: string, user: IUser }>();
   public userJoined = this.userJoinedSubject.asObservable();
@@ -42,11 +45,20 @@ export class WebRTCService {
 
   private _roomPasswordValid: BehaviorSubject<boolean|null> = new BehaviorSubject<boolean|null>(null);
 
+
   get roomPasswordValid(): Observable<boolean|null>{
     return this._roomPasswordValid.asObservable();
   }
 
-  constructor(private alertService: AlertsService, private logger: LoggerService, private localStorageService: LocalStorageService, private router: Router) {}
+  constructor(
+    private alertService: AlertsService, 
+    private logger: LoggerService, 
+    private localStorageService: LocalStorageService, 
+    private router: Router,
+    private twilioService:TwilioService
+  ) {
+    
+  }
 
   //adding this just for testing
   private logAspectRatio(stream: any): void {
@@ -311,7 +323,7 @@ export class WebRTCService {
     this.onStreamRemoved.push(callback);
   }
 
-  public joinRoom(roomId: any, password: any, callback: any) {
+  public joinRoom = async(roomId: any, password: any, callback: any) => {
     const playerId = this.localStorageService.playerId;
     const userType = this.localStorageService.amISpectator ? UserType.Spectator : UserType.Player
     const gameType = this.localStorageService.gameType;
@@ -319,6 +331,8 @@ export class WebRTCService {
     const roomName = this.localStorageService.roomName;
     const maxPlayers: number = parseInt(this.localStorageService.maxPlayers || "4");
     const reactionsEnabled: boolean = this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true;
+
+    this.iceServerList = await this.twilioService.getIceServerList();
 
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
@@ -505,7 +519,7 @@ export class WebRTCService {
       }
 
       const configuration = {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] // Add Google STUN server
+        iceServers: this.iceServerList
       };
       const peerConnection = new RTCPeerConnection(configuration);
       this.peerConnections[socketId] = peerConnection;
