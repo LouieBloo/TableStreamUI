@@ -72,7 +72,8 @@ export class HomeComponent {
       return;
     }
 
-    this.ipAddressModal.open();
+    //this.ipAddressModal.open();
+    this.onAgreeClicked();
   }
 
   onJoinGame(): void {
@@ -83,7 +84,8 @@ export class HomeComponent {
       this.navigateOnJoin();
       return;
     }
-    this.ipAddressModal.open();
+    //this.ipAddressModal.open();
+    this.onAgreeClicked();
   }
 
   onAgreeClicked(): void {
