@@ -47,9 +47,11 @@ export class SoundEffectModalComponent {
     ],
     "Laugh": [{
       name: 'Male Laugh', url: '/assets/sounds/maleLaugh.mp3', animojiId: "Laughing", icon: "😆"
-    },{
-      name: 'Evil Laugh', url: '/assets/sounds/dorkLaugh.mp3', animojiId: "Imp-smile", icon: "😈"
-    },{
+    },
+    // {
+    //   name: 'Evil Laugh', url: '/assets/sounds/dorkLaugh.mp3', animojiId: "Imp-smile", icon: "😈"
+    // },
+    {
       name: 'Female Laugh', url: '/assets/sounds/femaleLaugh.mp3', animojiId: "Laughing", icon: "😆"
     }],
     "Misc": [{
