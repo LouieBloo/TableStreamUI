@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class SettingsService {
 
-  public effectVolume:number = 0.75;
+  public effectVolume:number = 0.55;
   public tokensEnabled:boolean = true;
 
   constructor() { }

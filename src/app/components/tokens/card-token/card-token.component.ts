@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { IPlayingCard, Token } from '../../../interfaces/IPlayingCard';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../../interfaces/IGame';
@@ -29,6 +29,7 @@ import { SettingsService } from '../../../services/settings/settings.service';
 export class CardTokenComponent implements OnInit {
   @Input() token!: Token;
   @Input() editable: boolean = false;
+  @ViewChild(CardComponent) cardComponent!: CardComponent;
 
   private isDragging = false;
   isEditingText = false;
@@ -144,7 +145,7 @@ export class CardTokenComponent implements OnInit {
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
     this.clearMouseListeners();
-    if(!this.editable){return;}
+    // if(!this.editable){return;}
      // Check if the target element is the arrowsMove icon
     const targetElement = event.target as HTMLElement;
     if (!targetElement || !targetElement.closest('.arrowsMove')) return;
@@ -189,6 +190,11 @@ export class CardTokenComponent implements OnInit {
     // Normalize and update token position
     this.token.xPosition = this.normalizeX(constrainedLeft);
     this.token.yPosition = this.normalizeY(constrainedTop);
+
+    //tell the card component to re-render the popup so it moves while the user is moving the token
+    if(this.token && this.token.card){
+       this.cardComponent.onMouseEnter(event);
+    }
   }
 
   onMouseUp(): void {

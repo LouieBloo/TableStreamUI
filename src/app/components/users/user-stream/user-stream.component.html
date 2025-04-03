@@ -60,18 +60,26 @@
     </div>
 
     <!-- Status bar -->
-    <div class="flex flex-col absolute" id="statusBar">
+    <div class="flex flex-col absolute mt-2.5 mr-1.5" id="statusBar">
         <!-- Magic -->
         <div *ngIf="gameService.isMagicGame()">
             <div *ngIf="player.hasCitiesBlessing">
-                <p class="text-center text-4xl relative"  appTooltip="This player has the Cities Blessing" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">⛪</p>
+                <p class="text-center text-4xl relative"  appTooltip="This player has the Cities Blessing" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
+                    <img src="assets/images/icons/cities-blessing-icon.png" alt="Cities Blessing" class="w-12">
+                </p>
             </div>
             <div *ngIf="player.lifeTotal <= 0">
-                <p class="text-center text-4xl"  appTooltip="This player is dead" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">💀</p>
+                <p class="text-center text-4xl"  appTooltip="This player is dead" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
+                    <img src="assets/images/icons/death-icon.png" alt="Death" class="w-12">
+                </p>
             </div>
             <div *ngIf="gameService.room.game?.dayNightCycle != ''">
-                <p *ngIf="gameService.isDay" class="text-center text-4xl"  appTooltip="Daytime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">☀️</p>
-                <p *ngIf="!gameService.isDay" class="text-center text-4xl"  appTooltip="Nighttime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">🌑</p>
+                <p *ngIf="gameService.isDay" class="text-center text-4xl"  appTooltip="Daytime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
+                    <img src="assets/images/icons/sun-icon.png" alt="Daytime" class="w-12">
+                </p>
+                <p *ngIf="!gameService.isDay" class="text-center text-4xl"  appTooltip="Nighttime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
+                    <img src="assets/images/icons/moon-icon.png" alt="Nighttime" class="w-12">
+                </p>
             </div>
         </div>
         <!-- Pokemon -->
@@ -90,7 +98,7 @@
         <app-reactions [player]="player"></app-reactions>
     </div>
 
-    <div class="absolute right-2 top-2 ">
+    <div class="absolute right-3.5 top-2 ">
         <div class="dropdown">
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
