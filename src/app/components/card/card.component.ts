@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { PlayingCard } from '../../interfaces/IScryfall';
+import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 
 @Component({
@@ -10,7 +10,7 @@ import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
   styleUrl: './card.component.css'
 })
 export class CardComponent {
-  @Input() card!:PlayingCard | null;
+  @Input() card!:IPlayingCard | null;
   @Input() showPopup:boolean = true;
   @Input() maximumRightMargin:number = 0;
   @Input() hoverMinDistance:number = 50;

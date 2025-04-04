@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { PlayingCard } from '../../../interfaces/IScryfall';
+import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { FormsModule, NgModel } from '@angular/forms';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { environment } from '../../../../environments/environment';
@@ -25,8 +25,8 @@ export class DevClassifyComponent {
 
   scryfallSearchQuery: string = '';
   searching: boolean = false;
-  searchResults: PlayingCard[] = []
-  selectedCard: PlayingCard | null = null;
+  searchResults: IPlayingCard[] = []
+  selectedCard: IPlayingCard | null = null;
   message: string = '';
   loadingMoreImages: boolean = false;
   loadingScryfallSearchById: boolean = false;
@@ -37,8 +37,8 @@ export class DevClassifyComponent {
   searchSubscription: Subscription | null = null;
   searchByIdSubscription: Subscription | null = null;
 
-  cardBeingHovered!: PlayingCard;
-  cardClassifierGuessed!:PlayingCard | null;
+  cardBeingHovered!: IPlayingCard;
+  cardClassifierGuessed!:IPlayingCard | null;
 
   private searchSubject = new Subject<string>();
 
@@ -106,7 +106,7 @@ export class DevClassifyComponent {
     this.searching = true;
     const query = encodeURIComponent(searchTerm);
     this.searchSubscription = this.http
-      .get<{ data: PlayingCard[] }>(
+      .get<{ data: IPlayingCard[] }>(
         `https://api.scryfall.com/cards/search?q=${query}`
       )
       .subscribe(
@@ -144,12 +144,12 @@ export class DevClassifyComponent {
     });
   }
 
-  onCardHover = (card: PlayingCard | null) => {
+  onCardHover = (card: IPlayingCard | null) => {
     if (!card) { return }
     this.cardBeingHovered = card;
   }
 
-  selectCard(card: PlayingCard) {
+  selectCard(card: IPlayingCard) {
     this.selectedCard = card;
   }
 

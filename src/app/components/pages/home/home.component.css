@@ -22,7 +22,7 @@
 /* This is hack so we load all of our possible background images at the start so when we switch between them they dont flicker */
 .preloader::after{
     position:absolute; width:0; height:0; overflow:hidden; z-index:-1;
-    content:url(/assets/images/magic-background.jpg) url(/assets/images/pokemon-background.jpg) url(/assets/images/wrenn-background.jpg) url(/assets/images/ulamog-background.jpg) url(/assets/images/rakdos-background.jpg) url(/assets/images/mana-vault-background.jpg);  
+    content:url(/assets/images/magic-background.jpg) url(/assets/images/pokemon-background.jpg) url(/assets/images/wrenn-background.jpg) url(/assets/images/ulamog-background.jpg) url(/assets/images/rakdos-background.jpg) url(/assets/images/mana-vault-background.jpg) url(/assets/images/pauper-background.jpg) url(/assets/images/yugioh-background.jpg);  
 }
 
 .magicBackground{
@@ -47,4 +47,12 @@
 
 .mana-vaultBackground{
     background-image: url("/assets/images/mana-vault-background.jpg");
+}
+
+.pauperBackground{
+    background-image: url("/assets/images/pauper-background.jpg");
+}
+
+.yugiohBackground{
+    background-image: url("/assets/images/yugioh-background.jpg");
 }

@@ -1,60 +1,69 @@
-<div class="flex justify-center " *ngIf="player.isMonarch">
-    <img src="crown.png" class="w-16 animate__animated animate__bounceInDown cursor-pointer	" (click)="toggleMonarch()">
-</div>
-<div *ngIf="player" class="flex flex-row ">
-    
-    <div class="relative">
-
-        <div *ngIf="showEnergyCounter || player.energyTotal > 0" class="absolute " [ngClass]="{'energyPanelEditable': editable, 'energyPanel' : !editable}">
-            <app-property-counter [editable]="editable" [title]="'Energy'" [emoji]="'⚡'" [total]="player.energyTotal"
-                [modifyCallback]="modifyEnergyCallback" class="mb-2">
-            </app-property-counter>
-        </div>
-
-
-        <div class="join bg-black bg-opacity-50 text-sm">
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
-    
-            <div class="dropdown join-item button text-white pl-4 pr-4" appTooltip="Click to see more options" [tooltipDirection]="'bottom'" [tooltipStartOpen]="editable">
-                <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                    <p class="text-center">{{player.name | titlecase}}</p>
-                    <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
-                </div>
-                <ul *ngIf="editable || gameService.isCommanderGame()" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                    <li *ngIf="editable" (click)="setToZero()"><a>Set to 0</a></li>
-                    <li *ngIf="gameService.isCommanderGame()" (click)="toggleCommanderDamages()"><a>Commander Damage</a></li>
-                    <li *ngIf="editable" (click)="toggleMonarch()"><a>Become Monarch</a></li>
-                    <li *ngIf="editable" (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
-                    <li *ngIf="editable" (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
-                    <li *ngIf="editable" (click)="toggleCitiesBlessing()"><a>Toggle Cities Blessing</a></li>
-                    <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleDayNightCycle()"><a>Become {{gameService.isDay ? "Night" : "Day"}}</a></li>
-                </ul>
-            </div>
-    
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
-            <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
-        </div>
-    
-        <div *ngIf="showPoisonCounter || player.poisonTotal > 0" class="absolute bg-black bg-opacity-50 text-sm rounded-md" id="poisonPanel" [ngClass]="{'poisonPanelEditable': editable, 'poisonPanel' : !editable}">
-            <div class="join">
-                <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyPoisonCallback(-1)">-1</button>
-                <div class="dropdown join-item button text-white pl-4 pr-4">
-                    <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                        <p class="text-center">Poison</p>
-                        <p class="text-center">💀 {{player.poisonTotal}}</p>
-                    </div>
-                    <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                        <li (click)="modifyPoisonCallback(-player.poisonTotal)"><a>Set to 0</a></li>
-                    </ul>
-                </div>
-                <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyPoisonCallback(1)">+1</button>
-            </div>
-        </div>
+<div class="flex flex-col pt-1 items-center">
+  <div class="flex justify-center " *ngIf="player.isMonarch || player.hasInitiative">
+    <div *ngIf="player.isMonarch" appTooltip="Take The Monarch" [tooltipDirection]="'bottom'" >
+      <img src="crown.png" class="w-16 animate__animated animate__bounceInDown cursor-pointer" (click)="toggleMonarch()">
     </div>
     
-        <!-- <div class="join bg-black bg-opacity-50">
-            <p class="text-lg btn button text-white join-item"><ng-icon name="bootstrapSuitHeartFill"  [ngClass]="{'text-red-600': lifeTotal > 0, 'text-black': lifeTotal <= 0}"></ng-icon> {{lifeTotal}}</p>
-        </div> -->
-    
+    <div *ngIf="player.hasInitiative" appTooltip="Take The Initiative" [tooltipDirection]="'bottom'">
+      <img src="initiative.png" class="w-16 animate__animated animate__bounceIn cursor-pointer" (click)="toggleInitiative()">
+    </div>
+  </div>
+  <div *ngIf="player" class="flex flex-row ">
+    <div class="relative">
+      <div *ngIf="showEnergyCounter || player.energyTotal > 0" class="absolute " [ngClass]="{'energyPanelEditable': editable, 'energyPanel' : !editable}">
+        <app-property-counter
+          [editable]="editable"
+          [title]="'Energy'"
+          [emoji]="'⚡'"
+          [total]="player.energyTotal"
+          [modifyCallback]="modifyEnergyCallback" class="mb-2">
+        </app-property-counter>
+      </div>
+      <div class="join bg-black bg-opacity-50 text-sm">
+        
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-500)">-500</button>
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-100)">-100</button>
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
+  
+        <div class="dropdown join-item button text-white pl-4 pr-4" appTooltip="Click to see more options" [tooltipDirection]="'bottom'" [tooltipStartOpen]="editable">
+          <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+            <p class="text-center">{{player.name | titlecase}}</p>
+            <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
+          </div>
+          <ul *ngIf="editable || gameService.isCommanderGame()" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+            <li *ngIf="editable" (click)="setToZero()"><a>Set to 0</a></li>
+              <li *ngIf="gameService.isCommanderGame()" (click)="toggleCommanderDamages()"><a>Commander Damage</a></li>
+              <li *ngIf="editable && gameService.isMagicGame()" (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
+              <li *ngIf="editable && gameService.isMagicGame()" (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
+              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleMonarch()"><a>Become Monarch</a></li>
+              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleInitiative()"><a>Take Initiative</a></li>
+              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleCitiesBlessing()"><a>Toggle Cities Blessing</a></li>
+              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleDayNightCycle()"><a>Become {{gameService.isDay ? "Night" : "Day"}}</a></li>
+          </ul>
+        </div>
+  
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
+        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(100)">+100</button>
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(500)">+500</button>
+  
+      </div>
+      <div *ngIf="showPoisonCounter || player.poisonTotal > 0" class="absolute bg-black bg-opacity-50 text-sm rounded-md" id="poisonPanel" [ngClass]="{'poisonPanelEditable': editable, 'poisonPanel' : !editable}">
+        <div class="join">
+          <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyPoisonCallback(-1)">-1</button>
+          <div class="dropdown join-item button text-white pl-4 pr-4">
+            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+              <p class="text-center">Poison</p>
+              <p class="text-center">💀 {{player.poisonTotal}}</p>
+            </div>
+            <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+              <li (click)="modifyPoisonCallback(-player.poisonTotal)"><a>Set to 0</a></li>
+            </ul>
+          </div>
+          <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyPoisonCallback(1)">+1</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,10 +1,10 @@
 import { NgClass, NgFor, NgIf, NgStyle, SlicePipe } from '@angular/common';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, catchError, debounceTime, EMPTY, filter, of, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { GameEvent, IGameEvent } from '../../interfaces/IGame';
 import { UserInputAction } from '../../interfaces/inputs';
-import { PlayingCard } from '../../interfaces/IScryfall';
+import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { GameService } from '../../services/game/game.service';
 import { InputService } from '../../services/input/input.service';
 import { LoggerService } from '../../services/logger/logger.service';
@@ -31,26 +31,18 @@ export class CardListComponent {
 
   @ViewChild('cardInput') cardInput!: any;
 
-  cards:PlayingCard[] = []
-
+  private subscriptions: Subscription = new Subscription();
+  cards:IPlayingCard[] = []
   searchString!:string;
-  searchSubject: Subject<string> = new Subject<string>();
+  searchSubject: BehaviorSubject<string|null> = new BehaviorSubject<string|null>(null);
   sendSearchEvent: Subject<boolean> = new Subject<boolean>();
-  searchSubscription!: Subscription;
-  searchResults:PlayingCard[] = []
-
-  sharedCards:PlayingCard[] = [];
-
-  cardBeingHovered!:PlayingCard | null;
-
+  searchResults:IPlayingCard[] = []
+  sharedCards:IPlayingCard[] = [];
+  cardBeingHovered!:IPlayingCard | null;
   hasSearched:boolean = false;
   searching:boolean = false;
   includeOption: string = '';
-
-  currentCallback: any;
-
-  private subscriptions: Subscription = new Subscription();
-  private inputSubscription!: Subscription;
+  currentCallback: any;//boo
 
   constructor(
     private cardSearchService: CardSearchService,
@@ -60,9 +52,7 @@ export class CardListComponent {
     private modalService: ModalServiceService,
     public gameService:GameService,
     private logger: LoggerService){
-    
   }
-
 
   @HostListener('window:resize', ['$event'])
   onResize() {
@@ -80,27 +70,52 @@ export class CardListComponent {
   }
 
   ngOnInit(): void {
-    this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction)=>{
+    this.subscriptions.add(this.inputService.subscribe((userAction: UserInputAction)=>{
       if(userAction == UserInputAction.JumpToSearch){
         this.openSearchModal();
       }
-    })
+    }))
 
-    this.searchSubject.pipe(debounceTime(420)).subscribe(value => {
-      // this.searchString = value;
-      this.sendSearch()
-    });
-
-    this.sendSearchEvent.pipe(debounceTime(350)).subscribe(value => {
-      this.search();
-    });
+    this.subscribeToSearch();
   }
 
-  ngOnDestroy(): void {
-    if (this.inputSubscription) {
-      this.inputSubscription.unsubscribe();
-    }
+  subscribeToSearch() {
+    this.subscriptions.add(
+      this.searchSubject.pipe(
+        filter((searchString: string | null) => !!searchString),
+        debounceTime(420),
+        switchMap(() => {
+          this.searching = true;
+          return this.cardSearchService.searchCards(
+            this.searchString,
+            true,
+            this.gameService.room.game!,
+            { includeOption: this.includeOption }
+          ).pipe(
+            catchError((error: any) => {
+              this.logger.error('Error fetching cards: ', error);
+              this.searchResults = [];
+              this.hasSearched = true;
+              this.searching = false;
+              return EMPTY;
+            })
+          );
+        }),
+        tap((response: any) => {
+          this.searchResults = response.data;
+          this.hasSearched = true;
+          this.searching = false;
+  
+          if (this.searchResults.length > 0) {
+            this.onCardHover(this.searchResults[0]);
+          }
+        })
+      ).subscribe()
+    );
+  }
+  
 
+  ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
@@ -109,6 +124,9 @@ export class CardListComponent {
   }
 
   searchStringChanged(value: string): void {
+    if(value.length < 3){
+      return;
+    }
     this.searchSubject.next(value);
   }
 
@@ -117,38 +135,6 @@ export class CardListComponent {
     const topOffset = scrollableDiv.getBoundingClientRect().top;
     const windowHeight = window.innerHeight;
     scrollableDiv.style.height = `${windowHeight - topOffset}px`;
-  }
-
-  search= ()=>{
-    if(!this.searchString || !this.gameService.room.game){return;}
-    this.searching = true;
-
-    if(this.searchSubscription){
-      this.searchSubscription.unsubscribe();
-    }
-
-    this.searchSubscription = this.cardSearchService.searchCards(
-      this.searchString, true, 
-      this.gameService.room.game, 
-      {includeOption: this.includeOption})
-    .subscribe(
-      (response: any) => {
-        this.searchResults = response.data;
-        this.hasSearched = true;
-        this.searching = false;
-        
-
-        if(this.searchResults && this.searchResults.length > 0){
-          this.onCardHover(this.searchResults[0]);
-        }
-      },
-      (error: any) => {
-        this.logger.error(`Error fetching cards: `, error)
-        this.hasSearched = true;
-        this.searching = false;
-        this.searchResults = []
-      }
-    );
   }
 
   openSearchModal = ()=>{
@@ -174,7 +160,7 @@ export class CardListComponent {
   }
 
 
-  onCardHover = (card: PlayingCard | null)=>{
+  onCardHover = (card: IPlayingCard | null)=>{
     if(!card){return}
     this.cardBeingHovered = card;
   }
@@ -191,7 +177,6 @@ export class CardListComponent {
       this.currentCallback(this.cardBeingHovered);
     }
 
-    //close modal
     const closeModalButton = document.getElementById('closeModal');
     if (closeModalButton) {
       closeModalButton.click();
@@ -202,7 +187,7 @@ export class CardListComponent {
     this.sharedCards = []
   }
 
-  deleteCardFromSearchHistory = (cardToDelete:PlayingCard)=>{
-    this.sharedCards = this.sharedCards.filter((card:PlayingCard)=> card != cardToDelete)
+  deleteCardFromSearchHistory = (cardToDelete:IPlayingCard)=>{
+    this.sharedCards = this.sharedCards.filter((card:IPlayingCard)=> card != cardToDelete)
   }
 }

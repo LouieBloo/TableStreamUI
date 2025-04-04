@@ -18,7 +18,7 @@ import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.
 import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 import { TimerComponent } from '../../timer/timer.component';
-import { PlayingCard } from '../../../interfaces/IScryfall';
+import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
@@ -55,10 +55,8 @@ export class UserStreamComponent {
 
   private subscriptions: Subscription = new Subscription();
   showCommanderDamage: boolean = true;
-
   muted: boolean = false;
   volume: number = 1;
-
   audioInputDevices: MediaDeviceInfo[] = [];
   videoInputDevices: MediaDeviceInfo[] = [];
   selectedAudioDeviceId: string = '';
@@ -67,7 +65,6 @@ export class UserStreamComponent {
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
   loadingCardIdentification: boolean = false;
-
   boundingBox: any;
 
   constructor(
@@ -335,7 +332,7 @@ export class UserStreamComponent {
   modifyCommanderDamage = (
     playerId: string,
     amount: number,
-    card: PlayingCard
+    card: IPlayingCard
   ) => {
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyPlayerCommanderDamage,
@@ -349,7 +346,7 @@ export class UserStreamComponent {
 
   getModifyCommanderDamageCallback(
     playerId: string,
-    card: PlayingCard
+    card: IPlayingCard
   ): (amount: number) => void {
     return (amount: number) => {
       this.modifyCommanderDamage(playerId, amount, card);

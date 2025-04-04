@@ -34,7 +34,6 @@ export class LifeTotalComponent {
   private inputSubscription!: Subscription;
 
   constructor(private inputService: InputService, private webRtc: WebRTCService, public gameService:GameService){
-    
   }
 
 
@@ -62,6 +61,10 @@ export class LifeTotalComponent {
 
   toggleMonarch = ()=>{
     this.webRtc.sendGameEvent({event: GameEvent.ToggleMonarch});
+  }
+
+  toggleInitiative = ()=>{
+    this.webRtc.sendGameEvent({event: GameEvent.ToggleInitiative});
   }
 
   toggleCitiesBlessing = ()=>{

@@ -6,7 +6,7 @@ import { GameEvent, GameType } from '../../interfaces/IGame';
 import { Game } from '../../classes/game/game';
 import { CardComponent } from '../card/card.component';
 import { NgIf } from '@angular/common';
-import { PlayingCard } from '../../interfaces/IScryfall';
+import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { bootstrapRecord, bootstrapRecordFill, bootstrapClockHistory } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { GameService } from '../../services/game/game.service';
@@ -113,18 +113,20 @@ export class SpeechToTextComponent {
 
     this.cardIdentifierService.transcribe(audioBlob).subscribe((response: any) => {
 
-      if (response.transcript) {
+      if (response.transcript && this.gameService.room.game) {
         this.alertsService.addAlert("info",`Searching for card name '${response.transcript}'`)
-        this.searchService.searchNamedScryfall(
+        this.searchService.searchCards(
           response.transcript,
-          searchTag
+          true,
+          this.gameService.room.game,
+          null
         )
           .subscribe(
             (response: any) => {
               this.ngZone.run(() => {
                 console.log(response)
-                if (response) {
-                  this.webRTC.sendGameEvent({ event: GameEvent.ShareCard, payload: response });
+                if (response && response.data) {
+                  this.webRTC.sendGameEvent({ event: GameEvent.ShareCard, payload: response.data[0] });
                 }
                 this.status = 'IDLE';
               });
