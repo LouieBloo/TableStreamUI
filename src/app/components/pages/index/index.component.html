@@ -2,14 +2,19 @@
 <div class="hero min-h-screen backgroundImage">
     <div class="hero-overlay bg-opacity-60 background"></div>
     <div class="hero-content text-center text-white heroBackground">
-        <div class="max-w-650">
+        <div class="max-w-3xl">
             <h1 class="mb-5 text-5xl font-bold">Table Stream</h1>
             <p class="mb-5 text-xl"><strong>Welcome to Table Stream!</strong> A platform that lets you connect, share your webcam, and enjoy games like Magic: The Gathering, Pokémon, and Yu-Gi-Oh! with friends online.</p>
             <div>
-                <a routerLink="/join" class="btn btn-outline text-white py-2 px-4 rounded mr-2">Start Playing</a>
-                <button class="btn btn-outline text-white py-2 px-4 rounded" (click)="scrollToSection()">Learn More</button>
+                <a routerLink="/join" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="gameAxeSword"></ng-icon> Start Playing</a>
+                <button class="btn btn-outline text-white py-2 px-4 rounded" (click)="scrollToSection()"><ng-icon class="mr-1 text-lg" name="bootstrapInfoSquareFill"></ng-icon> Learn More</button>
             </div>
         </div>
+    </div>
+
+    <div class="text-center absolute bottom-10">
+        <a href="https://www.reddit.com/r/table_stream" target="_blank" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="bootstrapReddit"></ng-icon> Join us on Reddit</a>
+        <a href="https://discord.gg/JrjWCwZ3kb" class="btn btn-outline text-white py-2 px-4 rounded"><ng-icon class="mr-1 text-lg" name="bootstrapDiscord"></ng-icon> Discord Discussions</a>
     </div>
 </div>
 
@@ -69,8 +74,9 @@
         </section>
     
         <div class="text-center">
-            <a href="/join" class="btn btn-outline text-white py-2 px-4 rounded mr-2">Create or Join a Game Now</a>
-            <a href="https://discord.gg/JrjWCwZ3kb" class="btn btn-outline text-white py-2 px-4 rounded">Join our Discord</a>
+            <a routerLink="/join" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="gameAxeSword"></ng-icon> Create or Join a Game Now</a>
+            <a href="https://www.reddit.com/r/table_stream" target="_blank" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="bootstrapReddit"></ng-icon> Check Out the Subreddit</a>
+            <a href="https://discord.gg/JrjWCwZ3kb" class="btn btn-outline text-white py-2 px-4 rounded"><ng-icon class="mr-1 text-lg" name="bootstrapDiscord"></ng-icon> Join our Discord</a>
         </div>
     </main>
 </div>
