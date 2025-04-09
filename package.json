@@ -20,6 +20,7 @@
     "@angular/router": "^18.1.0",
     "@ng-icons/bootstrap-icons": "^29.3.0",
     "@ng-icons/core": "^29.3.0",
+    "@ng-icons/game-icons": "^31.2.0",
     "@types/howler": "^2.2.12",
     "animate.css": "^4.1.1",
     "apexcharts": "^4.5.0",
