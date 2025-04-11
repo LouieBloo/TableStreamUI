@@ -1,15 +1,24 @@
-.max-w-650{
-    max-width: 650px;
-}
-
 .background{
     background-color: #000000ad;
+}
+
+.backgroundImage{
+    background-image: url("/assets/images/table-stream.jpg");
 }
 
 .heroBackground{
     background-color: #00000078;
 }
 
-.backgroundImage{
-    background-image: url("/assets/images/table-stream.jpg");
+
+#heroSection{
+    top:15%;
+}
+
+.infoBackgroundImage{
+    background-image: url("/assets/images/playing-board.jpg");
+}
+
+.max-w-650{
+    max-width: 650px;
 }

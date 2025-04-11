@@ -1,16 +1,16 @@
 
-
+.subMenuLeft{
+    left: 90%;
+}
 
 .poisonPanelEditable{
-    right:-128px;
+    right:-126px;
     top:0px;
-    /* height:42px; */
 }
 
 .poisonPanel{
     right:-78px;
     top:2px;
-    /* height:42px; */
 }
 
 .energyPanel{
@@ -21,4 +21,32 @@
 .energyPanelEditable{
     left:-128px;
     top:0px;
+}
+
+.radiationPanelRightEditable{
+    right:-112px;
+    top:0px;
+}
+
+.radiationPanelRight{
+    right:-61px;
+    top:2px;
+}
+
+.radiationPanelLeftEditable{
+    left:-111px;
+    top:0px;
+}
+
+.radiationPanelLeft{
+    left:-61px;
+    top:2px;
+}
+
+.radiationPanelLower{
+    top:45px !important;
+}
+
+.radiationPanelFarRight{
+    right:-139px !important;
 }

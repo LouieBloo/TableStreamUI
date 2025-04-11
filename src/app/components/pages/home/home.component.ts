@@ -8,10 +8,11 @@ import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { IpAddressWarningModalComponent } from '../../modals/ip-address-warning-modal/ip-address-warning-modal.component';
 import { PrivacyPolicyModalComponent } from '../../modals/privacy-policy-modal/privacy-policy-modal.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
+import { MainLogoComponent } from "../../main-logo/main-logo.component";
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, NgClass, NgIf, NgFor, IpAddressWarningModalComponent, PrivacyPolicyModalComponent],
+  imports: [FormsModule, NgClass, NgIf, NgFor, IpAddressWarningModalComponent, PrivacyPolicyModalComponent, MainLogoComponent, MainLogoComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })

@@ -26,6 +26,7 @@ export interface IPlayer extends IUser{
 
     poisonTotal:number;
     energyTotal:number;
+    radiationTotal:number;
 
     commanderDamages: { [playerId: string]: { [cardId: string]: ICommanderDamage } };
 
@@ -54,5 +55,6 @@ export enum PlayerProperties{
     prizeCards,
     sharingImages,
     commanderCastAmount,
-    initiative
+    initiative,
+    radiationTotal
 }

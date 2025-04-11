@@ -1,9 +1,9 @@
 <!-- Hero Section -->
 <div class="hero min-h-screen backgroundImage">
     <div class="hero-overlay bg-opacity-60 background"></div>
-    <div class="hero-content text-center text-white heroBackground">
-        <div class="max-w-3xl">
-            <h1 class="mb-5 text-5xl font-bold">Table Stream</h1>
+    <div class="hero-content text-center text-white flex flex-col absolute" id="heroSection">
+        <app-main-logo [size]="'large'" [animationClass]="'animate__zoomIn'"></app-main-logo>
+        <div class="max-w-4xl heroBackground p-4 animate__animated animate__zoomIn">
             <p class="mb-5 text-xl"><strong>Welcome to Table Stream!</strong> A platform that lets you connect, share your webcam, and enjoy games like Magic: The Gathering, Pokémon, and Yu-Gi-Oh! with friends online.</p>
             <div>
                 <a routerLink="/join" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="gameAxeSword"></ng-icon> Start Playing</a>
@@ -12,16 +12,17 @@
         </div>
     </div>
 
-    <div class="text-center absolute bottom-10">
+    <div class="text-center absolute bottom-10 animate__animated animate__zoomIn animate__delay-1s">
         <a href="https://www.reddit.com/r/table_stream" target="_blank" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="bootstrapReddit"></ng-icon> Join us on Reddit</a>
         <a href="https://discord.gg/JrjWCwZ3kb" class="btn btn-outline text-white py-2 px-4 rounded"><ng-icon class="mr-1 text-lg" name="bootstrapDiscord"></ng-icon> Discord Discussions</a>
     </div>
 </div>
 
 <!-- Main Content -->
-<div class=" bg-slate-800">
-    <main class="container mx-auto p-8 text-white" id="main-content">
-        <section class="mb-12">
+<div class="relative infoBackgroundImage">
+    <div class="absolute inset-0 heroBackground z-0"></div>
+    <main class="relative  container mx-auto p-8 text-white z-10 max-w-6xl" id="main-content">
+        <section class="mb-8">
             <h2 class="text-3xl font-bold mb-4">How It Works</h2>
             <p class="mb-4">
                 Table Stream allows you to join or create games for different formats like <strong>Commander</strong>,
@@ -33,7 +34,7 @@
             </p>
         </section>
     
-        <section class="mb-12">
+        <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4">Game Features</h2>
             <ul class="list-disc list-inside mb-4">
                 <li>2-6 player games</li>
@@ -57,7 +58,7 @@
             </ul>
         </section>
 
-        <section class="mb-12">
+        <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4">Planned Features</h2>
             <ul class="list-disc list-inside mb-4">
                 <li>Public server list</li>
@@ -65,7 +66,7 @@
             </ul>
         </section>
     
-        <section class="mb-12">
+        <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4">No Account Needed</h2>
             <p class="mb-4">
                 Table Stream is completely free to use. No account or email registration is required. Just jump in and start
