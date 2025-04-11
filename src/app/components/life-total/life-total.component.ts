@@ -1,7 +1,7 @@
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { bootstrapSuitHeartFill } from '@ng-icons/bootstrap-icons';
-import { provideIcons } from '@ng-icons/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
@@ -11,14 +11,15 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
 import { GameService } from '../../services/game/game.service';
 import { IPlayer, PlayerProperties } from '../../interfaces/IPlayer';
 import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/IGame';
+import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameFairyWand, gameModernCity, gameSunCloud, gameTorch, gameDeathSkull } from '@ng-icons/game-icons';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgClass,NgIf,TitleCasePipe,PropertyCounterComponent,TooltipDirective],
+  imports: [NgClass,NgIf,TitleCasePipe,PropertyCounterComponent,TooltipDirective,NgIcon],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
-  viewProviders: [provideIcons({ bootstrapSuitHeartFill })]
+  viewProviders: [provideIcons({ bootstrapSuitHeartFill, gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand,gameTorch,gameModernCity, gameSunCloud, gameDeathSkull })]
 })
 export class LifeTotalComponent {
   @Input() player!:IPlayer;

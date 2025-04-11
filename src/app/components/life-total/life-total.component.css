@@ -1,5 +1,7 @@
 
-
+.subMenuLeft{
+    left: 90%;
+}
 
 .poisonPanelEditable{
     right:-128px;

@@ -2,11 +2,12 @@ import { Component, Input } from '@angular/core';
 import { IPlayer } from '../../interfaces/IPlayer';
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../directives/tooltip.directive';
+import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-property-counter',
   standalone: true,
-  imports: [NgIf,NgClass,TitleCasePipe,TooltipDirective],
+  imports: [NgIf,NgClass,TitleCasePipe,TooltipDirective,NgIcon],
   templateUrl: './property-counter.component.html',
   styleUrl: './property-counter.component.css'
 })
@@ -20,7 +21,8 @@ export class PropertyCounterComponent {
   // if true the side buttons will be joined together
   @Input() joined:boolean = true;
   @Input() modifyCallback:any;
-  @Input() emoji!:string;
+  @Input() iconClass!:string;
+  @Input() iconColor!:string;
   // + and - button class (mainly for rounding)
   @Input() buttonClass!: string;
   @Input() fullWidth:boolean = false;

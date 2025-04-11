@@ -1,40 +1,24 @@
-#heroSection{
-    top:15%;
-}
-
-.max-w-650{
-    max-width: 650px;
-}
-
-#mainLogo{
-    width:550px;
-}
-
-.logoGlow{
-    /* -webkit-box-shadow:0px 0px 99px 0px rgba(45,255,196,0.9);
-    -moz-box-shadow: 0px 0px 99px 0px rgba(45,255,196,0.9);
-    box-shadow: 0px 0px 99px 0px rgba(45,255,196,0.9); */
-
-    /* filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 6px #ffffff);
-    transition: filter 0.3s ease; #ff0be7*/
-    animation: pulseGlow 3s infinite ease-in-out;
-}
-
-
-@keyframes pulseGlow {
-    0% { filter: drop-shadow(0 0 15px #014cfb); }
-    50% { filter: drop-shadow(0 0 25px #014cfb); }
-    100% { filter: drop-shadow(0 0 15px #014cfb); }
-  }
-
 .background{
     background-color: #000000ad;
+}
+
+.backgroundImage{
+    background-image: url("/assets/images/table-stream.jpg");
 }
 
 .heroBackground{
     background-color: #00000078;
 }
 
-.backgroundImage{
-    background-image: url("/assets/images/table-stream.jpg");
+
+#heroSection{
+    top:15%;
+}
+
+.infoBackgroundImage{
+    background-image: url("/assets/images/playing-board.jpg");
+}
+
+.max-w-650{
+    max-width: 650px;
 }
