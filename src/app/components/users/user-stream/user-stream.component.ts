@@ -287,6 +287,17 @@ export class UserStreamComponent {
     });
   };
 
+  modifyRadiationTotal = (amount: number) => {
+    let payload: IModifyPlayerProperty = {
+      amountToModify: amount,
+      property: PlayerProperties.radiationTotal,
+    };
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyPlayerProperty,
+      payload: payload,
+    });
+  };
+
   modifyPrizeCardTotal = (amount: number) => {
     let payload: IModifyPlayerProperty = {
       amountToModify: amount,

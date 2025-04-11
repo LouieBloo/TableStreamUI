@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSquareFill } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { gameAxeSword} from '@ng-icons/game-icons';
+import { MainLogoComponent } from '../../main-logo/main-logo.component';
 
 @Component({
   selector: 'app-index',
   standalone: true,
-  imports: [RouterLink,NgIcon],
+  imports: [RouterLink,NgIcon, MainLogoComponent],
   templateUrl: './index.component.html',
   styleUrl: './index.component.css',
   viewProviders: [provideIcons({ bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSquareFill, gameAxeSword })]

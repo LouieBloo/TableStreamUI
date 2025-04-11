@@ -10,11 +10,12 @@
   </div>
   <div *ngIf="player" class="flex flex-row ">
     <div class="relative">
-      <div *ngIf="showEnergyCounter || player.energyTotal > 0" class="absolute " [ngClass]="{'energyPanelEditable': editable, 'energyPanel' : !editable}">
+      <div *ngIf="showingEnergyPanel" class="absolute " [ngClass]="{'energyPanelEditable': editable, 'energyPanel' : !editable}">
         <app-property-counter
           [editable]="editable"
           [title]="'Energy'"
-          [emoji]="'⚡'"
+          [iconClass]="'gamePowerLightning'"
+          [iconColor]="'text-orange-600'"
           [total]="player.energyTotal"
           [modifyCallback]="modifyEnergyCallback" class="mb-2">
         </app-property-counter>
@@ -31,15 +32,26 @@
             <p class="text-center">{{player.name | titlecase}}</p>
             <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
           </div>
-          <ul *ngIf="editable || gameService.isCommanderGame()" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-            <li *ngIf="editable" (click)="setToZero()"><a>Set to 0</a></li>
-              <li *ngIf="gameService.isCommanderGame()" (click)="toggleCommanderDamages()"><a>Commander Damage</a></li>
-              <li *ngIf="editable && gameService.isMagicGame()" (click)="showPoisonCounter = !showPoisonCounter;"><a>Show Poison</a></li>
-              <li *ngIf="editable && gameService.isMagicGame()" (click)="showEnergyCounter = !showEnergyCounter;"><a>Show Energy</a></li>
-              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleMonarch()"><a>Become Monarch</a></li>
-              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleInitiative()"><a>Take Initiative</a></li>
-              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleCitiesBlessing()"><a>Toggle Cities Blessing</a></li>
-              <li *ngIf="editable && gameService.isMagicGame()" (click)="toggleDayNightCycle()"><a>Become {{gameService.isDay ? "Night" : "Day"}}</a></li>
+          <ul *ngIf="editable || gameService.isCommanderGame()" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 shadow text-slate-800">
+            <li *ngIf="editable" (click)="setToZero()"><a><ng-icon class="mr-1 text-lg text-red-600" name="gameBrokenHeart"></ng-icon> Set Life to 0</a></li>
+            <li class="relative group" *ngIf="gameService.isMagicGame()">
+              <a><ng-icon class="mr-1 text-lg text-violet-600" name="gameDiceSixFacesFive"></ng-icon> Counters</a>
+              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu bg-base-100 rounded-box w-64 shadow  z-10">
+                <li *ngIf="gameService.isCommanderGame()" (click)="toggleCommanderDamages()"><a><ng-icon class="mr-1 text-lg text-red-600" name="gameHealthNormal"></ng-icon> Commander Damage</a></li>
+                <li *ngIf="editable && gameService.isMagicGame()" (click)="showPoisonCounter = !showPoisonCounter;"><a><ng-icon class="mr-1 text-lg text-green-600" name="gamePoisonBottle"></ng-icon> Poison</a></li>
+                <li *ngIf="editable && gameService.isMagicGame()" (click)="showEnergyCounter = !showEnergyCounter;"><a><ng-icon class="mr-1 text-lg text-orange-600" name="gamePowerLightning"></ng-icon> Energy</a></li>
+                <li *ngIf="editable && gameService.isMagicGame()" (click)="showRadiationCounter = !showRadiationCounter;"><a><ng-icon class="mr-1 text-lg text-yellow-400" name="gameRadioactive"></ng-icon> Rad</a></li>
+              </ul>
+            </li>
+            <li class="relative group" *ngIf="editable && gameService.isMagicGame()">
+              <a><ng-icon class="mr-1 text-lg text-amber-600" name="gameFairyWand"></ng-icon> Modifiers</a>
+              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu bg-base-100 rounded-box w-52 shadow  z-10">
+                <li (click)="toggleMonarch()"><a><ng-icon class="mr-1 text-lg text-amber-500" name="gameCrown"></ng-icon> Become Monarch</a></li>
+                <li (click)="toggleInitiative()"><a><ng-icon class="mr-1 text-lg text-red-500" name="gameTorch"></ng-icon> Take Initiative</a></li>
+                <li (click)="toggleCitiesBlessing()"><a><ng-icon class="mr-1 text-lg text-stone-800" name="gameModernCity"></ng-icon> Toggle Cities Blessing</a></li>
+                <li (click)="toggleDayNightCycle()"><a><ng-icon class="mr-1 text-lg text-cyan-500" name="gameSunCloud"></ng-icon> Become {{gameService.isDay ? "Night" : "Day"}}</a></li>
+              </ul>
+            </li>
           </ul>
         </div>
   
@@ -49,20 +61,34 @@
         <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(500)">+500</button>
   
       </div>
-      <div *ngIf="showPoisonCounter || player.poisonTotal > 0" class="absolute bg-black bg-opacity-50 text-sm rounded-md" id="poisonPanel" [ngClass]="{'poisonPanelEditable': editable, 'poisonPanel' : !editable}">
-        <div class="join">
-          <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyPoisonCallback(-1)">-1</button>
-          <div class="dropdown join-item button text-white pl-4 pr-4">
-            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-              <p class="text-center">Poison</p>
-              <p class="text-center">💀 {{player.poisonTotal}}</p>
-            </div>
-            <ul *ngIf="editable" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-              <li (click)="modifyPoisonCallback(-player.poisonTotal)"><a>Set to 0</a></li>
-            </ul>
-          </div>
-          <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyPoisonCallback(1)">+1</button>
-        </div>
+      <div *ngIf="showingPoisonPanel" class="absolute bg-black bg-opacity-50 text-sm rounded-md" id="poisonPanel" [ngClass]="{'poisonPanelEditable': editable, 'poisonPanel' : !editable}">
+        <app-property-counter
+          [editable]="editable"
+          [title]="'Poison'"
+          [iconClass]="'gameDeathSkull'"
+          [iconColor]="'text-green-600'"
+          [total]="player.poisonTotal"
+          [modifyCallback]="modifyPoisonCallback" class="mb-2">
+        </app-property-counter>
+      </div>
+
+      <div *ngIf="showRadiationCounter || player.radiationTotal > 0" class="absolute bg-black bg-opacity-50 text-sm rounded-md" id="radiationPanel" 
+        [ngClass]="{
+          'radiationPanelLeftEditable': editable && !showingEnergyPanel,
+          'radiationPanelRightEditable': editable && showingEnergyPanel,
+          'radiationPanelLeft' : !editable && !showingEnergyPanel,
+          'radiationPanelRight' : !editable && showingEnergyPanel,
+          'radiationPanelLower': editable && showingEnergyPanel && showingPoisonPanel,
+          'radiationPanelFarRight': !editable && showingEnergyPanel && showingPoisonPanel
+        }">
+        <app-property-counter
+          [editable]="editable"
+          [title]="'Rad'"
+          [iconClass]="'gameRadioactive'"
+          [iconColor]="'text-yellow-400'"
+          [total]="player.radiationTotal"
+          [modifyCallback]="modifyRadiationCallback" class="mb-2">
+        </app-property-counter>
       </div>
     </div>
   </div>

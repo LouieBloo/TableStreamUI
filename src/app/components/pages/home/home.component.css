@@ -12,7 +12,9 @@
 }
 
 .heroBackground{
-    background-color: #00000078;
+    /* background-color: #00000078; */
+    /* box-shadow: 10px 5px 5px #00000078; */
+    box-shadow: 0 0 45px #000000;
 }
 
 .hero{
