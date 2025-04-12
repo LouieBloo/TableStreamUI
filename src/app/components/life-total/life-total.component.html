@@ -36,7 +36,7 @@
             <li *ngIf="editable" (click)="setToZero()"><a><ng-icon class="mr-1 text-lg text-red-600" name="gameBrokenHeart"></ng-icon> Set Life to 0</a></li>
             <li class="relative group" *ngIf="gameService.isMagicGame()">
               <a><ng-icon class="mr-1 text-lg text-violet-600" name="gameDiceSixFacesFive"></ng-icon> Counters</a>
-              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu bg-base-100 rounded-box w-64 shadow  z-10">
+              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu popupColors rounded-box w-64 shadow  z-10">
                 <li *ngIf="gameService.isCommanderGame()" (click)="toggleCommanderDamages()"><a><ng-icon class="mr-1 text-lg text-red-600" name="gameHealthNormal"></ng-icon> Commander Damage</a></li>
                 <li *ngIf="editable && gameService.isMagicGame()" (click)="showPoisonCounter = !showPoisonCounter;"><a><ng-icon class="mr-1 text-lg text-green-600" name="gamePoisonBottle"></ng-icon> Poison</a></li>
                 <li *ngIf="editable && gameService.isMagicGame()" (click)="showEnergyCounter = !showEnergyCounter;"><a><ng-icon class="mr-1 text-lg text-orange-600" name="gamePowerLightning"></ng-icon> Energy</a></li>
@@ -45,7 +45,7 @@
             </li>
             <li class="relative group" *ngIf="editable && gameService.isMagicGame()">
               <a><ng-icon class="mr-1 text-lg text-amber-600" name="gameFairyWand"></ng-icon> Modifiers</a>
-              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu bg-base-100 rounded-box w-52 shadow  z-10">
+              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu popupColors rounded-box w-52 shadow  z-10">
                 <li (click)="toggleMonarch()"><a><ng-icon class="mr-1 text-lg text-amber-500" name="gameCrown"></ng-icon> Become Monarch</a></li>
                 <li (click)="toggleInitiative()"><a><ng-icon class="mr-1 text-lg text-red-500" name="gameTorch"></ng-icon> Take Initiative</a></li>
                 <li (click)="toggleCitiesBlessing()"><a><ng-icon class="mr-1 text-lg text-stone-800" name="gameModernCity"></ng-icon> Toggle Cities Blessing</a></li>
