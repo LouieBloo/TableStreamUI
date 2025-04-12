@@ -1,4 +1,4 @@
 <div class="text-center animate__animated " [ngClass]="animationClass">
     <img src="assets/images/main-logo.png" alt="Table Stream" class="" id="mainLogo" class="logoGlow" [ngClass]="{'max-w-52' : size === 'small', 'mx-auto': size === 'small'}">
-    <h1 class="mb-5 text-7xl font-bold text-white logoGlow" [ngClass]="{'text-7xl': size === 'large', 'text-5xl': size === 'small'  }">TABLE STREAM</h1>
+    <h1 class="mb-5 font-bold text-white logoGlow text-5xl md:text-7xl" [ngClass]="size === 'small' ? 'md:text-5xl' : ''">TABLE STREAM</h1>
 </div>

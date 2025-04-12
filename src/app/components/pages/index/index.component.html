@@ -1,7 +1,7 @@
 <!-- Hero Section -->
 <div class="hero min-h-screen" style="background-image: url('/assets/images/table-stream.jpg');">
     <div class="hero-overlay bg-opacity-60 background"></div>
-    <div class="hero-content text-center text-white flex flex-col absolute" id="heroSection">
+    <div class="hero-content text-center text-white flex flex-col absolute inset-x-0 mx-auto top-0 md:top-[15%]" >
         <app-main-logo [size]="'large'" [animationClass]="'animate__zoomIn'"></app-main-logo>
         <div class="max-w-4xl heroBackground p-4 animate__animated animate__zoomIn">
             <p class="mb-5 text-xl"><strong>Welcome to Table Stream!</strong> A platform that lets you connect, share your webcam, and enjoy games like Magic: The Gathering, Pokémon, and Yu-Gi-Oh! with friends online.</p>
@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="text-center absolute bottom-10 animate__animated animate__zoomIn animate__delay-1s">
+    <div class="text-center absolute bottom-5 md:bottom-10 inset-x-0 mx-auto animate__animated animate__zoomIn animate__delay-1s">
         <a href="https://www.reddit.com/r/table_stream" target="_blank" class="btn btn-outline text-white py-2 px-4 rounded mr-2"><ng-icon class="mr-1 text-lg" name="bootstrapReddit"></ng-icon> Join us on Reddit</a>
         <a href="https://discord.gg/JrjWCwZ3kb" class="btn btn-outline text-white py-2 px-4 rounded"><ng-icon class="mr-1 text-lg" name="bootstrapDiscord"></ng-icon> Discord Discussions</a>
     </div>
