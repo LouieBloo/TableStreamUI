@@ -332,7 +332,7 @@ export class WebRTCService {
     const maxPlayers: number = parseInt(this.localStorageService.maxPlayers || "4");
     const reactionsEnabled: boolean = this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true;
 
-    this.iceServerList = await this.twilioService.getIceServerList();
+    //this.iceServerList = await this.twilioService.getIceServerList();
 
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
@@ -372,6 +372,9 @@ export class WebRTCService {
             }
             return;
           }
+
+          this.iceServerList = room.iceServerList;
+
           // Set all our game state
           if (room.messages) {
             room.messages.forEach(m => this.handleMessage(m))

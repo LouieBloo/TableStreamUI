@@ -12,6 +12,7 @@ export interface IRoom {
     maxPlayers?:number;
     reactionsEnabled?:boolean;
     allowPlayerKicking?:boolean;
+    iceServerList?: any[];
 }
 
 export interface PasswordCheckResponse {
