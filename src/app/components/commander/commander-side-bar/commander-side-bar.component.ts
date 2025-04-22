@@ -19,9 +19,26 @@ export class CommanderSideBarComponent {
   @Input() localStream: boolean = false;
   @Input() getModifyCommanderDamageCallback:any;
 
-  showSidebar = true;
-
+  showSidebar:boolean = true;
+  panelHidden:boolean = false;
+  
   constructor(public gameService: GameService) {}
+
+  toggleSidebar() {
+    this.showSidebar = !this.showSidebar;
+  
+    // if showing, immediately unhide the wrapper
+    if (this.showSidebar) {
+      this.panelHidden = false;
+    }
+  }
+  
+  onTransitionEnd() {
+    // hide wrapper only if we're hiding the sidebar
+    if (!this.showSidebar) {
+      this.panelHidden = true;
+    }
+  }
 
   getKeys(object: any): string[] {
     return Object.keys(object);
