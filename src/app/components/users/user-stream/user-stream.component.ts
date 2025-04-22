@@ -24,6 +24,7 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
+import { CommanderSideBarComponent } from "../../commander/commander-side-bar/commander-side-bar.component";
 
 @Component({
   selector: 'app-user-stream',
@@ -42,7 +43,8 @@ import { IKickPlayerResponse } from '../../../interfaces/IRoom';
     ReactionsComponent,
     TimerComponent,
     BoundingBoxComponent,
-  ],
+    CommanderSideBarComponent
+],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
   viewProviders: [provideIcons({ bootstrapGearFill })],
@@ -355,14 +357,12 @@ export class UserStreamComponent {
     });
   };
 
-  getModifyCommanderDamageCallback(
-    playerId: string,
-    card: IPlayingCard
-  ): (amount: number) => void {
-    return (amount: number) => {
+  getModifyCommanderDamageCallback = (playerId: string, card: IPlayingCard): ((amount: number) => void) => {
+    return (amount: number): void => {
       this.modifyCommanderDamage(playerId, amount, card);
     };
-  }
+  };
+  
 
   getKeys(object: any): string[] {
     return Object.keys(object);
