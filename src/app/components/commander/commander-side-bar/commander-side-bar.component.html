@@ -4,20 +4,26 @@
         <div *ngIf="!showSidebar" class="text-sm text-pop flex items-center">Damages <ng-icon  class="text-md" name="bootstrapChevronDoubleRight"></ng-icon></div>
     </button>
     
-    <div class="overflow-hidden transition-all duration-300" [ngClass]="{
-        'hidden': !showSidebar
-      }">
-        <ng-container *ngFor="let playerId of getKeys(this.player.commanderDamages)">
-            <ng-container *ngFor="let cardId of getKeys(this.player.commanderDamages[playerId])">
-                <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
-                [total]="player.commanderDamages[playerId][cardId].damage"
-                [totalString]="gameService.getPlayerById(playerId)!.commanders.length > 1 ? (player.commanderDamages[playerId][cardId].card.name | slice:0:6) + '... ' : ''"
-                [tooltip]="'Commander damage taken'"
-                [modifyCallback]="getModifyCommanderDamageCallback(playerId, player.commanderDamages[playerId][cardId].card)" [joined]="localStream" [fullWidth]="true" [buttonClass]="'rounded-t-none rounded-b-none'" class="">
-                </app-property-counter>
+    <div class="relative overflow-hidden" [ngClass]="{'pointer-events-auto': showSidebar}" >
+        <div
+        class="transition-transform duration-300 ease-in-out "
+        [ngClass]="{
+            'translate-x-0 h-full': showSidebar,
+            '-translate-x-full h-0': !showSidebar
+        }">
+            <ng-container *ngFor="let playerId of getKeys(this.player.commanderDamages)">
+                <ng-container *ngFor="let cardId of getKeys(this.player.commanderDamages[playerId])">
+                    <app-property-counter [editable]="localStream" [title]="gameService.getPlayerById(playerId)!.name"
+                    [total]="player.commanderDamages[playerId][cardId].damage"
+                    [totalString]="gameService.getPlayerById(playerId)!.commanders.length > 1 ? (player.commanderDamages[playerId][cardId].card.name | slice:0:6) + '... ' : ''"
+                    [tooltip]="'Commander damage taken'"
+                    [modifyCallback]="getModifyCommanderDamageCallback(playerId, player.commanderDamages[playerId][cardId].card)" [joined]="localStream" [fullWidth]="true" [buttonClass]="'rounded-t-none rounded-b-none'" class="">
+                    </app-property-counter>
+                </ng-container>
             </ng-container>
-        </ng-container>
+        </div>
     </div>
+    
 </div>
 
 
