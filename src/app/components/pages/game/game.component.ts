@@ -24,6 +24,8 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { Token } from '../../../interfaces/IPlayingCard';
+import { DonationButtonComponent } from '../../donation-button/donation-button.component';
+import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 
 @Component({
   selector: 'app-game',
@@ -43,6 +45,8 @@ import { Token } from '../../../interfaces/IPlayingCard';
     CardTokenComponent,
     TokenModalComponent,
     TimerComponent,
+    DonationButtonComponent,
+    DonationModalComponent
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -55,6 +59,7 @@ export class GameComponent {
   @ViewChild(PlayerTurnOrderModalComponent)
   playerTurnOrderModal!: PlayerTurnOrderModalComponent;
   @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
+  @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
 
   private subscriptions: Subscription = new Subscription();
   localPlayerId: string = '';

@@ -1,0 +1,21 @@
+<div *ngIf="!hidden" class="relative inline-block group">
+    <!-- Donate Button -->
+    <button
+      (click)="clickCallback()"
+      class="text-white bg-violet-600 rounded-full px-4 py-2 font-bold flex items-center space-x-2"
+    >
+      <ng-icon name="gameCoffeeCup"></ng-icon>
+      <span>Donate</span>
+    </button>
+  
+    <!-- X Button (only visible on hover) -->
+    <button
+      (click)="hidden = !hidden"
+      class="absolute -top-2 -right-2 text-white bg-black rounded-full w-5 h-5 text-xs
+             opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      title="Close"
+    >
+      X
+    </button>
+  </div>
+  
