@@ -1,0 +1,23 @@
+@keyframes floatUp {
+    0% {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
+    5% {
+        opacity: 1;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, -150%);
+      opacity: 0;
+    }
+}
+  
+.animate-float {
+    animation: floatUp 30s ease-in-out forwards;
+}

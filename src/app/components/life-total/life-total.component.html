@@ -21,11 +21,12 @@
         </app-property-counter>
       </div>
       <div class="join bg-black bg-opacity-50 text-sm">
-        
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-3000)">-3K</button>
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-1000)">-1K</button>
         <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-500)">-500</button>
         <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-100)">-100</button>
-        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
-        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
+        <button *ngIf="editable && !gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
+        <button *ngIf="editable && !gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
   
         <div class="dropdown join-item button text-white pl-4 pr-4" appTooltip="Click to see more options" [tooltipDirection]="'bottom'" [tooltipStartOpen]="editable">
           <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
@@ -55,10 +56,12 @@
           </ul>
         </div>
   
-        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
-        <button *ngIf="editable" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
+        <button *ngIf="editable && !gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1)">+1</button>
+        <button *ngIf="editable && !gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(10)">+10</button>
         <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(100)">+100</button>
         <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(500)">+500</button>
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(1000)">+1K</button>
+        <button *ngIf="editable && gameService.isYugiohGame()" type="button" class=" button text-white p-1 join-item" (click)="modifyCallback(3000)">+3K</button>
   
       </div>
       <div *ngIf="showingPoisonPanel" class="absolute bg-black bg-opacity-50 text-sm rounded-md" id="poisonPanel" [ngClass]="{'poisonPanelEditable': editable, 'poisonPanel' : !editable}">

@@ -1,0 +1,10 @@
+<div class="">
+    <div *ngIf="activeDonation">
+        <app-donation-bubble
+            [donation]="activeDonation"
+            [lifeTimeInSeconds]="8"
+            [moveDistancePx]="200"
+            [callbackWhenDead]="onBubbleDeath"
+        ></app-donation-bubble>
+    </div>
+</div>

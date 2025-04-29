@@ -9,10 +9,25 @@ import { IpAddressWarningModalComponent } from '../../modals/ip-address-warning-
 import { PrivacyPolicyModalComponent } from '../../modals/privacy-policy-modal/privacy-policy-modal.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { MainLogoComponent } from "../../main-logo/main-logo.component";
+import { RecentDonationListComponent } from "../../donations/recent-donation-list/recent-donation-list.component";
+import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
+import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, NgClass, NgIf, NgFor, IpAddressWarningModalComponent, PrivacyPolicyModalComponent, MainLogoComponent, MainLogoComponent],
+  imports: [
+    FormsModule,
+    NgClass,
+    NgIf,
+    NgFor,
+    IpAddressWarningModalComponent,
+    PrivacyPolicyModalComponent,
+    MainLogoComponent,
+    MainLogoComponent,
+    RecentDonationListComponent,
+    DonationButtonComponent,
+    DonationModalComponent
+  ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -22,6 +37,8 @@ export class HomeComponent {
 
   @ViewChild(PrivacyPolicyModalComponent)
   privacyPolicyModal!: PrivacyPolicyModalComponent;
+
+  @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
 
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
@@ -138,10 +155,14 @@ export class HomeComponent {
       return "mana-vault"
     }else if(this.player.gameType == GameType.MTGPauperCommander){
       return "pauper"
-    }else if(this.player.gameType == GameType.YugiohStandard){
+    }else if(this.player.gameType == GameType.YugiohStandard || this.player.gameType == GameType.YugiohDomain){
       return "yugioh"
     }
         
     return "magic"
+  }
+
+  openDonationModel = ()=>{
+    this.donationModal.open();
   }
 }

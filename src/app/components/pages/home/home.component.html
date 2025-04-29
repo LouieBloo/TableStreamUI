@@ -95,5 +95,14 @@
   </div>
 </div>
 
+<div class="hidden sm:block">
+  <app-recent-donation-list></app-recent-donation-list>
+</div>
+
+<app-donation-modal></app-donation-modal>
+<div class="fixed bottom-2 right-2 sm:absolute sm:top-8 sm:right-8 sm:bottom-auto">
+    <app-donation-button [clickCallback]="openDonationModel"></app-donation-button>
+</div>
+
 <app-ip-address-warning-modal (agreeClicked)="onAgreeClicked()"></app-ip-address-warning-modal>
 <app-privacy-policy-modal></app-privacy-policy-modal>

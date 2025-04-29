@@ -24,6 +24,7 @@ export class SetCommanderComponent {
   @Input() editable!: boolean;
   @Input() index!: number;
   @Input() commander!:IPlayingCard;
+  @Input() label:string = "Commander";
   
   popoverPosition: { top: number, left: number } = { top: 0, left: 0 };
   flipped:boolean = false;
