@@ -20,17 +20,17 @@
           <form #createForm="ngForm" (ngSubmit)="onCreateGame()">
             <div class="mb-4">
               <label for="playerName" class="block text-sm font-medium text-white text-left">Your Name:</label>
-              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
+              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required maxlength="40"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-4">
               <label for="gameName" class="block text-sm font-medium text-white text-left">Room Name:</label>
-              <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required
+              <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required maxlength="40"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-4">
               <label for="password" class="block text-sm font-medium text-white text-left">Password (optional):</label>
-              <input type="text" id="password" name="password" [(ngModel)]="player.password"
+              <input type="text" id="password" name="password" [(ngModel)]="player.password" maxlength="40"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-6">
