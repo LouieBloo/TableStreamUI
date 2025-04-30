@@ -20,17 +20,17 @@
           <form #createForm="ngForm" (ngSubmit)="onCreateGame()">
             <div class="mb-4">
               <label for="playerName" class="block text-sm font-medium text-white text-left">Your Name:</label>
-              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required
+              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required maxlength="40"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-4">
               <label for="gameName" class="block text-sm font-medium text-white text-left">Room Name:</label>
-              <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required
+              <input type="text" id="gameName" name="gameName" [(ngModel)]="player.roomName" required maxlength="40"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-4">
               <label for="password" class="block text-sm font-medium text-white text-left">Password (optional):</label>
-              <input type="text" id="password" name="password" [(ngModel)]="player.password"
+              <input type="text" id="password" name="password" [(ngModel)]="player.password" maxlength="40"
                 class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
             </div>
             <div class="mb-6">
@@ -93,6 +93,15 @@
     </div>
     
   </div>
+</div>
+
+<div class="hidden sm:block">
+  <app-recent-donation-list></app-recent-donation-list>
+</div>
+
+<app-donation-modal></app-donation-modal>
+<div class="fixed bottom-2 right-2 sm:absolute sm:top-8 sm:right-8 sm:bottom-auto">
+    <app-donation-button [clickCallback]="openDonationModel"></app-donation-button>
 </div>
 
 <app-ip-address-warning-modal (agreeClicked)="onAgreeClicked()"></app-ip-address-warning-modal>

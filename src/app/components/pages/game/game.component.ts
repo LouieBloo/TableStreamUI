@@ -24,7 +24,7 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
 import { Token } from '../../../interfaces/IPlayingCard';
-import { DonationButtonComponent } from '../../donation-button/donation-button.component';
+import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 
 @Component({
@@ -390,4 +390,8 @@ export class GameComponent {
       payload: { dicesToRoll: dicesToRoll, sidedDice: sidedDice },
     });
   };
+
+  openDonationModel = ()=>{
+    this.donationModal.open();
+  }
 }

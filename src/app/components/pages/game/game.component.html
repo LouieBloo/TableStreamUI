@@ -114,8 +114,8 @@
     <app-token-modal></app-token-modal>
 
     <app-donation-modal></app-donation-modal>
-    <div *ngIf="donationModal" class="absolute bottom-3 left-3">
-        <app-donation-button [clickCallback]="donationModal.open"></app-donation-button>
+    <div class="absolute bottom-3 left-3">
+        <app-donation-button [clickCallback]="openDonationModel"></app-donation-button>
     </div>
 </div>
 

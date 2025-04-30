@@ -11,12 +11,13 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
 import { GameService } from '../../services/game/game.service';
 import { IPlayer, PlayerProperties } from '../../interfaces/IPlayer';
 import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/IGame';
-import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameFairyWand, gameModernCity, gameSunCloud, gameTorch, gameDeathSkull, gameRadioactive } from '@ng-icons/game-icons';
+import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameFairyWand, gameModernCity, gameSunCloud, gameTorch, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgClass, NgIf, TitleCasePipe, PropertyCounterComponent, TooltipDirective, NgIcon],
+  imports: [NgClass, NgIf, TitleCasePipe, PropertyCounterComponent, TooltipDirective, NgIcon,FormsModule],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
   viewProviders: [provideIcons({
@@ -32,7 +33,8 @@ import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gam
     gameModernCity,
     gameSunCloud,
     gameDeathSkull,
-    gameRadioactive
+    gameRadioactive,
+    gameHearts
   })]
 })
 export class LifeTotalComponent {
@@ -47,6 +49,8 @@ export class LifeTotalComponent {
   showPoisonCounter!: boolean;
   showEnergyCounter!: boolean;
   showRadiationCounter!:boolean;
+
+  setLifeTotalAmount!:number;
 
   private inputSubscription!: Subscription;
 
@@ -74,6 +78,11 @@ export class LifeTotalComponent {
 
   setToZero = () => {
     this.modifyCallback(-this.player.lifeTotal);
+  }
+
+  setLifeTotal = ()=>{
+    let difference:number = this.setLifeTotalAmount - this.player.lifeTotal;
+    this.modifyCallback(difference);
   }
 
   toggleMonarch = () => {

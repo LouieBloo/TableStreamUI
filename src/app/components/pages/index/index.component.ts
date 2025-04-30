@@ -29,4 +29,8 @@ export class IndexComponent {
   scrollToSection() {
     document.getElementById('main-content')?.scrollIntoView({ behavior: 'smooth' });
   }
+
+  openDonationModel = ()=>{
+    this.donationModal.open();
+  }
 }

@@ -1,6 +1,6 @@
 <div *ngIf="index == 0 || (index==1 && editable && player.commanders.length > 0) || (index==1 && !editable && player.commanders.length == 2)">
     <div *ngIf="editable && !commander" class="">
-        <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch()"><ng-icon class="mr-1" name="bootstrapPencilSquare"></ng-icon> Commander</button>
+        <button type="button" class="text-sm flex items-center text-pop" (click)="openSearch()"><ng-icon class="mr-1" name="bootstrapPencilSquare"></ng-icon> {{label}}</button>
     </div>
 
     <div *ngIf="commander" class="flex flex-row items-center" >

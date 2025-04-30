@@ -1,0 +1,9 @@
+<div class="text-center px-4 py-2 rounded-lg shadow-lg bg-violet-600 text-white text-sm font-medium animate__animated " [ngClass]="{
+    'animate__fadeIn': !fadeOut,
+    'animate__fadeOut': fadeOut
+  }">
+    <div class="opacity-80">💖 {{ donation.from }} donated ${{ donation.amount }}</div>
+    <div *ngIf="donation.message" class="text-xs italic opacity-60 mt-1">
+      "{{ donation.message }}"
+    </div>
+</div>
