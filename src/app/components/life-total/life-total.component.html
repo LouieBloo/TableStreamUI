@@ -34,7 +34,15 @@
             <p class="text-center">@if(player.lifeTotal > 0){❤️}@else{💀} {{player.lifeTotal}}</p>
           </div>
           <ul *ngIf="editable || gameService.isCommanderGame()" tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 shadow text-slate-800">
-            <li *ngIf="editable" (click)="setToZero()"><a><ng-icon class="mr-1 text-lg text-red-600" name="gameBrokenHeart"></ng-icon> Set Life to 0</a></li>
+            <li class="relative group" *ngIf="editable">
+              <a><ng-icon class="mr-1 text-lg text-red-600" name="gameHearts"></ng-icon> Set Life</a>
+              <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu popupColors rounded-box w-64 shadow  z-10">
+                <li class="flex flex-row items-center">
+                  <input type="number" [(ngModel)]="setLifeTotalAmount" (keydown.enter)="setLifeTotal()" class="w-36 mr-4 text-center text-lg border border-gray-300 rounded px-0 py-2"/>
+                  <button (click)="setLifeTotal()" class="text-xs text-white bg-violet-600 hover:bg-violet-700 rounded whitespace-nowrap">Set</button>
+                </li>
+              </ul>
+            </li>
             <li class="relative group" *ngIf="gameService.isMagicGame()">
               <a><ng-icon class="mr-1 text-lg text-violet-600" name="gameDiceSixFacesFive"></ng-icon> Counters</a>
               <ul class="absolute subMenuLeft top-0 hidden group-hover:block menu popupColors rounded-box w-64 shadow  z-10">
