@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { GameType } from '../../interfaces/IGame';
@@ -20,7 +20,7 @@ export class CardSearchService {
     if(game.gameType == GameType.PokemonStandard)
       return this.searchPokemon(query, game.searchTag);
 
-    if(game.gameType == GameType.YugiohStandard)
+    if(game.gameType == GameType.YugiohStandard || game.gameType == GameType.YugiohDomain)
       return this.searchYugioh(query)
 
     return this.searchScryfall(query,fuzzy,game.searchTag, options);
@@ -65,6 +65,9 @@ export class CardSearchService {
   }
 
   searchYugioh(name: string): Observable<any> {
+    if (!name || name.length < 3) {
+      return of({ data: [] });
+    }
     const params = new HttpParams().set('fname', name);
     return this.http.get<IPlayingCard>(environment.socketUrl + "/yugioh-cards", { params });
   }

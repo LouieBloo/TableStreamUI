@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { PokemonStandard } from '../../classes/game/PokemonStandard';
 import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
 import { YugiohStandard } from '../../classes/game/YugiohStandard';
+import { YugiohDomain } from '../../classes/game/YugiohStandardDomain';
 
 @Injectable({
   providedIn: 'root'
@@ -57,11 +58,15 @@ export class GameService {
     return this.room.game?.gameType == GameType.MTGCommander || this.room.game?.gameType == GameType.MTGPauperCommander;
   }
 
+  public isDomainGame = ():boolean =>{
+    return this.room.game?.gameType == GameType.YugiohDomain;
+  }
+
   public isYugiohGame = (): boolean => {
     if(!this.room.game?.gameType)
       return false
     
-    if(this.room.game.gameType === GameType.YugiohStandard)
+    if(this.room.game.gameType === GameType.YugiohStandard || this.room.game.gameType === GameType.YugiohDomain)
       return true
 
     return false
@@ -111,6 +116,8 @@ export class GameService {
         return new MTGPauperCommander();
       case GameType.YugiohStandard:
         return new YugiohStandard();
+      case GameType.YugiohDomain:
+        return new YugiohDomain();
     }
 
     return new MTGCommander();

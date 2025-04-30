@@ -48,7 +48,8 @@ export enum GameType{
     MTGVintage,
     PokemonStandard,
     MTGPauperCommander,
-    YugiohStandard
+    YugiohStandard,
+    YugiohDomain
 }
 
 export enum GameProperties{
