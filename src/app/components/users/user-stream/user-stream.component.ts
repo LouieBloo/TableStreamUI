@@ -52,6 +52,7 @@ import { CommanderSideBarComponent } from "../../commander/commander-side-bar/co
 export class UserStreamComponent {
   @Input() player!: IPlayer;
   @Input() localStream: boolean = false;
+  @Input() focusedLayout: boolean = false;
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
 
@@ -370,6 +371,11 @@ export class UserStreamComponent {
 
   isFirefox(): boolean {
     return /firefox/i.test(navigator.userAgent);
+  }
+
+  // only used to change the direction the settings menu renders
+  get isBottomRow():boolean{
+    return this.focusedLayout && !this.player.isTakingTurn;
   }
 
   onVideoClick(event: MouseEvent) {

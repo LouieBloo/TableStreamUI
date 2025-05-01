@@ -5,41 +5,19 @@
 
         <div class="flex flex-row flex-grow">
            
-            <div class="flex-grow h-screen" id="userStreams">
-                <!-- Top row -->
-                <div class="" 
-                    [ngClass]="{
-                        'h-2/3': focusedLayout,
-                        'grid grid-cols-2': !focusedLayout && topRowPlayers.length === 2,
-                        'grid grid-cols-3': !focusedLayout && topRowPlayers.length > 2
-                    }">
-                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800 bgTransition" 
-                        [ngClass]="{
-                            'h-full': focusedLayout,
-                            'full-height': !focusedLayout && bottomRowPlayers.length < 1,
-                            'half-height': !focusedLayout && bottomRowPlayers.length >= 1,
-                            'bgDayLight': gameService.isDay
-                        }">
-                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
-                    </div>
-                </div>
-            
-                <!-- Bottom row -->
-                <div class="" 
-                    [ngClass]="{
-                        'h-1/3': focusedLayout,
-                        'grid grid-cols-1': !focusedLayout && bottomRowPlayers.length === 1,
-                        'grid grid-cols-2': !focusedLayout && bottomRowPlayers.length === 2,
-                        'grid grid-cols-3': !focusedLayout && bottomRowPlayers.length > 2
-                    }">
-                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height bgTransition" 
-                        [ngClass]="{
-                            'h-full': focusedLayout,
-                            'half-height': !focusedLayout,
-                            'bgDayLight': gameService.isDay
-                        }">
-                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
-                    </div>
+            <div id="userStreams" class="flex flex-wrap h-screen ">
+                <div
+                  *ngFor="let player of gameService.room.players; let i = index"
+                  class="bg-slate-800 bgTransition"
+                  [class.bgDayLight]="gameService.isDay"
+                  [style.order]="getOrder(i)"
+                  [ngStyle]="computeFlexStyles(i)"
+                >
+                  <app-user-stream
+                    [player]="player"
+                    [localStream]="player.id === localPlayerId"
+                    [focusedLayout]="focusedLayout"
+                  ></app-user-stream>
                 </div>
             </div>
 
@@ -147,5 +125,13 @@
         <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
             Rejoin Game
         </button>
+    </div>
+</div>
+
+<div *ngIf="initialLoad" id="loadingScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
+    <div class="text-white text-center">
+        <p class="text-white w-full rounded-none text-4xl py-4 h-full">
+            Loading
+        </p>
     </div>
 </div>

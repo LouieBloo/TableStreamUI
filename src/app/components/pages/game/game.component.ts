@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -46,7 +46,8 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
     TokenModalComponent,
     TimerComponent,
     DonationButtonComponent,
-    DonationModalComponent
+    DonationModalComponent,
+    NgStyle
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -67,6 +68,7 @@ export class GameComponent {
   roomId!: string;
   showingHotkeys: boolean = false;
   focusedLayout: boolean = false;
+  initialLoad: boolean = true;
 
   constructor(
     private webRTC: WebRTCService,
@@ -191,6 +193,8 @@ export class GameComponent {
             this.addPlayer(p);
           }
         });
+
+        this.initialLoad = false;
       }
     );
   }
@@ -316,57 +320,6 @@ export class GameComponent {
     return this.gameService.room.players[this.focusedIndex];
   }
 
-  get topRowPlayers() {
-    if (this.focusedLayout) {
-      return [ this.focusedPlayer ];
-    }
-
-    switch (this.gameService.room.players.length) {
-      case 1:
-        return this.gameService.room.players;
-      case 2:
-        return this.gameService.room.players;
-      case 3:
-        return this.gameService.room.players.slice(0, 2);
-      case 4:
-        return this.gameService.room.players.slice(0, 2);
-      case 5:
-        return this.gameService.room.players.slice(0, 3);
-      case 6:
-        return this.gameService.room.players.slice(0, 3);
-    }
-
-    return [];
-  }
-
-  get bottomRowPlayers() {
-    if (this.focusedLayout) {
-      // take everyone AFTER focusedIndex, then wrap to the front
-      return [
-        ...this.gameService.room.players.slice(this.focusedIndex + 1),
-        ...this.gameService.room.players.slice(0, this.focusedIndex)
-      ];
-    }
-    switch (this.gameService.room.players.length) {
-      case 1:
-        return [];
-      case 2:
-        return [];
-      case 3:
-        return [this.gameService.room.players[2]];
-      case 4:
-        //notice the change in order, always clockwise rotation
-        return [this.gameService.room.players[3], this.gameService.room.players[2]];
-      case 5:
-        return [this.gameService.room.players[4], this.gameService.room.players[3]];
-      case 6:
-        return [
-          this.gameService.room.players[5], this.gameService.room.players[4], this.gameService.room.players[3]];
-    }
-
-    return [];
-  }
-
   startGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.StartGame });
   };
@@ -414,5 +367,123 @@ export class GameComponent {
 
   openDonationModel = ()=>{
     this.donationModal.open();
+  }
+
+  computeSizeClasses(i: number): string {
+    const len = this.gameService.room.players.length;
+    if (!this.focusedLayout) {
+      switch (len) {
+        case 1: return 'basis-full h-full';
+        case 2: return 'basis-1/2 h-1/2';
+        case 3:
+          return i < 2
+            ? 'basis-1/2 h-1/2'
+            : 'basis-full h-1/2';
+        case 4: return 'basis-1/2 h-1/2';
+        case 5:
+          return i < 3
+            ? 'basis-1/3 h-1/2'
+            : 'basis-1/2 h-1/2';
+        case 6: return 'basis-1/3 h-1/2';
+      }
+    } else {
+      // focused layout
+      if (i === this.focusedIndex) {
+        return 'basis-2/3 h-2/3';
+      } else {
+        return 'basis-1/3 h-1/3';
+      }
+    }
+    return '';
+  }
+
+   /**
+   * Returns the CSS flex‐order for the i’th player in the raw array,
+   * so they appear in the correct slot in non‐focused or focused layouts.
+   */
+   getOrder(i: number): number {
+    const n = this.gameService.room.players.length;
+    const turnOrder = this.gameService.room.players[i].turnOrder;
+
+    if (this.focusedLayout) {
+      // Focused: player whose turn it is always order=0,
+      // then the rest follow in turnOrder wraparound
+      return (turnOrder - this.focusedIndex + n) % n;
+    } else {
+      // Non-focused: clockwise slots:
+      // n=1: [0]
+      // n=2: [0,1]
+      // n=3: [0,1,2]
+      // n=4: [0,1,3,2]
+      // n=5: [0,1,2,4,3]
+      // n=6: [0,1,2,5,4,3]
+      const map: Record<number, number[]> = {
+        1: [0],
+        2: [0, 1],
+        3: [0, 1, 2],
+        4: [0, 1, 3, 2],
+        5: [0, 1, 2, 4, 3],
+        6: [0, 1, 2, 5, 4, 3],
+      } as any;
+
+      const ordering = map[n] || map[1];
+      return ordering[turnOrder];
+    }
+  }
+
+  /**
+   * Computes flex-basis (%) and height (%) for each player slot,
+   * for both normal and focused layouts.
+   */
+  computeFlexStyles(i: number): { [key: string]: string } {
+    const n = this.gameService.room.players.length;
+
+    if (!this.focusedLayout) {
+      // original two-row logic:
+      let topCount: number, bottomCount: number;
+      switch (n) {
+        case 1: topCount = 1; bottomCount = 0; break;
+        case 2: topCount = 2; bottomCount = 0; break;
+        case 3: topCount = 2; bottomCount = 1; break;
+        case 4: topCount = 2; bottomCount = 2; break;
+        case 5: topCount = 3; bottomCount = 2; break;
+        case 6: topCount = 3; bottomCount = 3; break;
+        default: topCount = n; bottomCount = 0;
+      }
+
+      if (i < topCount) {
+        // top row
+        const widthPct = 100 / topCount;
+        const heightPct = bottomCount > 0 ? 50 : 100;
+        return {
+          flexBasis: `${widthPct}%`,
+          height: `${heightPct}%`,
+        };
+      } else {
+        // bottom row
+        const widthPct = 100 / bottomCount;
+        return {
+          flexBasis: `${widthPct}%`,
+          height: `50%`,
+        };
+      }
+    } else {
+      // focused layout
+      const othersCount = n - 1;
+      if (i === this.focusedIndex) {
+        // highlighted player
+        return {
+          flexBasis: `100%`,
+          height: `66.6667%`,
+        };
+      } else {
+        // everyone else
+        const widthPct = othersCount > 0 ? 100 / othersCount : 100;
+        return {
+          flexBasis: `${widthPct}%`,
+          height: `33.3333%`,
+        };
+      }
+    }
   }
 }
