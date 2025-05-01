@@ -66,6 +66,7 @@ export class GameComponent {
   localPlayer!: IPlayer;
   roomId!: string;
   showingHotkeys: boolean = false;
+  focusedLayout: boolean = false;
 
   constructor(
     private webRTC: WebRTCService,
@@ -306,7 +307,20 @@ export class GameComponent {
     return this.gameService.room.players.find((p) => p.id === id);
   };
 
+
+  get focusedIndex(): number {
+    return this.gameService.getPlayerTakingTurnIndex();
+  }
+
+  get focusedPlayer() {
+    return this.gameService.room.players[this.focusedIndex];
+  }
+
   get topRowPlayers() {
+    if (this.focusedLayout) {
+      return [ this.focusedPlayer ];
+    }
+
     switch (this.gameService.room.players.length) {
       case 1:
         return this.gameService.room.players;
@@ -326,6 +340,13 @@ export class GameComponent {
   }
 
   get bottomRowPlayers() {
+    if (this.focusedLayout) {
+      // take everyone AFTER focusedIndex, then wrap to the front
+      return [
+        ...this.gameService.room.players.slice(this.focusedIndex + 1),
+        ...this.gameService.room.players.slice(0, this.focusedIndex)
+      ];
+    }
     switch (this.gameService.room.players.length) {
       case 1:
         return [];

@@ -5,17 +5,39 @@
 
         <div class="flex flex-row flex-grow">
            
-            <div class="flex-grow" id="userStreams">
+            <div class="flex-grow h-screen" id="userStreams">
                 <!-- Top row -->
-                <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
-                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800 bgTransition" [ngClass]="{'full-height': bottomRowPlayers.length < 1,'half-height': bottomRowPlayers.length >= 1,'bgDayLight': gameService.isDay}" >
+                <div class="" 
+                    [ngClass]="{
+                        'h-2/3': focusedLayout,
+                        'grid grid-cols-2': !focusedLayout && topRowPlayers.length === 2,
+                        'grid grid-cols-3': !focusedLayout && topRowPlayers.length > 2
+                    }">
+                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800 bgTransition" 
+                        [ngClass]="{
+                            'h-full': focusedLayout,
+                            'full-height': !focusedLayout && bottomRowPlayers.length < 1,
+                            'half-height': !focusedLayout && bottomRowPlayers.length >= 1,
+                            'bgDayLight': gameService.isDay
+                        }">
                         <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
                 </div>
             
                 <!-- Bottom row -->
-                <div class="grid" [ngClass]="{'grid-cols-1': bottomRowPlayers.length === 1,'grid-cols-2': bottomRowPlayers.length === 2, 'grid-cols-3': bottomRowPlayers.length > 2}">
-                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height bgTransition" [ngClass]="{'bgDayLight': gameService.isDay}">
+                <div class="" 
+                    [ngClass]="{
+                        'h-1/3': focusedLayout,
+                        'grid grid-cols-1': !focusedLayout && bottomRowPlayers.length === 1,
+                        'grid grid-cols-2': !focusedLayout && bottomRowPlayers.length === 2,
+                        'grid grid-cols-3': !focusedLayout && bottomRowPlayers.length > 2
+                    }">
+                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height bgTransition" 
+                        [ngClass]="{
+                            'h-full': focusedLayout,
+                            'half-height': !focusedLayout,
+                            'bgDayLight': gameService.isDay
+                        }">
                         <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
                     </div>
                 </div>
@@ -38,6 +60,7 @@
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
                         <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
                         <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
+                        <button (click)="focusedLayout = !focusedLayout" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{focusedLayout ? "Default" : "Focused"}}</button>
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
                     </div>
                     
