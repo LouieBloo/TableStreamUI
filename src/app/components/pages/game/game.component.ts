@@ -26,6 +26,9 @@ import { UserStreamComponent } from '../../users/user-stream/user-stream.compone
 import { Token } from '../../../interfaces/IPlayingCard';
 import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
+import { SettingsService } from '../../../services/settings/settings.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { bootstrapCheck } from '@ng-icons/bootstrap-icons';
 
 @Component({
   selector: 'app-game',
@@ -47,10 +50,12 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
     TimerComponent,
     DonationButtonComponent,
     DonationModalComponent,
-    NgStyle
+    NgStyle,
+    NgIcon
   ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
+  viewProviders: [provideIcons({ bootstrapCheck })]
 })
 export class GameComponent {
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
@@ -78,6 +83,7 @@ export class GameComponent {
     private route: ActivatedRoute,
     private alertService: AlertsService,
     private logger: LoggerService,
+    private settingsService:SettingsService,
     public localStorageService: LocalStorageService) {
     this.gameService.room = {
       name: 'temp',
@@ -398,17 +404,16 @@ export class GameComponent {
   }
 
    /**
-   * Returns the CSS flex‐order for the i’th player in the raw array,
+   * Returns the CSS flex‐order for the i'th player in the raw array,
    * so they appear in the correct slot in non‐focused or focused layouts.
    */
    getOrder(i: number): number {
     const n = this.gameService.room.players.length;
     const turnOrder = this.gameService.room.players[i].turnOrder;
-
     if (this.focusedLayout) {
       // Focused: player whose turn it is always order=0,
       // then the rest follow in turnOrder wraparound
-      return (turnOrder - this.focusedIndex + n) % n;
+      return (turnOrder - (this.focusedIndex >= 0 ? this.focusedIndex : 0) + n) % n;
     } else {
       // Non-focused: clockwise slots:
       // n=1: [0]
@@ -470,7 +475,8 @@ export class GameComponent {
     } else {
       // focused layout
       const othersCount = n - 1;
-      if (i === this.focusedIndex) {
+      // the -1 check is when the game hasnt started so its technically nobodies turn
+      if (i === this.focusedIndex || (i === 0 && this.focusedIndex === -1 )) {
         // highlighted player
         return {
           flexBasis: `100%`,
@@ -484,6 +490,20 @@ export class GameComponent {
           height: `33.3333%`,
         };
       }
+    }
+  }
+
+  setLayout(layout:string){
+    switch(layout){
+      case "DEFAULT":
+        this.focusedLayout = false;
+        this.settingsService.tokensEnabled = true;
+        break;
+      case "FOCUSED":
+        this.focusedLayout = true;
+        this.settingsService.tokensEnabled = false;
+        this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
+        break;
     }
   }
 }
