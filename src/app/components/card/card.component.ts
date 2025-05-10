@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-card',
@@ -12,6 +13,7 @@ import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 export class CardComponent {
   @Input() card!:IPlayingCard | null;
   @Input() showPopup:boolean = true;
+  @Input() showPurchaseInfo:boolean = true;
   @Input() maximumRightMargin:number = 0;
   @Input() hoverMinDistance:number = 50;
 
@@ -91,4 +93,26 @@ export class CardComponent {
   get hasDeleteHandler(): boolean {
     return this.deleteClicked.observed;
   }
+
+  get showPurchaseButtons():boolean{
+    return this.showPurchaseInfo && this.card && !this.loadingCard && this.card.purchase_uris && this.card.purchase_uris.tcgplayer ? true : false;
+  }
+
+  get tcgAffiliateLink(): string {
+    const scryfallLink = this.card?.purchase_uris?.tcgplayer;
+    if (!scryfallLink) return '';
+  
+    try {
+      const url = new URL(scryfallLink);
+      const rawProductUrl = url.searchParams.get('u');
+      const decodedUrl = rawProductUrl ? decodeURIComponent(rawProductUrl) : '';
+  
+      return decodedUrl
+        ? `${environment.tcgPlayerAffiliateLink}?u=${encodeURIComponent(decodedUrl)}`
+        : '';
+    } catch (e) {
+      return '';
+    }
+  }
+  
 }

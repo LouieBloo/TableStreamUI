@@ -9,6 +9,7 @@ import { SpeechToTextComponent } from './components/speech-to-text/speech-to-tex
 import { DashboardComponent } from './components/pages/dashboard/dashboard.component';
 import { dashboardGuard } from './guard/dashboard.guard';
 import { CheckPasswordComponent } from './components/pages/check-password/check-password.component';
+import { CardTestComponent } from './components/pages/card-test/card-test.component';
 
 export const routes: Routes = [
     {
@@ -38,5 +39,8 @@ export const routes: Routes = [
     },
     {
         path: 'check-password', component: CheckPasswordComponent
-    }
+    },
+    {
+        path: 'card-test', component: CardTestComponent
+    },
 ];
