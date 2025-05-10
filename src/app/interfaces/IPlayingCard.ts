@@ -5,6 +5,8 @@ export interface IPlayingCard {
     cmc: number;                        // Converted mana cost
     type_line: string;                  // The type line of the card (e.g., "Creature — Elf Druid")
     oracle_text: string;                // The oracle text of the card
+    oracle_id: string;
+    tcgplayer_id?: number;
     colors: string[];                   // Array of colors (e.g., ["G", "U"])
     color_identity: string[];           // Array of color identity (e.g., ["G", "U"])
     set: string;                        // The set code of the card (e.g., "znr" for Zendikar Rising)
@@ -21,6 +23,7 @@ export interface IPlayingCard {
     prices: {                           // An object containing the prices of the card in various currencies
       usd?: string;
       usd_foil?: string;
+      usd_etched?: string;
       eur?: string;
       eur_foil?: string;
       tix?: string;                     // MTGO tickets price
@@ -33,6 +36,9 @@ export interface IPlayingCard {
       commander: string;
       [key: string]: string;            // Allows for additional formats
     };
+    purchase_uris?: {
+      tcgplayer?:string;
+    }
     reserved: boolean;                  // Whether the card is on the reserved list
     foil: boolean;                      // Whether the card has a foil version
     nonfoil: boolean;                   // Whether the card has a non-foil version

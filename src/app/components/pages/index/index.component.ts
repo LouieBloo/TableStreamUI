@@ -1,12 +1,13 @@
 import { Component, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
-import { bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSquareFill } from '@ng-icons/bootstrap-icons';
+import { bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSquareFill, bootstrapShop } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { gameAxeSword, gameCoffeeCup} from '@ng-icons/game-icons';
 import { MainLogoComponent } from '../../main-logo/main-logo.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 import { NgIf } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-index',
@@ -14,7 +15,7 @@ import { NgIf } from '@angular/common';
   imports: [RouterLink,NgIcon, MainLogoComponent, DonationModalComponent,NgIf],
   templateUrl: './index.component.html',
   styleUrl: './index.component.css',
-  viewProviders: [provideIcons({ bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSquareFill, gameAxeSword, gameCoffeeCup })]
+  viewProviders: [provideIcons({ bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSquareFill, gameAxeSword, gameCoffeeCup, bootstrapShop })]
 })
 export class IndexComponent {
   @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
@@ -32,5 +33,9 @@ export class IndexComponent {
 
   openDonationModel = ()=>{
     this.donationModal.open();
+  }
+
+  get tcgAffiliateLink(): string {
+    return environment.tcgPlayerAffiliateLink
   }
 }
