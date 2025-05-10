@@ -53,6 +53,9 @@ export class GameService {
     }
   }
 
+  public getPlayerTakingTurnIndex = (): number => {
+    return this.room?.players?.findIndex(p => p.isTakingTurn) ?? 0;
+  };
 
   public isCommanderGame = ():boolean =>{
     return this.room.game?.gameType == GameType.MTGCommander || this.room.game?.gameType == GameType.MTGPauperCommander;

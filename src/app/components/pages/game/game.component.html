@@ -5,19 +5,19 @@
 
         <div class="flex flex-row flex-grow">
            
-            <div class="flex-grow" id="userStreams">
-                <!-- Top row -->
-                <div class="grid" [ngClass]="{'grid-cols-2': topRowPlayers.length === 2, 'grid-cols-3': topRowPlayers.length > 2}">
-                    <div *ngFor="let player of topRowPlayers" class="bg-slate-800 bgTransition" [ngClass]="{'full-height': bottomRowPlayers.length < 1,'half-height': bottomRowPlayers.length >= 1,'bgDayLight': gameService.isDay}" >
-                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
-                    </div>
-                </div>
-            
-                <!-- Bottom row -->
-                <div class="grid" [ngClass]="{'grid-cols-1': bottomRowPlayers.length === 1,'grid-cols-2': bottomRowPlayers.length === 2, 'grid-cols-3': bottomRowPlayers.length > 2}">
-                    <div *ngFor="let player of bottomRowPlayers" class="bg-slate-800 half-height bgTransition" [ngClass]="{'bgDayLight': gameService.isDay}">
-                        <app-user-stream [player]="player" [localStream]="player.id == localPlayerId"></app-user-stream>
-                    </div>
+            <div id="userStreams" class="flex flex-wrap h-screen flex-grow">
+                <div
+                  *ngFor="let player of gameService.room.players; let i = index"
+                  class="bg-slate-800 bgTransition"
+                  [class.bgDayLight]="gameService.isDay"
+                  [style.order]="getOrder(i)"
+                  [ngStyle]="computeFlexStyles(i)"
+                >
+                  <app-user-stream
+                    [player]="player"
+                    [localStream]="player.id === localPlayerId"
+                    [focusedLayout]="focusedLayout"
+                  ></app-user-stream>
                 </div>
             </div>
 
@@ -38,6 +38,18 @@
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
                         <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
                         <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
+                        <div class="relative inline-block dropdown">
+                            <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none">
+                              Layout
+                            </button>
+                            <ul
+                              tabindex="0"
+                              class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10"
+                            >
+                              <li><a (click)="setLayout('DEFAULT')"><ng-icon *ngIf="!focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Default</a></li>
+                              <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
+                            </ul>
+                        </div>
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
                     </div>
                     
@@ -124,5 +136,13 @@
         <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
             Rejoin Game
         </button>
+    </div>
+</div>
+
+<div *ngIf="initialLoad" id="loadingScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
+    <div class="text-white text-center">
+        <p class="text-white w-full rounded-none text-4xl py-4 h-full">
+            Loading
+        </p>
     </div>
 </div>
