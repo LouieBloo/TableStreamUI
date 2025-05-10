@@ -232,12 +232,14 @@ export class GameComponent {
         this.updatePlayers(event.response.players);
         if (this.gameService.room.game) {
           this.gameService.room.game.startedAt = event.response.game.startedAt;
+          this.gameService.room.game.active = event.response.game.active;
         }
         break;
       case GameEvent.ResetGame:
         this.updatePlayers(event.response.players);
         if (this.gameService.room.game) {
           this.gameService.room.game.startedAt = event.response.game.startedAt;
+          this.gameService.room.game.active = event.response.game.active;
         }
         break;
       case GameEvent.EndCurrentTurn:

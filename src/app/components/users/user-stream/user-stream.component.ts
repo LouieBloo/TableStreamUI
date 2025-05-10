@@ -375,7 +375,12 @@ export class UserStreamComponent {
 
   // only used to change the direction the settings menu renders
   get isBottomRow():boolean{
-    return this.focusedLayout && !this.player.isTakingTurn;
+    if(!this.focusedLayout){ return false;}
+    if(!this.gameService.room?.game?.active){
+      return this.player.turnOrder != 0;
+    }
+
+    return !this.player.isTakingTurn;
   }
 
   onVideoClick(event: MouseEvent) {
