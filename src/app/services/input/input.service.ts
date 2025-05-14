@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { filter, fromEvent, Subject } from 'rxjs';
 import { UserInputAction } from '../../interfaces/inputs';
+import { FormGroup } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -52,12 +53,12 @@ export class InputService {
 
     const activeElement = document.activeElement;
 
-    return activeElement && 
-    (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
-    !activeElement.classList.contains('drawer-toggle') ? true : false;
+    return activeElement &&
+      (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+      !activeElement.classList.contains('drawer-toggle') ? true : false;
   }
 
-  public triggerInput(input:string){
+  public triggerInput(input: string) {
     switch (input) {
       case ' ':
         this.inputEventSubject.next(UserInputAction.PassTurn)
@@ -69,7 +70,7 @@ export class InputService {
         this.inputEventSubject.next(UserInputAction.ModifyHealthMinus1)
         break;
       case 'ctrl-i':
-          this.inputEventSubject.next(UserInputAction.JumpToSearch)
+        this.inputEventSubject.next(UserInputAction.JumpToSearch)
         break;
     }
   }
@@ -77,6 +78,36 @@ export class InputService {
   subscribe(callback: (userInputAction: UserInputAction) => void) {
     return this.inputEventSubject.asObservable().subscribe(event => {
       callback(event);
+    });
+  }
+
+  clearServerErrors = (form: FormGroup) => {
+    Object.values(form.controls).forEach(control => {
+      if (control.hasError('serverError')) {
+        const errs = { ...control.errors };
+        delete errs['serverError'];
+        control.setErrors(Object.keys(errs).length ? errs : null);
+      }
+    });
+  }
+
+  applyServerValidationErrors = (form: FormGroup, errors: Array<{ path: string; msg: string }>) => {
+    Object.values(form.controls).forEach(control => {
+      // remove any existing serverError first
+      if (control.hasError('serverError')) {
+        const errs = { ...control.errors };
+        delete errs['serverError'];
+        control.setErrors(Object.keys(errs).length ? errs : null);
+      }
+    });
+
+    errors.forEach(err => {
+      const control = form.get(err.path);
+      if (control) {
+        // preserve other errors, just add serverError
+        const existing = control.errors || {};
+        control.setErrors({ ...existing, serverError: err.msg });
+      }
     });
   }
 }

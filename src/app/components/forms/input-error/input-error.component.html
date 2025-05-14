@@ -1,0 +1,20 @@
+<div *ngIf="inputForm.get(inputKey)?.invalid && (inputForm.get(inputKey)?.dirty || inputForm.get(inputKey)?.touched)"
+    class="text-sm text-red-500 mt-1 ">
+    <span *ngIf="inputForm.get(inputKey)?.errors?.['required']">
+        {{inputKey}} is required.
+    </span>
+    <span *ngIf="inputForm.get(inputKey)?.errors?.['email']">
+        Invalid email format.
+    </span>
+    <span *ngIf="inputForm.get(inputKey)?.getError('minlength') as error">
+        {{ inputKey }} must be at least {{ error.requiredLength }} characters.
+    </span>
+
+    <span *ngIf="inputForm.get(inputKey)?.getError('maxlength') as error">
+        {{ inputKey }} must be no more than {{ error.requiredLength }} characters.
+    </span>
+
+    <span *ngIf="inputForm.get(inputKey)?.getError('serverError') as error">
+        {{ error }}
+    </span>
+</div>

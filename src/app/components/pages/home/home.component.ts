@@ -12,6 +12,7 @@ import { MainLogoComponent } from "../../main-logo/main-logo.component";
 import { RecentDonationListComponent } from "../../donations/recent-donation-list/recent-donation-list.component";
 import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
+import { UserLoginModalComponent } from '../../modals/user-login-modal/user-login-modal.component';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -26,7 +27,8 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
     MainLogoComponent,
     RecentDonationListComponent,
     DonationButtonComponent,
-    DonationModalComponent
+    DonationModalComponent,
+    UserLoginModalComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -39,6 +41,8 @@ export class HomeComponent {
   privacyPolicyModal!: PrivacyPolicyModalComponent;
 
   @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
+
+  @ViewChild(UserLoginModalComponent) userLoginModal!: UserLoginModalComponent;
 
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
@@ -164,5 +168,9 @@ export class HomeComponent {
 
   openDonationModel = ()=>{
     this.donationModal.open();
+  }
+
+  openUserModal = ()=>{
+    this.userLoginModal.open();
   }
 }

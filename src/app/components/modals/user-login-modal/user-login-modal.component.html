@@ -1,0 +1,79 @@
+<button class="hidden" onclick="userLoginModal.showModal()" id="userLoginToggleModal">toggle</button>
+<dialog id="userLoginModal" class="modal">
+
+    <div class="absolute w-96  width shadow-md bg-slate-800 ">
+        <form method="dialog" class="">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white"
+                id="closeUserLoginModal">✕</button>
+        </form>
+
+        <div class="w-full p-6 text-white tabs tabs-lifted mt-4">
+            <!-- Tabs -->
+            <ul class="tabs mb-4">
+                <li class="tab tab-bordered text-white rounded flex-1 text-center"
+                    [ngClass]="{ 'tab-active': authMode === 'login' }" (click)="setMode('login')">
+                    Login
+                </li>
+                <li class="tab tab-bordered text-white rounded flex-1 text-center"
+                    [ngClass]="{ 'tab-active': authMode === 'signup' }" (click)="setMode('signup')">
+                    Sign Up
+                </li>
+            </ul>
+
+            <!-- Login Form -->
+            <form *ngIf="authMode === 'login'" (ngSubmit)="onLogin()" class="space-y-4" [formGroup]="loginForm">
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Email</label>
+                    <input type="email" formControlName="email"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="loginForm" [inputKey]="'email'"></app-input-error>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Password</label>
+                    <input type="password" formControlName="password"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="loginForm" [inputKey]="'password'"></app-input-error>
+                </div>
+                <button type="submit"
+                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+                    [disabled]="loginForm.invalid">
+                    Login
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form *ngIf="authMode === 'signup'" (ngSubmit)="onSignup()" class="space-y-4" [formGroup]="signupForm">
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Name</label>
+                    <input type="text" formControlName="name"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="signupForm" [inputKey]="'name'"></app-input-error>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Email</label>
+                    <input type="email" formControlName="email"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="signupForm" [inputKey]="'email'"></app-input-error>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Password</label>
+                    <input type="password" formControlName="password"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="signupForm" [inputKey]="'password'"></app-input-error>
+                </div>
+                <button type="submit"
+                    *ngIf="!showEmailVerificationMessage"
+                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+                    [disabled]="signupForm.invalid">
+                    Create Game
+                </button>
+                <div *ngIf="showEmailVerificationMessage"><p class="text-pop">Account created succesfully. Please check your email to verify before logging in.</p></div>
+            </form>
+        </div>
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+</dialog>

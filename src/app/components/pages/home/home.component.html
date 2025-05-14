@@ -77,6 +77,7 @@
               <input type="checkbox" id="isSpectator" name="isSpectator" [(ngModel)]="player.isSpectator"
                 class="mt-1 ml-2">
             </div>
+            <button (click)="openUserModal()" type="button" class="btn">Login</button>
             <button type="submit"
               class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
               [disabled]="!joinForm.valid">
@@ -106,3 +107,5 @@
 
 <app-ip-address-warning-modal (agreeClicked)="onAgreeClicked()"></app-ip-address-warning-modal>
 <app-privacy-policy-modal></app-privacy-policy-modal>
+
+<app-user-login-modal></app-user-login-modal>
