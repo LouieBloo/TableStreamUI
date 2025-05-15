@@ -1,12 +1,13 @@
 import { NgSwitch, NgSwitchCase } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { UserService } from '../../../services/user/user.service';
 
 @Component({
   selector: 'app-verify-email',
   standalone: true,
-  imports: [NgSwitch,NgSwitchCase],
+  imports: [NgSwitch,NgSwitchCase,RouterLink],
   templateUrl: './verify-email.component.html',
   styleUrl: './verify-email.component.css'
 })
@@ -15,7 +16,7 @@ export class VerifyEmailComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private http: HttpClient
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -25,11 +26,9 @@ export class VerifyEmailComponent {
       return;
     }
 
-    this.http
-      .post<{ message: string }>('/auth/verify-email', { token })
-      .subscribe({
-        next: () => (this.status = 'success'),
-        error: () => (this.status = 'error'),
-      });
+    this.userService.verifyEmail(token).subscribe({
+      next: () => (this.status = 'success'),
+      error: () => (this.status = 'error'),
+    });
   }
 }

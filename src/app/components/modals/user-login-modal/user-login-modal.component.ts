@@ -89,4 +89,11 @@ export class UserLoginModalComponent {
     });
   }
 
+  onResetPassword(){
+    const email = this.loginForm.get('email')?.value;
+
+    if (!email) {
+      return;
+    }
+  }
 }

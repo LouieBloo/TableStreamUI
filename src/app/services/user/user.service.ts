@@ -20,6 +20,19 @@ export class UserService {
   }
 
   verifyEmail(token: string): Observable<any> {
-    return this.http.post('/users/verify-email', { token });
+    return this.http.post(environment.socketUrl + '/users/verify-email', { token });
+  }
+
+  sendResetPasswordEmail(email: string): Observable<any> {
+    return this.http.post(environment.socketUrl + '/users/request-password-reset', {
+      email,
+    });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(environment.socketUrl + '/users/reset-password', {
+      token,
+      password,
+    });
   }
 }
