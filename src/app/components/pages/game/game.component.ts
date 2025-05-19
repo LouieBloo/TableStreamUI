@@ -29,6 +29,7 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
 import { SettingsService } from '../../../services/settings/settings.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { bootstrapCheck } from '@ng-icons/bootstrap-icons';
+import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
 
 @Component({
   selector: 'app-game',
@@ -51,8 +52,9 @@ import { bootstrapCheck } from '@ng-icons/bootstrap-icons';
     DonationButtonComponent,
     DonationModalComponent,
     NgStyle,
-    NgIcon
-  ],
+    NgIcon,
+    SidebarGameInfoComponent
+],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
   viewProviders: [provideIcons({ bootstrapCheck })]

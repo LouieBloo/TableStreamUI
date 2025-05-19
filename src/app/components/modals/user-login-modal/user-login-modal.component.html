@@ -1,6 +1,18 @@
-<div class="absolute top-2 left-0">
-    <button (click)="open()" type="button" class="btn">Signup</button>
-</div>
+<div class="absolute top-4 left-2" *ngIf="!isGamePage">
+    <button
+      (click)="open()"
+      type="button"
+      class="btn btn-outline h-10 rounded-full flex items-center justify-center text-white"
+      [title]="userService.isLoggedIn() ? userService.user?.name : 'Signup / Login'"
+    >
+      <ng-container *ngIf="userService.isLoggedIn(); else loggedOut">
+        {{ userService.user?.name }}
+      </ng-container>
+      <ng-template #loggedOut>
+        Signup / Login
+      </ng-template>
+    </button>
+  </div>
 <button class="hidden" onclick="userLoginModal.showModal()" id="userLoginToggleModal">toggle</button>
 <dialog id="userLoginModal" class="modal">
 
@@ -10,7 +22,7 @@
                 id="closeUserLoginModal">✕</button>
         </form>
 
-        <div class="w-full p-6 text-white tabs tabs-lifted mt-4">
+        <div *ngIf="!userService.isLoggedIn()" class="w-full p-6 text-white tabs tabs-lifted mt-4">
             <!-- Tabs -->
             <ul class="tabs mb-4">
                 <li class="tab tab-bordered text-white rounded flex-1 text-center"
@@ -73,6 +85,17 @@
                 <div *ngIf="showEmailVerificationMessage"><p class="text-pop">Account created succesfully. Please check your email to verify before logging in.</p></div>
             </form>
         </div>
+
+        <div *ngIf="userService.isLoggedIn()" class="mt-12">
+            <div>
+                <a [href]="'/user'" target="_blank" rel="noopener" class="text-white">Edit Profile</a>
+            </div>
+            <div>
+                <button type="button" (click)="userService.logout()" class="w-full btn btn-outline text-white py-2 px-4 rounded">Logout</button>
+            </div>
+        </div>
+
+
     </div>
 
     <form method="dialog" class="modal-backdrop">

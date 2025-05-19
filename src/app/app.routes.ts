@@ -12,6 +12,7 @@ import { CheckPasswordComponent } from './components/pages/check-password/check-
 import { CardTestComponent } from './components/pages/card-test/card-test.component';
 import { VerifyEmailComponent } from './components/pages/verify-email/verify-email.component';
 import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
+import { UserEditComponent } from './components/users/user-edit/user-edit.component';
 
 export const routes: Routes = [
     {
@@ -50,5 +51,8 @@ export const routes: Routes = [
     },
     {
         path: 'reset-password', component: ResetPasswordComponent
+    },
+    {
+        path: 'user', component: UserEditComponent
     }
 ];

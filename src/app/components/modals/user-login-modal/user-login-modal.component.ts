@@ -2,44 +2,62 @@ import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { Validators, FormBuilder, FormsModule, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { UserService } from '../../../services/user/user.service';
-import { RouterModule } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { InputErrorComponent } from '../../forms/input-error/input-error.component';
 import { InputService } from '../../../services/input/input.service';
 import { AlertsService } from '../../../services/alerts/alerts.service';
+import { Subscription } from 'rxjs';
+import { GameEvent } from '../../../interfaces/IGame';
+import { UserInputAction } from '../../../interfaces/inputs';
 
 @Component({
   selector: 'app-user-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink],
   templateUrl: './user-login-modal.component.html',
   styleUrl: './user-login-modal.component.css'
 })
 export class UserLoginModalComponent {
   authMode: 'login' | 'signup' = 'login';
 
-  loginForm!:FormGroup;
-  signupForm!:FormGroup;
+  loginForm!: FormGroup;
+  signupForm!: FormGroup;
 
-  showEmailVerificationMessage:boolean = false;
-  
+  showEmailVerificationMessage: boolean = false;
+
+  private subscriptions: Subscription = new Subscription();
+
   constructor(
     private fb: FormBuilder,
-    private userService: UserService,
-    private inputService:InputService,
-    private alertService:AlertsService
+    public userService: UserService,
+    private inputService: InputService,
+    private alertService: AlertsService,
+    private router: Router,
   ) { }
 
   ngOnInit(): void {
+    this.subscriptions.add(
+      this.inputService.subscribe((userAction: UserInputAction) => {
+        if (userAction == UserInputAction.OpenUserLogin) {
+          this.open();
+        }
+      })
+    );
+
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
     });
-  
+
     this.signupForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3),Validators.maxLength(40)]],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(40)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(10),Validators.maxLength(100)]],
+      password: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(100)]],
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   open() {
@@ -64,7 +82,9 @@ export class UserLoginModalComponent {
     if (this.loginForm.invalid) return;
 
     this.userService.login(this.loginForm.value).subscribe({
-      next: res => console.log('Logged in', res),
+      next: res => {
+        this.close();
+      },
       error: err => console.error(err)
     });
   }
@@ -76,7 +96,7 @@ export class UserLoginModalComponent {
 
     this.userService.signup(this.signupForm.value).subscribe({
       next: res => {
-        this.alertService.addAlert("success","Account created successfully!")
+        this.alertService.addAlert("success", "Account created successfully!")
         this.showEmailVerificationMessage = true;
       },
       error: err => {
@@ -89,11 +109,15 @@ export class UserLoginModalComponent {
     });
   }
 
-  onResetPassword(){
+  onResetPassword() {
     const email = this.loginForm.get('email')?.value;
 
     if (!email) {
       return;
     }
+  }
+
+  get isGamePage(): boolean {
+    return this.router.url.startsWith('/game');
   }
 }
