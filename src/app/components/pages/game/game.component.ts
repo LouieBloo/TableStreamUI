@@ -76,6 +76,7 @@ export class GameComponent {
   showingHotkeys: boolean = false;
   focusedLayout: boolean = false;
   initialLoad: boolean = true;
+  showChatbox: boolean = true;
 
   get localPlayer() {
     return this.gameService.getPlayerById(this.localPlayerId) ?? null
@@ -517,4 +518,5 @@ export class GameComponent {
         break;
     }
   }
+
 }

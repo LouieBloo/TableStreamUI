@@ -49,6 +49,8 @@
                               <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
                             </ul>
                         </div>
+                        <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showChatbox ? 'Hide Chat' : 'Show Chat'}}</button>
+
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
                     </div>
                     
@@ -66,7 +68,7 @@
                     </div>
                 </div>
 
-                <app-messenger></app-messenger>
+                <app-messenger [showChatbox]="showChatbox"></app-messenger>
 
                 <div class="justify-center mt-2 grid grid-cols-2">
                     <div class="flex flex-row">
