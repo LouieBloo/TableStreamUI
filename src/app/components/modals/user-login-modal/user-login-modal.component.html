@@ -22,6 +22,7 @@
                 id="closeUserLoginModal">✕</button>
         </form>
 
+        <!-- Not logged in -->
         <div *ngIf="!userService.isLoggedIn()" class="w-full p-6 text-white tabs tabs-lifted mt-4">
             <!-- Tabs -->
             <ul class="tabs mb-4">
@@ -86,12 +87,18 @@
             </form>
         </div>
 
-        <div *ngIf="userService.isLoggedIn()" class="mt-12">
-            <div>
-                <a [href]="'/user'" target="_blank" rel="noopener" class="text-white">Edit Profile</a>
+        <!-- Logged In -->
+        <div *ngIf="userService.isLoggedIn()" class="mt-8 text-white">
+            <div class="flex flex-row items-center ml-8 mb-8">
+                <ng-icon name="bootstrapPersonCircle" class="text-white text-6xl mt-2"></ng-icon>
+                <div class="flex flex-col ml-2">
+                    <h3 class="font-bold">{{userService.user?.name}}</h3>
+                    <p><span class="font-bold">Member Since: </span>{{userService.user?.createdAt | date:'yyyy'}}</p>
+                </div>
             </div>
-            <div>
-                <button type="button" (click)="userService.logout()" class="w-full btn btn-outline text-white py-2 px-4 rounded">Logout</button>
+            <div class="flex flex-row">
+                <a [href]="'/user'" target="_blank" rel="noopener" class="btn btn-sm btn-outline text-white drawer-button grow rounded-none">Edit Profile</a>
+                <button type="button" (click)="userService.logout()" class="btn btn-sm btn-outline text-white drawer-button grow rounded-none">Logout</button>
             </div>
         </div>
 

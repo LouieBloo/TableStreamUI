@@ -9,13 +9,17 @@ import { AlertsService } from '../../../services/alerts/alerts.service';
 import { Subscription } from 'rxjs';
 import { GameEvent } from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
+import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
+import { bootstrapPersonCircle } from '@ng-icons/bootstrap-icons';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 
 @Component({
   selector: 'app-user-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink, NgIcon],
   templateUrl: './user-login-modal.component.html',
-  styleUrl: './user-login-modal.component.css'
+  styleUrl: './user-login-modal.component.css',
+  viewProviders: [provideIcons({ bootstrapPersonCircle, })]
 })
 export class UserLoginModalComponent {
   authMode: 'login' | 'signup' = 'login';
@@ -33,6 +37,7 @@ export class UserLoginModalComponent {
     private inputService: InputService,
     private alertService: AlertsService,
     private router: Router,
+    private localStorageService: LocalStorageService
   ) { }
 
   ngOnInit(): void {
@@ -54,6 +59,12 @@ export class UserLoginModalComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(100)]],
     });
+
+    if(this.localStorageService.userEmail){
+      this.loginForm.patchValue({
+        email: this.localStorageService.userEmail
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -83,6 +94,7 @@ export class UserLoginModalComponent {
 
     this.userService.login(this.loginForm.value).subscribe({
       next: res => {
+        this.localStorageService.setUserEmail(this.loginForm.value.email);
         this.close();
       },
       error: err => console.error(err)

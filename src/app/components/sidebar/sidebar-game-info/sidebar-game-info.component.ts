@@ -14,7 +14,7 @@ import { UserInputAction } from '../../../interfaces/inputs';
   imports: [TimerComponent, NgIcon, TooltipDirective],
   templateUrl: './sidebar-game-info.component.html',
   styleUrl: './sidebar-game-info.component.css',
-    viewProviders: [provideIcons({ bootstrapPersonCircle, gameSandsOfTime, gameHouse, gameGamepadCross })]
+  viewProviders: [provideIcons({ bootstrapPersonCircle, gameSandsOfTime, gameHouse, gameGamepadCross })]
 })
 export class SidebarGameInfoComponent {
 
