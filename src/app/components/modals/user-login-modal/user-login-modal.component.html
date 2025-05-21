@@ -89,16 +89,16 @@
 
         <!-- Logged In -->
         <div *ngIf="userService.isLoggedIn()" class="mt-8 text-white">
-            <div class="flex flex-row items-center ml-8 mb-8">
+            <div class="flex flex-row items-center ml-4 mb-8">
                 <ng-icon name="bootstrapPersonCircle" class="text-white text-6xl mt-2"></ng-icon>
-                <div class="flex flex-col ml-2">
+                <div class="flex flex-col ml-4">
                     <h3 class="font-bold">{{userService.user?.name}}</h3>
                     <p><span class="font-bold">Member Since: </span>{{userService.user?.createdAt | date:'yyyy'}}</p>
                 </div>
             </div>
             <div class="flex flex-row">
                 <a [href]="'/user'" target="_blank" rel="noopener" class="btn btn-sm btn-outline text-white drawer-button grow rounded-none">Edit Profile</a>
-                <button type="button" (click)="userService.logout()" class="btn btn-sm btn-outline text-white drawer-button grow rounded-none">Logout</button>
+                <button type="button" (click)="userService.logout()" class="btn btn-sm btn-outline btn-warning drawer-button grow rounded-none">Logout</button>
             </div>
         </div>
 

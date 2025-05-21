@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { fromEvent, Observable, Subscription, tap } from 'rxjs';
+import { BehaviorSubject, fromEvent, Observable, Subscription, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ILoginPayload, ISignupPayload, IUser } from '../../interfaces/IUser';
+import { ILoginPayload, ISignupPayload, IUpdateUserPayload, IUser } from '../../interfaces/IUser';
 import { AlertsService } from '../alerts/alerts.service';
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
@@ -16,9 +16,14 @@ export class UserService {
   private logoutTimer: any = null;
   private focusSub!: Subscription;
 
-  user: IUser | null = null;
+  private userSubject = new BehaviorSubject<IUser | null>(null);
+  public user$ = this.userSubject.asObservable();
 
-  constructor(private http: HttpClient, private alertService:AlertsService) {
+  get user(): IUser | null {
+    return this.userSubject.value;
+  }
+
+  constructor(private http: HttpClient, private alertService: AlertsService) {
     this.restoreSession();
     this.focusSub = fromEvent(window, 'focus').subscribe(() => this.checkTokenValidity());
   }
@@ -29,7 +34,7 @@ export class UserService {
   }
 
   login(payload: ILoginPayload): Observable<any> {
-    return this.http.post<any>(environment.socketUrl +  '/users/login', payload).pipe(
+    return this.http.post<any>(environment.socketUrl + '/users/login', payload).pipe(
       tap(res => {
         localStorage.setItem(this.tokenKey, res.token);
         this.scheduleAutoLogout(res.token);
@@ -59,16 +64,28 @@ export class UserService {
     });
   }
 
+  setUser(user: IUser | null) {
+    this.userSubject.next(user);
+    if (user) {
+      localStorage.setItem(this.userKey, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(this.userKey);
+    }
+  }
+
   logout(): void {
     this.clearLogoutTimer();
     localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.userKey);
-    this.user = null;
+    this.setUser(null);
     this.alertService.addAlert("warning", "You have been logged out", 2)
   }
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem(this.tokenKey);
+  }
+
+  updateUser(updates: IUpdateUserPayload): Observable<any> {
+    return this.http.post(environment.socketUrl + '/users', updates, { headers: this.getAuthHeaders() });
   }
 
   private restoreSession(): void {
@@ -84,22 +101,22 @@ export class UserService {
   }
 
   private fetchUser(): void {
-    const token = localStorage.getItem(this.tokenKey);
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    };
-
-    this.http.get<{ user: IUser }>(environment.socketUrl + '/users/me', {headers}).subscribe({
+    this.http.get<{ user: IUser }>(environment.socketUrl + '/users/me', { headers: this.getAuthHeaders() }).subscribe({
       next: res => {
-        this.user = res.user;
-        localStorage.setItem(this.userKey, JSON.stringify(this.user));
-        this.alertService.addAlert("success",`Welcome ${this.user.name}!`)
+        this.setUser(res.user);
+        this.alertService.addAlert("success", `Welcome ${res.user.name}!`)
       },
       error: () => {
         this.logout(); // token invalid
       }
     });
+  }
+
+  private getAuthHeaders() {
+    const token = localStorage.getItem(this.tokenKey);
+    return {
+      Authorization: `Bearer ${token}`,
+    };
   }
 
   /** Decode the JWT and schedule a logout at `exp` */
@@ -114,8 +131,8 @@ export class UserService {
     }
 
     const expiresAt = decoded.exp ? decoded.exp * 1000 : 0;           // ms
-    const now       = Date.now();
-    const delay     = expiresAt - now;
+    const now = Date.now();
+    const delay = expiresAt - now;
 
     if (delay <= 0) {
       // already expired

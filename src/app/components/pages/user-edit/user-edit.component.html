@@ -1,0 +1,28 @@
+<div class="max-w-lg mx-auto mt-10 text-white">
+    <h2 class="text-2xl font-bold mb-6 text-center">Edit Profile</h2>
+  
+    <form [formGroup]="updateForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-white text-left">Name</label>
+        <input
+          type="text"
+          formControlName="name"
+          class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors"
+        />
+        <app-input-error [inputForm]="updateForm" [inputKey]="'name'"></app-input-error>
+      </div>
+  
+      <button
+        type="submit"
+        [disabled]="updateForm.invalid"
+        class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+      >
+        Save Changes
+      </button>
+    </form>
+  
+    <div *ngIf="success" class="text-green-400 text-sm mt-4 text-center">
+      ✅ Profile updated successfully.
+    </div>
+</div>
+  

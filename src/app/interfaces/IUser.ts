@@ -13,4 +13,9 @@ export interface IUser{
     name: string;
     email: string;
     createdAt?: Date;
+    lastNameUpdate?:Date;
+}
+
+export interface IUpdateUserPayload {
+    name?: string;
 }
