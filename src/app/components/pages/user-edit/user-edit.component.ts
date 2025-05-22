@@ -5,11 +5,12 @@ import { NgIf } from '@angular/common';
 import { InputErrorComponent } from '../../forms/input-error/input-error.component';
 import { InputService } from '../../../services/input/input.service';
 import { Subscription, take } from 'rxjs';
+import { EditProfileIconComponent } from '../../users/edit-profile-icon/edit-profile-icon.component';
 
 @Component({
   selector: 'app-user-edit',
   standalone: true,
-  imports: [NgIf, FormsModule, InputErrorComponent, ReactiveFormsModule],
+  imports: [NgIf, FormsModule, InputErrorComponent, ReactiveFormsModule,EditProfileIconComponent],
   templateUrl: './user-edit.component.html',
   styleUrl: './user-edit.component.css'
 })
@@ -17,6 +18,9 @@ export class UserEditComponent {
   private subscriptions: Subscription = new Subscription();
 
   updateForm!: FormGroup;
+
+  selectedIcon!:string;
+  selectedColor:string = '#ffffff';
 
   success = false;
   errors: string[] = [];
@@ -29,7 +33,7 @@ export class UserEditComponent {
 
   ngOnInit() {
     this.updateForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(40)]]
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
     });
 
     this.subscriptions.add(
@@ -38,6 +42,8 @@ export class UserEditComponent {
           if (user?.name) {
             this.updateForm.patchValue({ name: user.name });
           }
+          this.selectedIcon = this.userService.user?.profileSettings?.icon?.id + "";
+          this.selectedColor = this.userService.user?.profileSettings?.icon?.color || this.selectedColor;
         })
     );
 
@@ -56,7 +62,15 @@ export class UserEditComponent {
 
     this.inputService.clearServerErrors(this.updateForm);
 
-    this.userService.updateUser({ name: this.updateForm.value.name! }).subscribe({
+    const updates: any = { name: this.updateForm.value.name };
+    updates.profileSettings = {
+      icon: {
+        id: this.selectedIcon,
+        color: this.selectedColor
+      }
+    };
+
+    this.userService.updateUser(updates).subscribe({
       next: () => {
         this.success = true;
       },

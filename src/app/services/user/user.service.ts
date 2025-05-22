@@ -85,7 +85,13 @@ export class UserService {
   }
 
   updateUser(updates: IUpdateUserPayload): Observable<any> {
-    return this.http.post(environment.socketUrl + '/users', updates, { headers: this.getAuthHeaders() });
+    return this.http.post<{ user: IUser }>(
+      environment.socketUrl + '/users',
+      updates,
+      { headers: this.getAuthHeaders() }
+    ).pipe(
+      tap(res => this.setUser(res.user))
+    );
   }
 
   private restoreSession(): void {

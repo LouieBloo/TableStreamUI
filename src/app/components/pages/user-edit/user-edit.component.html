@@ -1,4 +1,4 @@
-<div class="max-w-lg mx-auto mt-10 text-white">
+<div class="max-w-lg h-screen mx-auto text-white">
     <h2 class="text-2xl font-bold mb-6 text-center">Edit Profile</h2>
   
     <form [formGroup]="updateForm" (ngSubmit)="onSubmit()" class="space-y-4">
@@ -11,11 +11,20 @@
         />
         <app-input-error [inputForm]="updateForm" [inputKey]="'name'"></app-input-error>
       </div>
+
+      <div>
+        <app-edit-profile-icon
+            [iconId]="selectedIcon"
+            [color]="selectedColor"
+            (iconChange)="selectedIcon = $event"
+            (colorChange)="selectedColor = $event"
+        ></app-edit-profile-icon>
+      </div>
   
       <button
         type="submit"
         [disabled]="updateForm.invalid"
-        class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+        class="w-full btn btn-outline text-white py-2 px-4 mt-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
       >
         Save Changes
       </button>

@@ -10,8 +10,9 @@ import { Subscription } from 'rxjs';
 import { GameEvent } from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
-import { bootstrapPersonCircle } from '@ng-icons/bootstrap-icons';
+import { bootstrapDiscord, bootstrapInfoSquareFill, bootstrapPersonCircle, bootstrapPlayFill, bootstrapReddit, bootstrapShop } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { gameAxeSword, gameBoba, gameBookmarklet, gameCoffeeCup, gameDreadSkull, gameDrippingSword, gameDwarfFace, gameEvilBat, gameFairyWand, gameWingfoot, gameWitchFlight, gameWolfHowl, gameWoodenPegleg, gameWrappedHeart, gameWyvern, gameYinYang, gameZeusSword } from '@ng-icons/game-icons';
 
 @Component({
   selector: 'app-user-login-modal',
@@ -19,7 +20,23 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink, NgIcon],
   templateUrl: './user-login-modal.component.html',
   styleUrl: './user-login-modal.component.css',
-  viewProviders: [provideIcons({ bootstrapPersonCircle, })]
+  viewProviders: [provideIcons({ 
+    bootstrapPersonCircle,
+    gameYinYang,
+    gameZeusSword,
+    gameWyvern,
+    gameWrappedHeart,
+    gameWoodenPegleg,
+    gameWolfHowl,
+    gameWitchFlight,
+    gameWingfoot,
+    gameBookmarklet,
+    gameBoba,
+    gameFairyWand,
+    gameEvilBat,
+    gameDwarfFace,
+    gameDrippingSword,
+    gameDreadSkull})]
 })
 export class UserLoginModalComponent {
   authMode: 'login' | 'signup' = 'login';
@@ -55,7 +72,7 @@ export class UserLoginModalComponent {
     });
 
     this.signupForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(40)]],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(100)]],
     });
@@ -92,12 +109,20 @@ export class UserLoginModalComponent {
   onLogin() {
     if (this.loginForm.invalid) return;
 
+    this.inputService.clearServerErrors(this.loginForm);
+
     this.userService.login(this.loginForm.value).subscribe({
       next: res => {
         this.localStorageService.setUserEmail(this.loginForm.value.email);
         this.close();
       },
-      error: err => console.error(err)
+      error: err => {
+        if (err?.error?.errors?.length) {
+          this.inputService.applyServerValidationErrors(this.loginForm, err.error.errors);
+        } else {
+          console.error('Unexpected login error:', err);
+        }
+      }
     });
   }
 
