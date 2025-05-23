@@ -146,12 +146,9 @@ export class UserLoginModalComponent {
     });
   }
 
-  onResetPassword() {
-    const email = this.loginForm.get('email')?.value;
-
-    if (!email) {
-      return;
-    }
+  onForgotPassword(){
+    this.close();
+    this.router.navigate(["/reset-password"])
   }
 
   get isGamePage(): boolean {

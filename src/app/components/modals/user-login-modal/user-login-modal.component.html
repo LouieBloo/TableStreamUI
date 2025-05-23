@@ -50,6 +50,9 @@
                         class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
                     <app-input-error [inputForm]="loginForm" [inputKey]="'password'"></app-input-error>
                 </div>
+                <button type="button" class="text-white mt-1 text-sm" (click)="onForgotPassword()">
+                    Forgot Password
+                </button>
                 <button type="submit"
                     class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
                     [disabled]="loginForm.invalid">

@@ -8,7 +8,7 @@ import { InputErrorComponent } from '../../forms/input-error/input-error.compone
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [NgIf, InputErrorComponent,FormsModule, ReactiveFormsModule],
+  imports: [NgIf, InputErrorComponent,FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.css'
 })
