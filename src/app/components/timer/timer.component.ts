@@ -54,7 +54,7 @@ export class TimerComponent {
     const seconds = Math.floor((diff % 60000) / 1000);
 
     if (minutes > 0) {
-      return `${minutes}min ${seconds}s`;
+      return `${minutes}m ${seconds}s`;
     } else {
       return `${seconds}s`;
     }

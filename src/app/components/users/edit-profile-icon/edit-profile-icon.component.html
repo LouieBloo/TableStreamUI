@@ -1,0 +1,31 @@
+<div class="">
+    <div class="mb-2">
+        <label class="block text-sm font-medium text-white text-left">Profile Icon</label>
+    </div>
+
+    
+
+    <div class="flex flex-row items-center">
+        <!-- <ng-icon *ngIf="iconId" [name]="iconId" [style.color]="color" class="text-6xl mr-2"></ng-icon> -->
+        <app-profile-icon [classes]="'text-6xl mr-2'" [color]="color" [iconId]="iconId"></app-profile-icon>
+
+        <div class="grow">
+
+        </div>
+
+
+        <select id="icon-select" [(ngModel)]="iconId" (change)="iconChange.emit(iconId)"
+            class="bg-slate-700 text-white border border-gray-600 rounded px-3 py-2 cursor-pointer">
+            <option *ngFor="let opt of iconOptions" [value]="opt.id">
+                {{ opt.label }}
+            </option>
+        </select>
+        
+
+        <!-- Color Picker -->
+        <div class="flex items-center space-x-2 ml-1">
+            <input type="color" [(ngModel)]="color" (change)="onColorChange(color)" class="w-10 h-10 p-0 border-0 bg-slate-700" />
+        </div>
+    </div>
+
+</div>

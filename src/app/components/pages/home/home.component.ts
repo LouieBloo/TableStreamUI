@@ -12,6 +12,9 @@ import { MainLogoComponent } from "../../main-logo/main-logo.component";
 import { RecentDonationListComponent } from "../../donations/recent-donation-list/recent-donation-list.component";
 import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
+import { UserLoginModalComponent } from '../../modals/user-login-modal/user-login-modal.component';
+import { Subscription } from 'rxjs';
+import { UserService } from '../../../services/user/user.service';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -26,7 +29,8 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
     MainLogoComponent,
     RecentDonationListComponent,
     DonationButtonComponent,
-    DonationModalComponent
+    DonationModalComponent,
+    UserLoginModalComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -39,6 +43,10 @@ export class HomeComponent {
   privacyPolicyModal!: PrivacyPolicyModalComponent;
 
   @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
+
+  @ViewChild(UserLoginModalComponent) userLoginModal!: UserLoginModalComponent;
+
+  private subscriptions: Subscription = new Subscription();
 
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
@@ -58,8 +66,9 @@ export class HomeComponent {
     private router: Router,
     private webRTC: WebRTCService,
     private route: ActivatedRoute,
-    private localStorageService: LocalStorageService
-  ) {}
+    private localStorageService: LocalStorageService,
+    private userService:UserService
+  ) { }
 
   ngOnInit() {
     const joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
@@ -72,6 +81,22 @@ export class HomeComponent {
     this.localStorageService.removeStorageOnHomeLoad();
     this.localStorageService.setUserInteractedWithSite(true);
 
+    this.loadInitialValues();
+
+    //when the user changes we should update our name (if its been set in localstorage)
+    this.subscriptions.add(
+      this.userService.user$
+        .subscribe(user => {
+          this.loadInitialValues();
+        })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  loadInitialValues() {
     if (this.localStorageService.playerName) {
       this.player.name = this.localStorageService.playerName!;
     }
@@ -140,29 +165,33 @@ export class HomeComponent {
     });
   }
 
-  get backgroundImage():string{
-    if(this.player.gameType == GameType.PokemonStandard){
+  get backgroundImage(): string {
+    if (this.player.gameType == GameType.PokemonStandard) {
       return "pokemon"
-    }else if(this.player.gameType == GameType.MTGCommander){
+    } else if (this.player.gameType == GameType.MTGCommander) {
       return "magic"
-    }else if(this.player.gameType == GameType.MTGLegacy){
+    } else if (this.player.gameType == GameType.MTGLegacy) {
       return "wrenn"
-    }else if(this.player.gameType == GameType.MTGModern){
+    } else if (this.player.gameType == GameType.MTGModern) {
       return "ulamog"
-    }else if(this.player.gameType == GameType.MTGStandard){
+    } else if (this.player.gameType == GameType.MTGStandard) {
       return "rakdos"
-    }else if(this.player.gameType == GameType.MTGVintage){
+    } else if (this.player.gameType == GameType.MTGVintage) {
       return "mana-vault"
-    }else if(this.player.gameType == GameType.MTGPauperCommander){
+    } else if (this.player.gameType == GameType.MTGPauperCommander) {
       return "pauper"
-    }else if(this.player.gameType == GameType.YugiohStandard || this.player.gameType == GameType.YugiohDomain){
+    } else if (this.player.gameType == GameType.YugiohStandard || this.player.gameType == GameType.YugiohDomain) {
       return "yugioh"
     }
-        
+
     return "magic"
   }
 
-  openDonationModel = ()=>{
+  openDonationModel = () => {
     this.donationModal.open();
+  }
+
+  openUserModal = () => {
+    this.userLoginModal.open();
   }
 }

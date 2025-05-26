@@ -1,0 +1,115 @@
+<div class="absolute top-4 left-2" *ngIf="!isGamePage">
+    <button
+      (click)="open()"
+      type="button"
+      class="btn btn-outline h-10 rounded-full flex items-center justify-center text-white"
+      [title]="userService.isLoggedIn() ? userService.user?.name : 'Signup / Login'"
+    >
+      <ng-container *ngIf="userService.isLoggedIn(); else loggedOut">
+        {{ userService.user?.name }}
+      </ng-container>
+      <ng-template #loggedOut>
+        Signup / Login
+      </ng-template>
+    </button>
+  </div>
+<button class="hidden" onclick="userLoginModal.showModal()" id="userLoginToggleModal">toggle</button>
+<dialog id="userLoginModal" class="modal">
+
+    <div class="absolute w-96  width shadow-md bg-slate-800 ">
+        <form method="dialog" class="">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white"
+                id="closeUserLoginModal">✕</button>
+        </form>
+
+        <!-- Not logged in -->
+        <div *ngIf="!userService.isLoggedIn()" class="w-full p-6 text-white tabs tabs-lifted mt-4">
+            <!-- Tabs -->
+            <ul class="tabs mb-4">
+                <li class="tab tab-bordered text-white rounded flex-1 text-center"
+                    [ngClass]="{ 'tab-active': authMode === 'login' }" (click)="setMode('login')">
+                    Login
+                </li>
+                <li class="tab tab-bordered text-white rounded flex-1 text-center"
+                    [ngClass]="{ 'tab-active': authMode === 'signup' }" (click)="setMode('signup')">
+                    Sign Up
+                </li>
+            </ul>
+
+            <!-- Login Form -->
+            <form *ngIf="authMode === 'login'" (ngSubmit)="onLogin()" class="space-y-4" [formGroup]="loginForm">
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Email</label>
+                    <input type="email" formControlName="email"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="loginForm" [inputKey]="'email'"></app-input-error>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Password</label>
+                    <input type="password" formControlName="password"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="loginForm" [inputKey]="'password'"></app-input-error>
+                </div>
+                <button type="button" class="text-white mt-1 text-sm" (click)="onForgotPassword()">
+                    Forgot Password
+                </button>
+                <button type="submit"
+                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+                    [disabled]="loginForm.invalid">
+                    Login
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form *ngIf="authMode === 'signup'" (ngSubmit)="onSignup()" class="space-y-4" [formGroup]="signupForm">
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Name</label>
+                    <input type="text" formControlName="name"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="signupForm" [inputKey]="'name'"></app-input-error>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Email</label>
+                    <input type="email" formControlName="email"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="signupForm" [inputKey]="'email'"></app-input-error>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-white text-left">Password</label>
+                    <input type="password" formControlName="password"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
+                    <app-input-error [inputForm]="signupForm" [inputKey]="'password'"></app-input-error>
+                </div>
+                <button type="submit"
+                    *ngIf="!showEmailVerificationMessage"
+                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+                    [disabled]="signupForm.invalid">
+                    Create Game
+                </button>
+                <div *ngIf="showEmailVerificationMessage"><p class="text-pop">Account created succesfully. Please check your email to verify before logging in.</p></div>
+            </form>
+        </div>
+
+        <!-- Logged In -->
+        <div *ngIf="userService.isLoggedIn()" class="mt-8 text-white">
+            <div class="flex flex-row items-center ml-4 mb-8">
+                <app-profile-icon [classes]="'text-6xl mt-2'" [color]="userService.user?.profileSettings?.icon?.color" [iconId]="userService.user?.profileSettings?.icon?.id"></app-profile-icon>
+                <div class="flex flex-col ml-4">
+                    <h3 class="font-bold">{{userService.user?.name}}</h3>
+                    <p><span class="font-bold">Member Since: </span>{{userService.user?.createdAt | date:'yyyy'}}</p>
+                </div>
+            </div>
+            <div class="flex flex-row">
+                <a [href]="'/user'" target="_blank" rel="noopener" class="btn btn-sm btn-outline text-white drawer-button grow rounded-none">Edit Profile</a>
+                <button type="button" (click)="userService.logout()" class="btn btn-sm btn-outline btn-warning drawer-button grow rounded-none">Logout</button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+</dialog>

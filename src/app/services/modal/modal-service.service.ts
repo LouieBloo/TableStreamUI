@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { InputService } from '../input/input.service';
+import { UserInputAction } from '../../interfaces/inputs';
 
 export enum ModalType{
   SearchCards,
@@ -19,7 +20,7 @@ export class ModalServiceService {
     this.callbacks[modalToOpen] = callback;
     switch(modalToOpen){
       case ModalType.SearchCards:
-        this.inputService.triggerInput("ctrl-i");
+        this.inputService.triggerEvent(UserInputAction.JumpToSearch);
         break;
     }
   }

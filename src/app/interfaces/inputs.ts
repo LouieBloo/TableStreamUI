@@ -3,5 +3,6 @@ export enum UserInputAction{
     ModifyHealth1,
     ModifyHealthMinus1,
     JumpToSearch,
-    Transcribe
+    Transcribe,
+    OpenUserLogin
 }

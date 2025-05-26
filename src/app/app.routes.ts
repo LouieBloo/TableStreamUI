@@ -10,6 +10,9 @@ import { DashboardComponent } from './components/pages/dashboard/dashboard.compo
 import { dashboardGuard } from './guard/dashboard.guard';
 import { CheckPasswordComponent } from './components/pages/check-password/check-password.component';
 import { CardTestComponent } from './components/pages/card-test/card-test.component';
+import { VerifyEmailComponent } from './components/pages/verify-email/verify-email.component';
+import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
+import { UserEditComponent } from './components/pages/user-edit/user-edit.component';
 
 export const routes: Routes = [
     {
@@ -43,4 +46,13 @@ export const routes: Routes = [
     {
         path: 'card-test', component: CardTestComponent
     },
+    {
+        path: 'verify-email', component: VerifyEmailComponent
+    },
+    {
+        path: 'reset-password', component: ResetPasswordComponent
+    },
+    {
+        path: 'user', component: UserEditComponent
+    }
 ];
