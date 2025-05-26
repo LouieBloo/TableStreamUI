@@ -20,6 +20,7 @@ export class LocalStorageService {
   private readonly VIDEO_QUALITY = 'videoQuality';
   private readonly MIC_MUTED = 'micMuted';
   private readonly IS_SHARING_IMAGES = 'isSharingImages';
+  private readonly USER_EMAIL = 'userEmail';
 
   private userInteractedWithSite:boolean = false;
 
@@ -97,6 +98,14 @@ export class LocalStorageService {
 
   get hasUserInteractedWithSite(){
     return this.userInteractedWithSite;
+  }
+
+  get userEmail(){
+    return this.getItem(this.USER_EMAIL);
+  }
+
+  setUserEmail(userEmail:string){
+    this.setItem(this.USER_EMAIL, userEmail);
   }
 
   setVideoQuality(videoQuality: string) {

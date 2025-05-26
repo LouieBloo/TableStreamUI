@@ -29,10 +29,8 @@
 
             <div class="flex flex-col p-1  min-w-64 max-w-64 pl-2 pr-2 bg-slate-900 bgTransition" [ngClass]="{'bgDay': gameService.isDay}">
                 <div class="">
-                    <h3 class="text-white">Room Name: <span class="text-pop">{{gameService.room.name}}</span></h3>
-                    <h3 class="text-white">Game Type: <span class="text-pop capitalize">{{gameService.room.game?.name}}</span></h3>
-                    <h3 class="text-white mb-2 ">Game Time: <app-timer [date]="gameService.room.game?.startedAt"></app-timer></h3>
-                    
+
+                    <app-sidebar-game-info></app-sidebar-game-info>
 
                     <div class="justify-center mb-2 grid grid-cols-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>

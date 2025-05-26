@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
 })
 export class DonationModalComponent {
 
-  constructor(){
+  constructor() {
   }
 
   ngOnDestroy(): void {
@@ -22,10 +22,10 @@ export class DonationModalComponent {
     }
   }
 
-  close(){
+  close() {
     const closeModalButton = document.getElementById('closeDonationModal');
     if (closeModalButton) {
       closeModalButton.click();
     }
- }
+  }
 }

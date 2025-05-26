@@ -1,0 +1,13 @@
+<div class="min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-sm w-full border rounded shadow p-6 text-center bg-slate-800">
+    <ng-container [ngSwitch]="status">
+      <p *ngSwitchCase="'pending'">Verifying your email…</p>
+      <p *ngSwitchCase="'success'" class="text-green-600">
+        ✅ Your email has been verified! <a routerLink="/join" class="link">Back</a>
+      </p>
+      <p *ngSwitchCase="'error'" class="text-red-600">
+        ❌ Invalid or expired token. Please request a new verification email.
+      </p>
+    </ng-container>
+  </div>
+</div>

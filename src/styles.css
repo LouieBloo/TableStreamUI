@@ -37,6 +37,10 @@ body{
     background-color: #3b3b3b; /* Change to your desired color on click */
 }
 
+.btn-warning{
+    border-color: yellow;
+    color: yellow;
+}
 
 .popupColors{
     background-color: white;
