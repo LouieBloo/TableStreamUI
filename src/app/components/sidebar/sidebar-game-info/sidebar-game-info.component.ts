@@ -7,18 +7,20 @@ import { gameGamepadCross, gameHouse, gameSandsOfTime } from '@ng-icons/game-ico
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { InputService } from '../../../services/input/input.service';
 import { UserInputAction } from '../../../interfaces/inputs';
+import { UserService } from '../../../services/user/user.service';
+import { ProfileIconComponent } from '../../users/profile-icon/profile-icon.component';
 
 @Component({
   selector: 'app-sidebar-game-info',
   standalone: true,
-  imports: [TimerComponent, NgIcon, TooltipDirective],
+  imports: [TimerComponent, NgIcon, TooltipDirective, ProfileIconComponent],
   templateUrl: './sidebar-game-info.component.html',
   styleUrl: './sidebar-game-info.component.css',
   viewProviders: [provideIcons({ bootstrapPersonCircle, gameSandsOfTime, gameHouse, gameGamepadCross })]
 })
 export class SidebarGameInfoComponent {
 
-  constructor(public gameService: GameService, public inputService:InputService){
+  constructor(public gameService: GameService, public inputService:InputService, public userService:UserService){
 
   }
 

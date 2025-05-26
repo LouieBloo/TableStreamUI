@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { ILoginPayload, ISignupPayload, IUpdateUserPayload, IUser } from '../../interfaces/IUser';
 import { AlertsService } from '../alerts/alerts.service';
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import { LocalStorageService } from '../local-storage/local-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,7 @@ export class UserService {
     return this.userSubject.value;
   }
 
-  constructor(private http: HttpClient, private alertService: AlertsService) {
+  constructor(private http: HttpClient, private alertService: AlertsService, private localStorageService: LocalStorageService) {
     this.restoreSession();
     this.focusSub = fromEvent(window, 'focus').subscribe(() => this.checkTokenValidity());
   }
@@ -101,16 +102,23 @@ export class UserService {
         this.logout();
       } else {
         this.scheduleAutoLogout(token);
-        this.fetchUser();
+        this.fetchUser(false);
       }
     }
   }
 
-  private fetchUser(): void {
+  private fetchUser(showAlert:boolean = true): void {
     this.http.get<{ user: IUser }>(environment.socketUrl + '/users/me', { headers: this.getAuthHeaders() }).subscribe({
       next: res => {
+        if(!this.localStorageService.playerName){
+          this.localStorageService.setPlayerName(res.user.name);
+        }
+
         this.setUser(res.user);
-        this.alertService.addAlert("success", `Welcome ${res.user.name}!`)
+        
+        if(showAlert){
+          this.alertService.addAlert("success", `Welcome ${res.user.name}!`)
+        }
       },
       error: () => {
         this.logout(); // token invalid

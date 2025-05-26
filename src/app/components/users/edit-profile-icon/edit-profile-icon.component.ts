@@ -5,31 +5,16 @@ import { bootstrapReddit, bootstrapDiscord, bootstrapPlayFill, bootstrapInfoSqua
 import { gameAxeSword, gameBoba, gameBookmarklet, gameCoffeeCup, gameDreadSkull, gameDrippingSword, gameDwarfFace, gameEvilBat, gameFairyWand, gameWingfoot, gameWitchFlight, gameWolfHowl, gameWoodenPegleg, gameWrappedHeart, gameWyvern, gameYinYang, gameZeusSword } from '@ng-icons/game-icons';
 import { FormsModule, NgModel } from '@angular/forms';
 import { NgClass, NgFor, NgIf } from '@angular/common';
+import { ProfileIconComponent } from '../profile-icon/profile-icon.component';
 
 @Component({
   selector: 'app-edit-profile-icon',
   standalone: true,
-  imports: [NgIcon,NgIf, NgClass,FormsModule,NgFor],
+  imports: [NgIcon,NgIf, NgClass,FormsModule,NgFor,ProfileIconComponent],
   templateUrl: './edit-profile-icon.component.html',
   styleUrl: './edit-profile-icon.component.css',
-  //make sure to also update user-login component
   viewProviders: [provideIcons({ 
-    bootstrapPersonCircle,
-    gameYinYang,
-    gameZeusSword,
-    gameWyvern,
-    gameWrappedHeart,
-    gameWoodenPegleg,
-    gameWolfHowl,
-    gameWitchFlight,
-    gameWingfoot,
-    gameBookmarklet,
-    gameBoba,
-    gameFairyWand,
-    gameEvilBat,
-    gameDwarfFace,
-    gameDrippingSword,
-    gameDreadSkull
+    
   })]
 })
 export class EditProfileIconComponent {
@@ -44,22 +29,21 @@ export class EditProfileIconComponent {
 
   iconOptions: IProfileIcon[] = [
     { id: 'bootstrapPersonCircle', label: 'Default'},
+    { id: 'gameEvilBat', label: 'Bat' },
+    { id: 'gameBoba', label: 'Boba' },
+    { id: 'gameDrippingSword', label: 'Dripping Sword' },
+    { id: 'gameDwarfFace', label: 'Dwarf' },
+    { id: 'gameBookmarklet', label: 'Open Book' },
+    { id: 'gameWoodenPegleg', label: 'Peg Leg' },
+    { id: 'gameDreadSkull', label: 'Skull' },
+    { id: 'gameFairyWand', label: 'Wand' },
+    { id: 'gameWingfoot', label: 'Winged Foot' },
+    { id: 'gameWitchFlight', label: 'Witch' },
+    { id: 'gameWolfHowl', label: 'Wolf Howl' },
+    { id: 'gameWrappedHeart', label: 'Wrapped Heart' },
+    { id: 'gameWyvern', label: 'Wyvern' },
     { id: 'gameYinYang', label: 'Yin Yang' },
     { id: 'gameZeusSword', label: 'Zeus Sword' },
-    { id: 'gameWyvern', label: 'Wyvern' },
-    { id: 'gameWrappedHeart', label: 'Wrapped Heart' },
-    { id: 'gameWoodenPegleg', label: 'Peg Leg' },
-    { id: 'gameWolfHowl', label: 'Wolf Howl' },
-    { id: 'gameWitchFlight', label: 'Witch' },
-    { id: 'gameWingfoot', label: 'Winged Foot' },
-    { id: 'gameBookmarklet', label: 'Open Book' },
-    { id: 'gameBoba', label: 'Boba' },
-    { id: 'gameFairyWand', label: 'Wand' },
-    { id: 'gameEvilBat', label: 'Bat' },
-    { id: 'gameDwarfFace', label: 'Dwarf' },
-    { id: 'gameDrippingSword', label: 'Dripping Sword' },
-    { id: 'gameDreadSkull', label: 'Skull' },
-
   ];
 
   selectIcon(id: string | undefined) {

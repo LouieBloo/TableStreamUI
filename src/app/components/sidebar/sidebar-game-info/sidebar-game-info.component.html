@@ -7,7 +7,9 @@
         </div>
     
         <div class="flex flex-col ">
-            <button type="button" class="" (click)="openUserLogin()" appTooltip="User Options" [tooltipDirection]="'left'"><ng-icon name="bootstrapPersonCircle" class="text-white text-4xl mt-2"></ng-icon></button>
+            <button type="button" class="" (click)="openUserLogin()" appTooltip="User Options" [tooltipDirection]="'left'">
+                <app-profile-icon [classes]="'text-4xl mt-2'" [color]="userService.user?.profileSettings?.icon?.color" [iconId]="userService.user?.profileSettings?.icon?.id"></app-profile-icon>
+            </button>
         </div>
     </div>
 </div>

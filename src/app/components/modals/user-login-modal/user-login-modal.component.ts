@@ -13,30 +13,17 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { bootstrapDiscord, bootstrapInfoSquareFill, bootstrapPersonCircle, bootstrapPlayFill, bootstrapReddit, bootstrapShop } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { gameAxeSword, gameBoba, gameBookmarklet, gameCoffeeCup, gameDreadSkull, gameDrippingSword, gameDwarfFace, gameEvilBat, gameFairyWand, gameWingfoot, gameWitchFlight, gameWolfHowl, gameWoodenPegleg, gameWrappedHeart, gameWyvern, gameYinYang, gameZeusSword } from '@ng-icons/game-icons';
+import { ProfileIconComponent } from '../../users/profile-icon/profile-icon.component';
 
 @Component({
   selector: 'app-user-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink, NgIcon],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink, NgIcon, ProfileIconComponent],
   templateUrl: './user-login-modal.component.html',
   styleUrl: './user-login-modal.component.css',
   viewProviders: [provideIcons({ 
     bootstrapPersonCircle,
-    gameYinYang,
-    gameZeusSword,
-    gameWyvern,
-    gameWrappedHeart,
-    gameWoodenPegleg,
-    gameWolfHowl,
-    gameWitchFlight,
-    gameWingfoot,
-    gameBookmarklet,
-    gameBoba,
-    gameFairyWand,
-    gameEvilBat,
-    gameDwarfFace,
-    gameDrippingSword,
-    gameDreadSkull})]
+   })]
 })
 export class UserLoginModalComponent {
   authMode: 'login' | 'signup' = 'login';

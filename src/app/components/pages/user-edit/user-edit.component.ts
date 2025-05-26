@@ -6,11 +6,12 @@ import { InputErrorComponent } from '../../forms/input-error/input-error.compone
 import { InputService } from '../../../services/input/input.service';
 import { Subscription, take } from 'rxjs';
 import { EditProfileIconComponent } from '../../users/edit-profile-icon/edit-profile-icon.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-user-edit',
   standalone: true,
-  imports: [NgIf, FormsModule, InputErrorComponent, ReactiveFormsModule,EditProfileIconComponent],
+  imports: [NgIf, FormsModule, InputErrorComponent, ReactiveFormsModule,EditProfileIconComponent,RouterLink],
   templateUrl: './user-edit.component.html',
   styleUrl: './user-edit.component.css'
 })
@@ -34,6 +35,7 @@ export class UserEditComponent {
   ngOnInit() {
     this.updateForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
+      email: [{value: "", disabled: true}],
     });
 
     this.subscriptions.add(
@@ -41,6 +43,9 @@ export class UserEditComponent {
         .subscribe(user => {
           if (user?.name) {
             this.updateForm.patchValue({ name: user.name });
+          }
+          if(user?.email){
+            this.updateForm.patchValue({email: user.email});
           }
           this.selectedIcon = this.userService.user?.profileSettings?.icon?.id + "";
           this.selectedColor = this.userService.user?.profileSettings?.icon?.color || this.selectedColor;
