@@ -1,0 +1,40 @@
+<div class="bg-slate-800 text-white">
+    <!-- header row -->
+    <div class="grid grid-cols-5 gap-2 p-2 font-semibold">
+      <div class="cursor-pointer" (click)="toggleSort('name')">
+        Name
+        <span *ngIf="sortField === 'name'">({{ sortDirection }})</span>
+      </div>
+      <div class="cursor-pointer" (click)="toggleSort('gameType')">
+        Game Type
+        <span *ngIf="sortField === 'gameType'">({{ sortDirection }})</span>
+      </div>
+      <div class="cursor-pointer" (click)="toggleSort('passwordProtected')">
+        Password Protected
+        <span *ngIf="sortField === 'passwordProtected'">({{ sortDirection }})</span>
+      </div>
+      <div class="cursor-pointer" (click)="toggleSort('reactionsEnabled')">
+        Reactions Enabled
+        <span *ngIf="sortField === 'reactionsEnabled'">({{ sortDirection }})</span>
+      </div>
+      <div class="cursor-pointer" (click)="toggleSort('maxPlayers')">
+        Max Players
+        <span *ngIf="sortField === 'maxPlayers'">({{ sortDirection }})</span>
+      </div>
+    </div>
+  
+    <!-- rows -->
+    <ng-container *ngIf="sortedRooms.length; else noRooms">
+      <div *ngFor="let room of sortedRooms" class="grid grid-cols-5 gap-2 p-2 border-t border-slate-600 hover:bg-slate-800 cursor-pointer">
+        <div>{{ room.name }}</div>
+        <div>{{ room.gameType }}</div>
+        <div>{{ room.passwordProtected ? 'Yes' : 'No' }}</div>
+        <div>{{ room.reactionsEnabled  ? 'Yes' : 'No' }}</div>
+        <div>{{ room.maxPlayers }}</div>
+      </div>
+    </ng-container>
+    <ng-template #noRooms>
+      <div class="p-4 text-center">No Rooms</div>
+    </ng-template>
+  </div>
+  

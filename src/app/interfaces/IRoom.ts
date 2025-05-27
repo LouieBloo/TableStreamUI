@@ -1,4 +1,5 @@
 import { Game } from '../classes/game/game';
+import { GameType } from './IGame';
 import { IMessage } from './IMessage';
 import {IPlayer} from './IPlayer';
 import { Token } from './IPlayingCard';
@@ -8,7 +9,9 @@ export interface IRoom {
     name:string;
     players: IPlayer[];
     messages: IMessage[];
+    gameType?:GameType;
     game?: Game;
+    passwordProtected?:boolean;
     maxPlayers?:number;
     reactionsEnabled?:boolean;
     allowPlayerKicking?:boolean;

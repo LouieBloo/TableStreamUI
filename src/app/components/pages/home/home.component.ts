@@ -15,6 +15,8 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
 import { UserLoginModalComponent } from '../../modals/user-login-modal/user-login-modal.component';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../../services/user/user.service';
+import { IRoom } from '../../../interfaces/IRoom';
+import { RoomListComponent } from '../../room-list/room-list.component';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -30,7 +32,8 @@ import { UserService } from '../../../services/user/user.service';
     RecentDonationListComponent,
     DonationButtonComponent,
     DonationModalComponent,
-    UserLoginModalComponent
+    UserLoginModalComponent,
+    RoomListComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -51,6 +54,7 @@ export class HomeComponent {
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
   isCreateGame: boolean = false;
+  showRoomList: boolean = true;
   player = {
     name: '',
     roomName: '',
@@ -75,6 +79,7 @@ export class HomeComponent {
 
     if (joinRoomId) {
       this.player.roomId = joinRoomId;
+      this.showRoomList = false;
     }
 
     this.webRTC.disconnect();
@@ -129,6 +134,10 @@ export class HomeComponent {
     }
     //this.ipAddressModal.open();
     this.onAgreeClicked();
+  }
+
+  onRoomClick(room:IRoom){
+    debugger
   }
 
   onAgreeClicked(): void {
@@ -193,5 +202,9 @@ export class HomeComponent {
 
   openUserModal = () => {
     this.userLoginModal.open();
+  }
+
+  get showTermsOfService(): boolean{
+    return !this.showRoomList || this.activeTab == 'create'
   }
 }
