@@ -13,6 +13,7 @@ export interface IRoom {
     game?: Game;
     passwordProtected?:boolean;
     maxPlayers?:number;
+    currentPlayers?:number;
     reactionsEnabled?:boolean;
     allowPlayerKicking?:boolean;
     iceServerList?: any[];

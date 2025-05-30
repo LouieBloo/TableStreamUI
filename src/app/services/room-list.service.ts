@@ -22,6 +22,7 @@ export class RoomListService {
       reactionsEnabled: true,
       passwordProtected: true,
       gameType: GameType.MTGCommander,
+      currentPlayers:2,
       maxPlayers: 4,
       players: [],
       messages: []
@@ -32,6 +33,7 @@ export class RoomListService {
       passwordProtected: true,
       gameType: GameType.YugiohDomain,
       maxPlayers: 2,
+      currentPlayers:1,
       players: [],
       messages: []
     },{
@@ -41,6 +43,7 @@ export class RoomListService {
       passwordProtected: true,
       gameType: GameType.YugiohDomain,
       maxPlayers: 2,
+      currentPlayers:1,
       players: [],
       messages: []
     },{
@@ -50,6 +53,7 @@ export class RoomListService {
       passwordProtected: false,
       gameType: GameType.PokemonStandard,
       maxPlayers: 2,
+      currentPlayers:1,
       players: [],
       messages: []
     },{
@@ -59,6 +63,7 @@ export class RoomListService {
       passwordProtected: false,
       gameType: GameType.MTGCommander,
       maxPlayers: 6,
+      currentPlayers:4,
       players: [],
       messages: []
     },{
@@ -68,6 +73,7 @@ export class RoomListService {
       passwordProtected: false,
       gameType: GameType.MTGLegacy,
       maxPlayers: 2,
+      currentPlayers:1,
       players: [],
       messages: []
     }]);

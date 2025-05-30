@@ -3,26 +3,30 @@ import { IRoom } from '../../interfaces/IRoom';
 import { Subscription } from 'rxjs';
 import { RoomListService } from '../../services/room-list.service';
 import { NgFor, NgIf } from '@angular/common';
-import { RoomListItemComponent } from "./room-list-item/room-list-item.component";
+import { GameType } from '../../interfaces/IGame';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { gameCombinationLock } from '@ng-icons/game-icons';
+import { bootstrapUnlock, bootstrapLock, bootstrapLockFill } from '@ng-icons/bootstrap-icons';
 
 @Component({
   selector: 'app-room-list',
   standalone: true,
-  imports: [NgIf, RoomListItemComponent,NgFor],
+  imports: [NgIf, NgFor, NgIcon],
   templateUrl: './room-list.component.html',
-  styleUrl: './room-list.component.css'
+  styleUrl: './room-list.component.css',
+  viewProviders: [provideIcons({ gameCombinationLock, bootstrapUnlock, bootstrapLock, bootstrapLockFill })]
 })
 export class RoomListComponent {
   @Input() roomClickedCallback!: (room: IRoom) => void;
 
   private subscriptions: Subscription = new Subscription();
 
-  allRooms:IRoom[] = [];
+  allRooms: IRoom[] = [];
 
   sortField: keyof IRoom = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  constructor(private roomListService:RoomListService) {
+  constructor(private roomListService: RoomListService) {
 
   }
 
@@ -33,6 +37,7 @@ export class RoomListComponent {
           this.allRooms = rooms || [];
         })
     );
+
   }
 
   ngOnDestroy(): void {
@@ -54,16 +59,30 @@ export class RoomListComponent {
     }
   }
 
-   get sortedRooms(): IRoom[] {
+  get sortedRooms(): IRoom[] {
     return [...this.allRooms].sort((a, b) => {
       const aVal = a[this.sortField];
       const bVal = b[this.sortField];
       // normalize booleans to numbers for comparison
-      const aCmp:any = typeof aVal === 'boolean' ? (aVal ? 1 : 0) : aVal;
-      const bCmp:any = typeof bVal === 'boolean' ? (bVal ? 1 : 0) : bVal;
+      const aCmp: any = typeof aVal === 'boolean' ? (aVal ? 1 : 0) : aVal;
+      const bCmp: any = typeof bVal === 'boolean' ? (bVal ? 1 : 0) : bVal;
       if (aCmp < bCmp) return this.sortDirection === 'asc' ? -1 : 1;
-      if (aCmp > bCmp) return this.sortDirection === 'asc' ?  1 : -1;
+      if (aCmp > bCmp) return this.sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
+  }
+
+  get sortDirectionSymbol():string{
+    return this.sortDirection == 'desc' ? '⇩' : '⇧' ;
+  }
+
+  gameTypeDisplay(gameType: any): string {
+    return this.splitCamelCase(GameType[gameType] + "");
+  }
+
+  splitCamelCase(str:string) {
+    return str
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
   }
 }
