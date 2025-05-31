@@ -4,6 +4,7 @@ import { IRoom } from '../../interfaces/IRoom';
 import { GameType } from '../../interfaces/IGame';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { UserService } from '../user/user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,20 +14,16 @@ export class RoomListService {
   private roomsSubject = new BehaviorSubject<IRoom[] | null>(null);
   public rooms$ = this.roomsSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    this.getRooms();
+  constructor(private http: HttpClient, private userService:UserService) {
+    // this.getRooms();
   }
 
   getRooms() {
-    
-    this.http.get<any>(environment.socketUrl + '/rooms').pipe(
+    this.http.get<any>(environment.socketUrl + '/rooms', { headers: this.userService.getAuthHeaders() }).pipe(
       tap(res => {
         this.roomsSubject.next(res.rooms);
       })
     ).subscribe();
-
-
-
 
     // this.roomsSubject.next([{
     //   id: "1",
@@ -91,3 +88,5 @@ export class RoomListService {
     // }]);
   }
 }
+
+

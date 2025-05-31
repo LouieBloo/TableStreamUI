@@ -7,17 +7,19 @@ import { GameType } from '../../interfaces/IGame';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { gameCombinationLock } from '@ng-icons/game-icons';
 import { bootstrapUnlock, bootstrapLock, bootstrapLockFill } from '@ng-icons/bootstrap-icons';
+import { TimerComponent } from '../timer/timer.component';
 
 @Component({
   selector: 'app-room-list',
   standalone: true,
-  imports: [NgIf, NgFor, NgIcon],
+  imports: [NgIf, NgFor, NgIcon,TimerComponent],
   templateUrl: './room-list.component.html',
   styleUrl: './room-list.component.css',
   viewProviders: [provideIcons({ gameCombinationLock, bootstrapUnlock, bootstrapLock, bootstrapLockFill })]
 })
 export class RoomListComponent {
   @Input() roomClickedCallback!: (room: IRoom) => void;
+  @Input() createGameClickedCallback!: () => void;
 
   private subscriptions: Subscription = new Subscription();
 
@@ -25,6 +27,12 @@ export class RoomListComponent {
 
   sortField: keyof IRoom = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
+
+  private timesUpdated: number = 0;
+  private maxTimesUpdated: number = 15;
+  private secondsBetweenUpdates: number = 15;
+  private timerRef: any;
+  public updateTimerDate!: Date;
 
   constructor(private roomListService: RoomListService) {
 
@@ -38,16 +46,48 @@ export class RoomListComponent {
         })
     );
 
+    this.startListUpdater();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.stopListUpdater();
   }
 
   roomClicked(room: IRoom) {
     if (this.roomClickedCallback) {
       this.roomClickedCallback(room);
     }
+  }
+
+  startListUpdater = () => {
+    this.timesUpdated = 0;
+    this.stopListUpdater();
+    this.updateList();
+
+    this.timerRef = setInterval(() => {
+      this.updateList();
+    }, this.secondsBetweenUpdates * 1000);
+  }
+
+  updateList = () => {
+    this.roomListService.getRooms();
+    this.timesUpdated++;
+    this.updateTimerDate = new Date();
+    if (this.timesUpdated >= this.maxTimesUpdated) {
+      this.stopListUpdater();
+    }
+  }
+
+  stopListUpdater = () => {
+    if (this.timerRef) {
+      clearInterval(this.timerRef);
+    }
+    this.timerRef = null;
+  }
+
+  get countDownTimerDate():Date{
+    return new Date(this.updateTimerDate.getTime() + this.secondsBetweenUpdates * 1000);
   }
 
   toggleSort(field: keyof IRoom) {
@@ -72,17 +112,17 @@ export class RoomListComponent {
     });
   }
 
-  get sortDirectionSymbol():string{
-    return this.sortDirection == 'desc' ? '⇩' : '⇧' ;
+  get sortDirectionSymbol(): string {
+    return this.sortDirection == 'desc' ? '⇩' : '⇧';
   }
 
   gameTypeDisplay(gameType: any): string {
     return this.splitCamelCase(GameType[gameType] + "");
   }
 
-  splitCamelCase(str:string) {
+  splitCamelCase(str: string) {
     return str
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
   }
 }

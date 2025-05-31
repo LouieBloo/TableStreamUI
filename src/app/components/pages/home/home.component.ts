@@ -140,6 +140,10 @@ export class HomeComponent {
     debugger
   }
 
+  onCreateGameButtonClicked = ()=>{
+    this.setTab('create')
+  }
+
   onAgreeClicked(): void {
     if (this.isCreateGame) {
       this.localStorageService.setLocalStorageForCreateGame(this.player);

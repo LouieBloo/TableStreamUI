@@ -126,7 +126,7 @@ export class UserService {
     });
   }
 
-  private getAuthHeaders() {
+  public getAuthHeaders() {
     const token = localStorage.getItem(this.tokenKey);
     return {
       Authorization: `Bearer ${token}`,
