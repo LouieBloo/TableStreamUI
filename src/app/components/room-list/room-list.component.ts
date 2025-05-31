@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { IRoom } from '../../interfaces/IRoom';
 import { Subscription } from 'rxjs';
-import { RoomListService } from '../../services/room-list.service';
+import { RoomListService } from '../../services/room/room-list.service';
 import { NgFor, NgIf } from '@angular/common';
 import { GameType } from '../../interfaces/IGame';
 import { NgIcon, provideIcons } from '@ng-icons/core';
