@@ -27,8 +27,6 @@
             </button>
           </div>
 
-
-
           <form #createForm="ngForm" (ngSubmit)="onCreateGame()">
             <div class="mb-4">
               <label for="playerName" class="block text-sm font-medium text-white text-left">Your Name:</label>
@@ -59,12 +57,20 @@
                 [(ngModel)]="player.maxPlayers" class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black"
                 required>
             </div>
-            <div class="mb-4 text-left flex flex-row items-center">
-              <label for="reactionsEnabled"
-                class="text-sm font-medium text-white text-left mr-2 cursor-pointer">Reactions Enabled:</label>
-              <input type="checkbox" id="reactionsEnabled" name="reactionsEnabled" class="cursor-pointer"
-                [(ngModel)]="player.reactionsEnabled">
+            <div class="flex flex-row gap-x-4 mb-4">
+              <div class="text-left flex flex-row items-center">
+                <label for="reactionsEnabled"
+                  class="text-sm font-medium text-white text-left mr-2 cursor-pointer">Reactions Enabled:</label>
+                <input type="checkbox" id="reactionsEnabled" name="reactionsEnabled" class="cursor-pointer"
+                  [(ngModel)]="player.reactionsEnabled">
+              </div>
+              <div class="text-left flex flex-row items-center">
+                <label for="public"
+                  class="text-sm font-medium text-white text-left mr-2 cursor-pointer" appTooltip="{{userService.isLoggedIn ? 'Game will show on server list' : 'Account required for public games'}}" [tooltipDirection]="'bottom'">Public:</label>
+                <input type="checkbox" id="public" name="public" class="cursor-pointer" [(ngModel)]="player.public" [disabled]="!userService.isLoggedIn">
+              </div>
             </div>
+            
             <button type="submit"
               class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
               [disabled]="!createForm.valid">

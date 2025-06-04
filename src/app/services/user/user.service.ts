@@ -81,8 +81,12 @@ export class UserService {
     this.alertService.addAlert("warning", "You have been logged out", 2)
   }
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem(this.tokenKey);
+  get isLoggedIn(): boolean {
+    return !!this.jwtToken;
+  }
+
+  get jwtToken():string | null{
+    return localStorage.getItem(this.tokenKey)
   }
 
   updateUser(updates: IUpdateUserPayload): Observable<any> {
@@ -96,7 +100,7 @@ export class UserService {
   }
 
   private restoreSession(): void {
-    const token = localStorage.getItem(this.tokenKey);
+    const token = this.jwtToken;
     if (token) {
       if (this.isTokenExpired(token)) {
         this.logout();
@@ -127,7 +131,7 @@ export class UserService {
   }
 
   public getAuthHeaders() {
-    const token = localStorage.getItem(this.tokenKey);
+    const token = this.jwtToken;
     return {
       Authorization: `Bearer ${token}`,
     };
@@ -166,7 +170,7 @@ export class UserService {
 
   /** Called on window focus — immediately check expiry */
   private checkTokenValidity(): void {
-    const token = localStorage.getItem(this.tokenKey);
+    const token = this.jwtToken;
     if (token && this.isTokenExpired(token)) {
       this.logout();
     }

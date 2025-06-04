@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs';
 import { UserService } from '../../../services/user/user.service';
 import { IRoom } from '../../../interfaces/IRoom';
 import { RoomListComponent } from '../../room-list/room-list.component';
+import { TooltipDirective } from '../../../directives/tooltip.directive';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -33,7 +34,8 @@ import { RoomListComponent } from '../../room-list/room-list.component';
     DonationButtonComponent,
     DonationModalComponent,
     UserLoginModalComponent,
-    RoomListComponent
+    RoomListComponent,
+    TooltipDirective
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -59,6 +61,7 @@ export class HomeComponent {
     name: '',
     roomName: '',
     isSpectator: false,
+    public: false,
     roomId: '',
     password: null,
     gameType: GameType.MTGCommander,
@@ -71,7 +74,7 @@ export class HomeComponent {
     private webRTC: WebRTCService,
     private route: ActivatedRoute,
     private localStorageService: LocalStorageService,
-    private userService:UserService
+    public userService:UserService
   ) { }
 
   ngOnInit() {
@@ -89,10 +92,15 @@ export class HomeComponent {
     this.loadInitialValues();
 
     //when the user changes we should update our name (if its been set in localstorage)
+    //also update any form configs
     this.subscriptions.add(
       this.userService.user$
         .subscribe(user => {
           this.loadInitialValues();
+
+          if(!this.userService.isLoggedIn){
+            this.player.public = false;
+          }
         })
     );
   }

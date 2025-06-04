@@ -38,17 +38,25 @@
 
   <!-- rows -->
   <ng-container *ngIf="sortedRooms.length; else noRooms">
-    <div class="flex flex-col gap-x-4">
-      <div *ngFor="let room of sortedRooms"
-        class="flex flex-row items-center p-2 py-4 bg-opacity-70 bg-slate-900 hover:bg-slate-800 text-white rounded-none cursor-pointer  rowListItem">
-        <div class="w-20 text-center">
-          <ng-icon *ngIf="room.passwordProtected" name="bootstrapLockFill"></ng-icon>
+    <div class="relative">
+      <div class="flex flex-col gap-x-4">
+        <div *ngFor="let room of sortedRooms"
+          class="flex flex-row items-center p-2 py-4 bg-opacity-70 bg-slate-900 hover:bg-slate-800 text-white rounded-none cursor-pointer  rowListItem">
+          <div class="w-20 text-center">
+            <ng-icon *ngIf="room.passwordProtected" name="bootstrapLockFill"></ng-icon>
+          </div>
+          <div class="text-left w-44 mr-2">{{ room.name }}</div>
+          <div class="text-left w-40">{{ gameTypeDisplay(room.gameType) }}</div>
+          <div class="text-center w-44">{{ room.reactionsEnabled ? 'Yes' : 'No' }}</div>
+          <div class="text-center w-40">{{ room.currentPlayers + "/" + room.maxPlayers }}</div>
+          <!-- <div class="text-left w-40">{{ room.maxPlayers }}</div> -->
         </div>
-        <div class="text-left w-44 mr-2">{{ room.name }}</div>
-        <div class="text-left w-40">{{ gameTypeDisplay(room.gameType) }}</div>
-        <div class="text-center w-44">{{ room.reactionsEnabled ? 'Yes' : 'No' }}</div>
-        <div class="text-center w-40">{{ room.currentPlayers + "/" + room.maxPlayers }}</div>
-        <!-- <div class="text-left w-40">{{ room.maxPlayers }}</div> -->
+      </div>
+
+      <!-- Overlay if not logged in -->
+      <div *ngIf="!userService.isLoggedIn" class="absolute inset-0 bg-slate-900 bg-opacity-90 text-white flex flex-col items-center">
+        <p>You must have an account to play public games, <button type="button" (click)="openUserLogin()" class="text-pop hover:underline">Login now!</button></p>
+        <p>Private games require no account. <button type="button" (click)="createGameClickedCallback()" class="text-pop hover:underline">Create One Now!</button></p>
       </div>
     </div>
 
@@ -56,6 +64,7 @@
   <ng-template #noRooms>
     <div class="bg-opacity-70 bg-slate-900">
       <div class="p-4 text-center">No Public Rooms. <button type="button" (click)="createGameClickedCallback()" class="text-pop hover:underline">Create One Now!</button></div>
+      
     </div>
   </ng-template>
 </div>

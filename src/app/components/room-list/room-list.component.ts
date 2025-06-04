@@ -8,11 +8,14 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { gameCombinationLock } from '@ng-icons/game-icons';
 import { bootstrapUnlock, bootstrapLock, bootstrapLockFill } from '@ng-icons/bootstrap-icons';
 import { TimerComponent } from '../timer/timer.component';
+import { UserService } from '../../services/user/user.service';
+import { UserInputAction } from '../../interfaces/inputs';
+import { InputService } from '../../services/input/input.service';
 
 @Component({
   selector: 'app-room-list',
   standalone: true,
-  imports: [NgIf, NgFor, NgIcon,TimerComponent],
+  imports: [NgIf, NgFor, NgIcon, TimerComponent],
   templateUrl: './room-list.component.html',
   styleUrl: './room-list.component.css',
   viewProviders: [provideIcons({ gameCombinationLock, bootstrapUnlock, bootstrapLock, bootstrapLockFill })]
@@ -24,6 +27,7 @@ export class RoomListComponent {
   private subscriptions: Subscription = new Subscription();
 
   allRooms: IRoom[] = [];
+  sortedRooms: IRoom[] = [];
 
   sortField: keyof IRoom = 'name';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -34,19 +38,27 @@ export class RoomListComponent {
   private timerRef: any;
   public updateTimerDate!: Date;
 
-  constructor(private roomListService: RoomListService) {
+  constructor(
+    private roomListService: RoomListService,
+    private inputService: InputService,
+    public userService: UserService
+  ) {
 
   }
 
   ngOnInit() {
     this.subscriptions.add(
-      this.roomListService.rooms$
-        .subscribe(rooms => {
-          this.allRooms = rooms || [];
-        })
+      this.roomListService.rooms$.subscribe(rooms => {
+        this.setRooms(rooms);
+      })
     );
 
     this.startListUpdater();
+  }
+
+  setRooms = (rooms:IRoom[] | null)=>{
+    this.allRooms = rooms || [];
+    this.sortedRooms = this.sortRooms;
   }
 
   ngOnDestroy(): void {
@@ -86,7 +98,7 @@ export class RoomListComponent {
     this.timerRef = null;
   }
 
-  get countDownTimerDate():Date{
+  get countDownTimerDate(): Date {
     return new Date(this.updateTimerDate.getTime() + this.secondsBetweenUpdates * 1000);
   }
 
@@ -97,9 +109,11 @@ export class RoomListComponent {
       this.sortField = field;
       this.sortDirection = 'asc';
     }
+
+    this.setRooms(this.allRooms);
   }
 
-  get sortedRooms(): IRoom[] {
+  get sortRooms(): IRoom[] {
     return [...this.allRooms].sort((a, b) => {
       const aVal = a[this.sortField];
       const bVal = b[this.sortField];
@@ -124,5 +138,9 @@ export class RoomListComponent {
     return str
       .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
       .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+  }
+
+  openUserLogin() {
+    this.inputService.triggerEvent(UserInputAction.OpenUserLogin);
   }
 }
