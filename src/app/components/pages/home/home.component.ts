@@ -81,8 +81,7 @@ export class HomeComponent {
     const joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
 
     if (joinRoomId) {
-      this.player.roomId = joinRoomId;
-      this.showRoomList = false;
+      this.setJoinRoomId(joinRoomId);
     }
 
     this.webRTC.disconnect();
@@ -119,6 +118,12 @@ export class HomeComponent {
     this.activeTab = tab;
   }
 
+  setJoinRoomId = (roomId:string)=>{
+    this.setTab('join')
+    this.player.roomId = roomId;
+    this.showRoomList = false;
+  }
+
   onCreateGame() {
     this.isCreateGame = true;
 
@@ -144,8 +149,8 @@ export class HomeComponent {
     this.onAgreeClicked();
   }
 
-  onRoomClick(room:IRoom){
-    debugger
+  onRoomClick = (room:IRoom)=>{
+    this.setJoinRoomId(room.id + "");
   }
 
   onCreateGameButtonClicked = ()=>{

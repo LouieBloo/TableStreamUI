@@ -40,7 +40,7 @@
   <ng-container *ngIf="sortedRooms.length; else noRooms">
     <div class="relative">
       <div class="flex flex-col gap-x-4">
-        <div *ngFor="let room of sortedRooms"
+        <div *ngFor="let room of sortedRooms" (click)="roomClickedCallback(room)"
           class="flex flex-row items-center p-2 py-4 bg-opacity-70 bg-slate-900 hover:bg-slate-800 text-white rounded-none cursor-pointer  rowListItem">
           <div class="w-20 text-center">
             <ng-icon *ngIf="room.passwordProtected" name="bootstrapLockFill"></ng-icon>
@@ -64,7 +64,6 @@
   <ng-template #noRooms>
     <div class="bg-opacity-70 bg-slate-900">
       <div class="p-4 text-center">No Public Rooms. <button type="button" (click)="createGameClickedCallback()" class="text-pop hover:underline">Create One Now!</button></div>
-      
     </div>
   </ng-template>
 </div>
