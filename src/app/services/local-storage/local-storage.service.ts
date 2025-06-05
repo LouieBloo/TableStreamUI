@@ -22,6 +22,7 @@ export class LocalStorageService {
   private readonly IS_SHARING_IMAGES = 'isSharingImages';
   private readonly USER_EMAIL = 'userEmail';
   private readonly PUBLIC_GAME = 'publicGame';
+  private readonly ALLOW_SPECTATORS = 'allowSpectators';
 
   private userInteractedWithSite:boolean = false;
 
@@ -109,6 +110,10 @@ export class LocalStorageService {
     return this.getItem(this.PUBLIC_GAME) == 'true' ? true : false;
   }
 
+  get allowSpectators(){
+    return this.getItem(this.ALLOW_SPECTATORS) == 'true' ? true : false;
+  }
+
   setUserEmail(userEmail:string){
     this.setItem(this.USER_EMAIL, userEmail);
   }
@@ -190,6 +195,10 @@ export class LocalStorageService {
     this.setItem(this.PUBLIC_GAME, isPublic + "")
   }
 
+  setAllowSpectators = (allowSpectators:boolean)=>{
+    this.setItem(this.ALLOW_SPECTATORS, allowSpectators + "");
+  }
+
   setLocalStorageForCreateGame(player: any) {
     this.setPlayerName(player.name);
     this.setRoomName(player.roomName);
@@ -198,6 +207,7 @@ export class LocalStorageService {
     this.setIsSpectator('false');
     this.setReactionsEnabled(player.reactionsEnabled + '');
     this.setPublicGame(player.public);
+    this.setAllowSpectators(player.allowSpectators);
 
     if (player.password)
       this.setPassword(player.password);
@@ -212,6 +222,7 @@ export class LocalStorageService {
     this.removeItem(this.ROOM_ID);
     this.removeItem(this.REACTIONS_ENABLED);
     this.removeItem(this.PUBLIC_GAME)
+    this.removeItem(this.ALLOW_SPECTATORS)
   }
 
   private setItem(item: string, text: string) {

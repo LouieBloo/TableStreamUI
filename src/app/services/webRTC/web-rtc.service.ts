@@ -334,6 +334,7 @@ export class WebRTCService {
     const reactionsEnabled: boolean = this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true;
     const isPublic:boolean = this.localStorageService.publicGame;
     const jwt:string|null = this.userService.isLoggedIn ? this.userService.jwtToken : null;
+    const allowSpectators:boolean = this.localStorageService.allowSpectators;
 
     //this.iceServerList = await this.twilioService.getIceServerList();
 
@@ -363,6 +364,7 @@ export class WebRTCService {
         reactionsEnabled: reactionsEnabled,
         isPublic: isPublic,
         joinerJwtToken: jwt,
+        allowSpectators: allowSpectators,
         isSharingImages: this.localStorageService.isSharingImages && this.localStorageService.isSharingImages == 'false' ? false : true
       },
         (newPlayer: IUser, room: IRoom, error: IGameError) => {

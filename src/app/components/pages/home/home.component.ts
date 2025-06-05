@@ -66,7 +66,8 @@ export class HomeComponent {
     password: null,
     gameType: GameType.MTGCommander,
     maxPlayers: 4,
-    reactionsEnabled: true
+    reactionsEnabled: true,
+    allowSpectators: false
   };
 
   constructor(
@@ -122,6 +123,12 @@ export class HomeComponent {
     this.setTab('join')
     this.player.roomId = roomId;
     this.showRoomList = false;
+  }
+
+  publicToggled = ()=>{
+    if(!this.player.public){
+      this.player.allowSpectators = false;
+    }
   }
 
   onCreateGame() {
