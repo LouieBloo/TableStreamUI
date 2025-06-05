@@ -1,4 +1,4 @@
-<div class="min-h-screen" [ngClass]="backgroundImage + 'Background'" id="top">
+<div class="min-h-screen bg-cover" [ngClass]="backgroundImage + 'Background'" id="top">
   <div class="preloader"></div>
   <div class="bg-opacity-60 background"></div>
   <div class="text-white flex-col justify-center">
@@ -81,6 +81,15 @@
 
         <!-- Join Game Form -->
         <div *ngIf="activeTab === 'join' && !showRoomList">
+
+          <div class="flex flex-row">
+            <div class="grow">
+              <h1 class="text-white text-2xl">Join Game</h1>
+            </div>
+            <button (click)="setTab('join'); showRoomList = true;" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800">
+              <span>Back</span>
+            </button>
+          </div>
 
           <form #joinForm="ngForm" (ngSubmit)="onJoinGame()">
             <div class="mb-4">
