@@ -30,6 +30,7 @@ import { SettingsService } from '../../../services/settings/settings.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { bootstrapCheck } from '@ng-icons/bootstrap-icons';
 import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
+import { ReportUserModalComponent } from '../../modals/report-user-modal/report-user-modal.component';
 
 @Component({
   selector: 'app-game',
@@ -53,7 +54,8 @@ import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sideba
     DonationModalComponent,
     NgStyle,
     NgIcon,
-    SidebarGameInfoComponent
+    SidebarGameInfoComponent,
+    ReportUserModalComponent
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -68,6 +70,7 @@ export class GameComponent {
   playerTurnOrderModal!: PlayerTurnOrderModalComponent;
   @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
   @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
+  @ViewChild(ReportUserModalComponent) reportUserModal!: ReportUserModalComponent;
 
   private subscriptions: Subscription = new Subscription();
   localPlayerId: string = '';
@@ -377,6 +380,10 @@ export class GameComponent {
 
   openDonationModel = ()=>{
     this.donationModal.open();
+  }
+
+  openReportUserModal = (offenderPlayerId:string)=>{
+    this.reportUserModal.open(offenderPlayerId, this.gameService.room.id + "")
   }
 
   computeSizeClasses(i: number): string {

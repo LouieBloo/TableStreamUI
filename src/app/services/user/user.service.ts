@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, fromEvent, Observable, Subscription, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ILoginPayload, ISignupPayload, IUpdateUserPayload, IUser } from '../../interfaces/IUser';
+import { ILoginPayload, IReportUserPayload, ISignupPayload, IUpdateUserPayload, IUser } from '../../interfaces/IUser';
 import { AlertsService } from '../alerts/alerts.service';
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { LocalStorageService } from '../local-storage/local-storage.service';
@@ -97,6 +97,14 @@ export class UserService {
     ).pipe(
       tap(res => this.setUser(res.user))
     );
+  }
+
+  reportUser(updates: IReportUserPayload): Observable<any> {
+    return this.http.post<{ user: IUser }>(
+      environment.socketUrl + '/users/reports',
+      updates,
+      { headers: this.getAuthHeaders() }
+    )
   }
 
   private restoreSession(): void {

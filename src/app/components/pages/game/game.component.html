@@ -17,6 +17,7 @@
                     [player]="player"
                     [localStream]="player.id === localPlayerId"
                     [focusedLayout]="focusedLayout"
+                    (reportPlayerEvent)="openReportUserModal($event)"
                   ></app-user-stream>
                 </div>
             </div>
@@ -122,6 +123,7 @@
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>
+    <app-report-user-modal></app-report-user-modal>
 
     <app-donation-modal></app-donation-modal>
     <div class="absolute bottom-3 left-3">
