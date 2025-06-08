@@ -1,0 +1,56 @@
+<button class="hidden" onclick="reportUserModal.showModal()" id="toggleReportUserModal">toggle</button>
+<!-- report modal -->
+<dialog id="reportUserModal" class="modal">
+    <div class="modal-box bg-slate-800 text-white absolute top-2">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeReportUserModal">✕</button>
+        </form>
+
+        <div>
+            <h1 class="text-2xl text-white">Kick Player</h1>
+            <h3 class="text-lg text-white">Are you sure you wish to kick this player?</h3>
+        </div>
+
+        <div class="mt-4 mb-4 ">
+            <label class="cursor-pointer">
+                <input type="checkbox" [(ngModel)]="reportingUser" /> Report User?
+            </label>
+        </div>
+
+
+        <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+            <div *ngIf="reportingUser">
+                <div>
+                    <label for="reason" class="block text-sm font-medium text-white text-left">Reason:</label>
+                    <select id="reason" formControlName="reason"
+                        class="mt-1 p-2 w-full border rounded-md shadow-sm bg-white text-black mb-2">
+                        <option value="">Select a reason</option>
+                        <option value="GRIEFING">Griefing</option>
+                        <option value="CAMERA_ABUSE">Camera Abuse</option>
+                        <option value="AUDIO_ABUSE">Audio Abuse</option>
+                        <option value="HARASSMENT">Harassment</option>
+                        <option value="CHAT_ABUSE">Chat Abuse</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-white text-left">Notes (optional):</label>
+                    <textarea id="notes" formControlName="notes" class="text-black w-full p-2"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded mt-2" [disabled]="submitting">
+                Kick Player
+            </button>
+
+            <div *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</div>
+            <div *ngIf="successMessage" style="color: green;">{{ successMessage }}</div>
+        </form>
+    </div>
+
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

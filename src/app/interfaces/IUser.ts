@@ -22,6 +22,13 @@ export interface IUpdateUserPayload {
     profileSettings?:IProfileSettings;
 }
 
+export interface IReportUserPayload{
+    offenderPlayerId:string;
+    reason:string;
+    roomId:string;
+    notes?:string;
+}
+
 export interface IProfileSettings{
     icon?:IProfileIcon;
 }

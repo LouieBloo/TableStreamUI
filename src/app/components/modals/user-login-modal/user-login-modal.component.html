@@ -3,9 +3,9 @@
       (click)="open()"
       type="button"
       class="btn btn-outline h-10 rounded-full flex items-center justify-center text-white"
-      [title]="userService.isLoggedIn() ? userService.user?.name : 'Signup / Login'"
+      [title]="userService.isLoggedIn ? userService.user?.name : 'Signup / Login'"
     >
-      <ng-container *ngIf="userService.isLoggedIn(); else loggedOut">
+      <ng-container *ngIf="userService.isLoggedIn; else loggedOut">
         {{ userService.user?.name }}
       </ng-container>
       <ng-template #loggedOut>
@@ -23,7 +23,7 @@
         </form>
 
         <!-- Not logged in -->
-        <div *ngIf="!userService.isLoggedIn()" class="w-full p-6 text-white tabs tabs-lifted mt-4">
+        <div *ngIf="!userService.isLoggedIn" class="w-full p-6 text-white tabs tabs-lifted mt-4">
             <!-- Tabs -->
             <ul class="tabs mb-4">
                 <li class="tab tab-bordered text-white rounded flex-1 text-center"
@@ -91,7 +91,7 @@
         </div>
 
         <!-- Logged In -->
-        <div *ngIf="userService.isLoggedIn()" class="mt-8 text-white">
+        <div *ngIf="userService.isLoggedIn" class="mt-8 text-white">
             <div class="flex flex-row items-center ml-4 mb-8">
                 <app-profile-icon [classes]="'text-6xl mt-2'" [color]="userService.user?.profileSettings?.icon?.color" [iconId]="userService.user?.profileSettings?.icon?.id"></app-profile-icon>
                 <div class="flex flex-col ml-4">
