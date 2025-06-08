@@ -30,8 +30,8 @@
           <form #createForm="ngForm" (ngSubmit)="onCreateGame()">
             <div class="mb-4">
               <label for="playerName" class="block text-sm font-medium text-white text-left">Your Name:</label>
-              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required maxlength="40"
-                class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors">
+              <input type="text" id="playerName" name="name" [(ngModel)]="player.name" required maxlength="40" [disabled]="player.public"
+                class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed">
             </div>
             <div class="mb-4">
               <label for="gameName" class="block text-sm font-medium text-white text-left">Room Name:</label>
