@@ -128,6 +128,10 @@ export class HomeComponent {
   publicToggled = ()=>{
     if(!this.player.public){
       this.player.allowSpectators = false;
+
+      if(this.userService.isLoggedIn){
+        this.player.name = this.userService.user?.name + "";
+      }
     }
   }
 
