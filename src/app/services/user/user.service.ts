@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, fromEvent, Observable, Subscription, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ILoginPayload, ISignupPayload, IUpdateUserPayload, IUser } from '../../interfaces/IUser';
+import { ILoginPayload, IReportUserPayload, ISignupPayload, IUpdateUserPayload, IUser } from '../../interfaces/IUser';
 import { AlertsService } from '../alerts/alerts.service';
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { LocalStorageService } from '../local-storage/local-storage.service';
@@ -81,8 +81,12 @@ export class UserService {
     this.alertService.addAlert("warning", "You have been logged out", 2)
   }
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem(this.tokenKey);
+  get isLoggedIn(): boolean {
+    return !!this.jwtToken;
+  }
+
+  get jwtToken():string | null{
+    return localStorage.getItem(this.tokenKey)
   }
 
   updateUser(updates: IUpdateUserPayload): Observable<any> {
@@ -95,8 +99,16 @@ export class UserService {
     );
   }
 
+  reportUser(updates: IReportUserPayload): Observable<any> {
+    return this.http.post<{ user: IUser }>(
+      environment.socketUrl + '/users/reports',
+      updates,
+      { headers: this.getAuthHeaders() }
+    )
+  }
+
   private restoreSession(): void {
-    const token = localStorage.getItem(this.tokenKey);
+    const token = this.jwtToken;
     if (token) {
       if (this.isTokenExpired(token)) {
         this.logout();
@@ -126,8 +138,8 @@ export class UserService {
     });
   }
 
-  private getAuthHeaders() {
-    const token = localStorage.getItem(this.tokenKey);
+  public getAuthHeaders() {
+    const token = this.jwtToken;
     return {
       Authorization: `Bearer ${token}`,
     };
@@ -166,7 +178,7 @@ export class UserService {
 
   /** Called on window focus — immediately check expiry */
   private checkTokenValidity(): void {
-    const token = localStorage.getItem(this.tokenKey);
+    const token = this.jwtToken;
     if (token && this.isTokenExpired(token)) {
       this.logout();
     }

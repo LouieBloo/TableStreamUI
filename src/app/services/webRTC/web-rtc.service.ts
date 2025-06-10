@@ -12,6 +12,7 @@ import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { Router } from '@angular/router';
 import { TwilioService } from '../twilio/twilio.service';
+import { UserService } from '../user/user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +56,7 @@ export class WebRTCService {
     private logger: LoggerService, 
     private localStorageService: LocalStorageService, 
     private router: Router,
-    private twilioService:TwilioService
+    private userService: UserService
   ) {
     
   }
@@ -331,6 +332,9 @@ export class WebRTCService {
     const roomName = this.localStorageService.roomName;
     const maxPlayers: number = parseInt(this.localStorageService.maxPlayers || "4");
     const reactionsEnabled: boolean = this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true;
+    const isPublic:boolean = this.localStorageService.publicGame;
+    const jwt:string|null = this.userService.isLoggedIn ? this.userService.jwtToken : null;
+    const allowSpectators:boolean = this.localStorageService.allowSpectators;
 
     //this.iceServerList = await this.twilioService.getIceServerList();
 
@@ -358,6 +362,9 @@ export class WebRTCService {
         userType: userType,
         maxPlayers: maxPlayers || 4,
         reactionsEnabled: reactionsEnabled,
+        isPublic: isPublic,
+        joinerJwtToken: jwt,
+        allowSpectators: allowSpectators,
         isSharingImages: this.localStorageService.isSharingImages && this.localStorageService.isSharingImages == 'false' ? false : true
       },
         (newPlayer: IUser, room: IRoom, error: IGameError) => {
@@ -369,6 +376,9 @@ export class WebRTCService {
             } else if (error.type === GameErrorType.EnteringBannedRoom){
               this.router.navigate(['/join']);
               this.alertService.addAlert('error', error.message,5);
+            } else if(error.type === GameErrorType.InvalidAction){
+              this.router.navigate(['/join']);
+              this.alertService.addAlert('error', error.message);
             }
             return;
           }
@@ -408,7 +418,8 @@ export class WebRTCService {
                 password: password && password != "null" ? password : null,
                 userType: userType,
                 maxPlayers: maxPlayers || 4,
-                reactionsEnabled: reactionsEnabled
+                reactionsEnabled: reactionsEnabled,
+                joinerJwtToken: jwt,
               },
               (newPlayer: IUser, room: IRoom, error: IGameError) => {
                 this.alertService.addAlert("success", "Successfully rejoined room", 5);

@@ -15,6 +15,9 @@ import { DonationModalComponent } from '../../modals/donation-modal/donation-mod
 import { UserLoginModalComponent } from '../../modals/user-login-modal/user-login-modal.component';
 import { Subscription } from 'rxjs';
 import { UserService } from '../../../services/user/user.service';
+import { IRoom } from '../../../interfaces/IRoom';
+import { RoomListComponent } from '../../room-list/room-list.component';
+import { TooltipDirective } from '../../../directives/tooltip.directive';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -30,7 +33,9 @@ import { UserService } from '../../../services/user/user.service';
     RecentDonationListComponent,
     DonationButtonComponent,
     DonationModalComponent,
-    UserLoginModalComponent
+    UserLoginModalComponent,
+    RoomListComponent,
+    TooltipDirective
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -51,15 +56,18 @@ export class HomeComponent {
   activeTab: string = 'join';
   gameTypes = GAME_TYPES;
   isCreateGame: boolean = false;
+  showRoomList: boolean = true;
   player = {
     name: '',
     roomName: '',
     isSpectator: false,
+    public: false,
     roomId: '',
     password: null,
     gameType: GameType.MTGCommander,
     maxPlayers: 4,
-    reactionsEnabled: true
+    reactionsEnabled: true,
+    allowSpectators: false
   };
 
   constructor(
@@ -67,14 +75,14 @@ export class HomeComponent {
     private webRTC: WebRTCService,
     private route: ActivatedRoute,
     private localStorageService: LocalStorageService,
-    private userService:UserService
+    public userService:UserService
   ) { }
 
   ngOnInit() {
     const joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
 
     if (joinRoomId) {
-      this.player.roomId = joinRoomId;
+      this.setJoinRoomId(joinRoomId);
     }
 
     this.webRTC.disconnect();
@@ -84,10 +92,15 @@ export class HomeComponent {
     this.loadInitialValues();
 
     //when the user changes we should update our name (if its been set in localstorage)
+    //also update any form configs
     this.subscriptions.add(
       this.userService.user$
         .subscribe(user => {
           this.loadInitialValues();
+
+          if(!this.userService.isLoggedIn){
+            this.player.public = false;
+          }
         })
     );
   }
@@ -104,6 +117,22 @@ export class HomeComponent {
 
   setTab(tab: string) {
     this.activeTab = tab;
+  }
+
+  setJoinRoomId = (roomId:string)=>{
+    this.setTab('join')
+    this.player.roomId = roomId;
+    this.showRoomList = false;
+  }
+
+  publicToggled = ()=>{
+    if(!this.player.public){
+      this.player.allowSpectators = false;
+
+      if(this.userService.isLoggedIn){
+        this.player.name = this.userService.user?.name + "";
+      }
+    }
   }
 
   onCreateGame() {
@@ -129,6 +158,14 @@ export class HomeComponent {
     }
     //this.ipAddressModal.open();
     this.onAgreeClicked();
+  }
+
+  onRoomClick = (room:IRoom)=>{
+    this.setJoinRoomId(room.id + "");
+  }
+
+  onCreateGameButtonClicked = ()=>{
+    this.setTab('create')
   }
 
   onAgreeClicked(): void {
@@ -193,5 +230,9 @@ export class HomeComponent {
 
   openUserModal = () => {
     this.userLoginModal.open();
+  }
+
+  get showTermsOfService(): boolean{
+    return !this.showRoomList || this.activeTab == 'create'
   }
 }

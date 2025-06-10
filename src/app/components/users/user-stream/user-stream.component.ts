@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, Output, ViewChild } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
@@ -53,6 +53,7 @@ export class UserStreamComponent {
   @Input() player!: IPlayer;
   @Input() localStream: boolean = false;
   @Input() focusedLayout: boolean = false;
+  @Output() reportPlayerEvent: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
 
@@ -326,12 +327,13 @@ export class UserStreamComponent {
   }
 
   kickPlayer(playerId: string) {
-    this.webRTC.sendGameEvent({
-      event: GameEvent.KickPlayer,
-      payload: {
-        playerId: playerId,
-      },
-    });
+    // this.webRTC.sendGameEvent({
+    //   event: GameEvent.KickPlayer,
+    //   payload: {
+    //     playerId: playerId,
+    //   },
+    // });
+    this.reportPlayerEvent.emit(this.player.id);
   }
 
   toggleImageSharing = async()=>{

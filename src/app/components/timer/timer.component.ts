@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 })
 export class TimerComponent {
   @Input() date:any;
+  @Input() countDown: boolean = false;
 
   display!:string;
   interval:any;
@@ -27,13 +28,13 @@ export class TimerComponent {
   startTimer(){
     this.ngZone.runOutsideAngular(() => {
       this.interval = setInterval(() => {
-        this.display = this.parse(this.date);
+        this.display = this.parse(this.date, this.countDown);
         this.cdr.detectChanges();
       }, 1000);
     });
   }
 
-  private parse(payload: Date | number | undefined){
+  private parse(payload: Date | number | undefined, countDown: boolean){
     if(!payload){
       return "0"; 
     }
@@ -41,14 +42,18 @@ export class TimerComponent {
     if(typeof payload === "number"){
       return this.getTotalTime(payload);
     }else{
-      return this.getTimeAgo(payload);
+      return this.getTime(payload, countDown); 
     }
   }
 
-  private getTimeAgo(date: Date): string {
+  private getTime(date: Date, countDown:boolean): string {
     const now = new Date().getTime();
-    const past = new Date(date).getTime();
-    const diff = now - past;
+    const target = new Date(date).getTime();
+    const diff = countDown ? (target - now) : (now - target);
+
+     if (diff <= 0) {
+      return "0s";
+    }
 
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
