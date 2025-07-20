@@ -10,6 +10,7 @@
     </div>
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <app-life-total
+          class="w-full"
           *ngIf="gameService.isMagicGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"

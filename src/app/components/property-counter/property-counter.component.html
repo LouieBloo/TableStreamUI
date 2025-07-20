@@ -1,4 +1,4 @@
-<div class="bg-black bg-opacity-50 text-sm rounded-md w-full" [ngClass]="{'w-full': fullWidth, 'join': joined}">
+<div class="bg-black bg-opacity-50 text-sm rounded-md w-full" [ngClass]="{'w-full': fullWidth, 'join': joined}" >
     <button *ngIf="editable" type="button" class=" button text-white p-1 join-item " (click)="modifyCallback(-1)" [ngClass]="buttonClass">-1</button>
     <div class="dropdown join-item button text-white pl-4 pr-4" [ngClass]="{'w-full': fullWidth}" appTooltip="{{tooltip}}" [tooltipDirection]="'right'" >
         <div tabindex="0" role="button" class="flex flex-col h-full justify-center">

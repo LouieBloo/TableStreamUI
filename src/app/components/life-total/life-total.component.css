@@ -1,9 +1,27 @@
 
+.dropZone {
+    min-height: 50px;
+    min-width: 200px;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+    transition: background-color 0.2s;
+}
+
+.dropZoneBorder{
+    border: 2px dashed #ccc;;
+    border-radius: 8px;
+}
+
+.dropZone.cdk-drop-list-dragging {
+    background-color: #f0f8ff;
+}
+
 .subMenuLeft{
     left: 90%;
 }
 
-.poisonPanelEditable{
+/* .poisonPanelEditable{
     right:-126px;
     top:0px;
 }
@@ -49,4 +67,4 @@
 
 .radiationPanelFarRight{
     right:-139px !important;
-}
+} */
