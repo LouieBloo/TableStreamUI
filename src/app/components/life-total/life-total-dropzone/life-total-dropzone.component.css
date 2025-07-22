@@ -1,0 +1,32 @@
+.dropZone {
+    /* min-height: 50px;
+    min-width: 200px; */
+    transition: background-color 0.2s;
+}
+
+.dropZoneBorder{
+    border: 2px dashed #ccc;;
+    border-radius: 8px;
+}
+
+.dropZone.cdk-drop-list-dragging {
+    background-color: #f0f8ff;
+}
+
+
+.hoverContainer {
+  transition: opacity 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
+}
+
+.hoverContainer:hover{
+  opacity: 1;
+}
+
+.hoverContainerOpen{
+    opacity: 0;
+}
+
+.hoverContainerOpen:hover{
+  opacity: 1;
+}

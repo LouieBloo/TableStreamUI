@@ -1,6 +1,6 @@
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
-import { bootstrapSuitHeartFill } from '@ng-icons/bootstrap-icons';
+import { bootstrapChevronDoubleDown, bootstrapChevronDoubleUp, bootstrapSuitHeartFill } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
@@ -11,18 +11,21 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
 import { GameService } from '../../services/game/game.service';
 import { IPlayer, PlayerProperties } from '../../interfaces/IPlayer';
 import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/IGame';
-import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameFairyWand, gameModernCity, gameSunCloud, gameTorch, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
+import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameFairyWand, gameModernCity, gameSunCloud, gameTorch, gameDeathSkull, gameRadioactive, gameHearts, gameEyeTarget } from '@ng-icons/game-icons';
 import { FormsModule } from '@angular/forms';
-import { CdkDrag, CdkDragDrop, CdkDragPreview, CdkDropList, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { LifeTotalDropzoneComponent } from './life-total-dropzone/life-total-dropzone.component';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgClass, NgIf, TitleCasePipe, PropertyCounterComponent, TooltipDirective, NgIcon,FormsModule, CdkDrag, CdkDropList, CdkDragPreview],
+  imports: [NgClass, NgIf, TitleCasePipe, PropertyCounterComponent, LifeTotalDropzoneComponent, TooltipDirective, NgIcon,FormsModule, CdkDrag, CdkDropList],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
   viewProviders: [provideIcons({
     bootstrapSuitHeartFill,
+    bootstrapChevronDoubleUp,
+    bootstrapChevronDoubleDown,
     gameCrown,
     gameHealthNormal,
     gamePoisonBottle,
@@ -35,7 +38,8 @@ import { CdkDrag, CdkDragDrop, CdkDragPreview, CdkDropList, moveItemInArray, tra
     gameSunCloud,
     gameDeathSkull,
     gameRadioactive,
-    gameHearts
+    gameHearts,
+    gameEyeTarget
   })]
 })
 export class LifeTotalComponent {
@@ -46,10 +50,13 @@ export class LifeTotalComponent {
   @Input() modifyRadiationCallback!: (amount: number) => void;
   @Input() editable!: boolean;
   @Input() toggleCommanderDamages!: () => void;
+  @Input() id!:string;
 
   showPoisonCounter!: boolean;
   showEnergyCounter!: boolean;
   showRadiationCounter!:boolean;
+  showTopBar:boolean = true;
+  topBarPanelHidden:boolean = false;
   isDragging!:boolean;
 
   setLifeTotalAmount!:number;
@@ -57,6 +64,11 @@ export class LifeTotalComponent {
   private inputSubscription!: Subscription;
 
   topLeftDropZoneList:any[] = [{
+    title: 'Blank', 
+    iconClass: 'gamePowerLightning', 
+    iconColor: 'text-orange-600', 
+    total: 0, 
+  },{
     title: 'Energy', 
     iconClass: 'gamePowerLightning', 
     iconColor: 'text-orange-600', 
@@ -74,6 +86,9 @@ export class LifeTotalComponent {
     iconColor: 'text-yellow-400', 
     total: 0
   }];
+
+  public leftDropZoneList:any[] = [];
+  public rightDropZoneList:any[] = [];
   
 
   constructor(private inputService: InputService, private webRtc: WebRTCService, public gameService: GameService, private cdr:ChangeDetectorRef) {
@@ -130,7 +145,7 @@ export class LifeTotalComponent {
     this.webRtc.sendGameEvent({ event: GameEvent.ModifyGameProperty, payload: payload });
   }
 
-  getCallback = (title:string)=>{
+  public getCallback = (title:string)=>{
     switch(title){
       case 'Energy':
         return this.modifyEnergyCallback;
@@ -143,7 +158,7 @@ export class LifeTotalComponent {
     }
   }
 
-  getTotal = (title:string)=>{
+  public getTotal = (title:string)=>{
     switch(title){
       case 'Energy':
         return this.player?.energyTotal;
@@ -156,7 +171,7 @@ export class LifeTotalComponent {
     }
   }
 
-  getHidden = (title:string):boolean=>{
+  public getHidden = (title:string):boolean=>{
     switch(title){
       case 'Energy':
         return !this.showingEnergyPanel;
@@ -167,6 +182,10 @@ export class LifeTotalComponent {
       default:
         return true;
     }
+  }
+
+  public onDraggingChanged(dragging: boolean) {
+    this.isDragging = dragging;
   }
 
   get showingPoisonPanel(): boolean {
@@ -181,23 +200,20 @@ export class LifeTotalComponent {
     return this.showRadiationCounter || this.player.radiationTotal > 0
   }
 
-  drop(event: CdkDragDrop<any[]>) {
-    console.log(event)
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
+  toggleTopBar() {
+    this.showTopBar = !this.showTopBar;
+  
+    // if showing, immediately unhide the wrapper
+    if (this.showTopBar) {
+      this.topBarPanelHidden = false;
     }
-
-    // this.cdr.detectChanges(); // Or this.cdr.markForCheck();
   }
-
-  // trackByItem(index: number, item: any): any {
-  //   return item.id || item.title; // Use a truly unique identifier
-  // }
+  
+  onTransitionEnd() {
+    // hide wrapper only if we're hiding the sidebar
+    if (!this.showTopBar) {
+      this.topBarPanelHidden = true;
+    }
+  }
+  
 }
