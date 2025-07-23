@@ -1,11 +1,4 @@
 <div *ngIf="hasAnyCommanderAssigned">
-    <button type="button" (click)="toggleSidebar()">
-        <div *ngIf="showSidebar" class="text-sm text-pop flex items-center"><ng-icon class="text-md"
-                name="bootstrapChevronDoubleLeft"></ng-icon> Hide</div>
-        <div *ngIf="!showSidebar" class="text-sm text-pop flex items-center">Damages <ng-icon class="text-md"
-                name="bootstrapChevronDoubleRight"></ng-icon></div>
-    </button>
-
     <div class="relative overflow-hidden transition-all duration-300 ease-in-out" (transitionend)="onTransitionEnd()"
         [ngClass]="{
         'h-0 opacity-0 pointer-events-none': panelHidden,
@@ -30,5 +23,10 @@
             </ng-container>
         </div>
     </div>
-
+    <button type="button" (click)="toggleSidebar()" class="text-md text-white hover:text-yellow-400">
+        <div *ngIf="showSidebar" class="flex items-center"><ng-icon class="text-md"
+                name="bootstrapChevronDoubleLeft"></ng-icon> </div>
+        <div *ngIf="!showSidebar" class="flex items-center"> <ng-icon class="text-md"
+                name="bootstrapChevronDoubleRight"></ng-icon></div>
+    </button>
 </div>

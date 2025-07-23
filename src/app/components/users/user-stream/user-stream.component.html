@@ -8,7 +8,7 @@
             [videoElement]="videoElement"
           ></app-bounding-box>
     </div>
-    <div class="absolute top-1 w-full text-white  flex flex-col items-center" style="z-index: 10">
+    <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <app-life-total
           id="magicLifeTotal"
           class="w-full"
@@ -19,21 +19,19 @@
           [modifyPoisonCallback]="modifyPoisonTotal"
           [modifyEnergyCallback]="modifyEnergyTotal"
           [modifyRadiationCallback]="modifyRadiationTotal"
-          [toggleCommanderDamages]="toggleCommanderDamages">
+          [toggleCommanderDamages]="toggleCommanderDamages" >
         </app-life-total>
-        <app-pokemon-prize-tracker
+        <app-life-total
           *ngIf="gameService.isPokemonGame()"
           [player]="player"
-          [modifyPrizeCardsCallback]="modifyPrizeCardTotal"
+          [modifyCallback]="modifyPrizeCardTotal"
           [editable]="localStream">
-        </app-pokemon-prize-tracker>
+        </app-life-total>
         <app-life-total *ngIf="gameService.isYugiohGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"
           [editable]="localStream"
-          [modifyPoisonCallback]="modifyPoisonTotal"
-          [modifyEnergyCallback]="modifyEnergyTotal"
-          [toggleCommanderDamages]="toggleCommanderDamages">
+        >
         </app-life-total>
     </div>
     <div class="absolute left-2 text-white flex flex-col leftPanel">

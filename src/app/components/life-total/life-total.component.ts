@@ -63,8 +63,6 @@ export class LifeTotalComponent {
 
   private inputSubscription!: Subscription;
 
-  
-
   topLeftDropZoneList:any[] = [{
     title: 'Energy', 
     iconClass: 'gamePowerLightning', 

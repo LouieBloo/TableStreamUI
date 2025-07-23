@@ -15,7 +15,6 @@ import { LoggerService } from '../../../services/logger/logger.service';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { environment } from '../../../../environments/environment';
 import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.component';
-import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 import { TimerComponent } from '../../timer/timer.component';
 import { IPlayingCard } from '../../../interfaces/IPlayingCard';
@@ -42,7 +41,6 @@ import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, game
     SetCommanderComponent,
     TooltipDirective,
     CoinFlipperComponent,
-    PokemonPrizeTrackerComponent,
     ReactionsComponent,
     TimerComponent,
     BoundingBoxComponent,
