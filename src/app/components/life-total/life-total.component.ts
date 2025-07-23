@@ -63,12 +63,9 @@ export class LifeTotalComponent {
 
   private inputSubscription!: Subscription;
 
+  
+
   topLeftDropZoneList:any[] = [{
-    title: 'Blank', 
-    iconClass: 'gamePowerLightning', 
-    iconColor: 'text-orange-600', 
-    total: 0, 
-  },{
     title: 'Energy', 
     iconClass: 'gamePowerLightning', 
     iconColor: 'text-orange-600', 
@@ -80,14 +77,14 @@ export class LifeTotalComponent {
     iconClass: 'gameDeathSkull', 
     iconColor: 'text-green-600', 
     total: 0
-  },{
+  }];
+
+  public leftDropZoneList:any[] = [{
     title: 'Rad', 
     iconClass: 'gameRadioactive', 
     iconColor: 'text-yellow-400', 
     total: 0
   }];
-
-  public leftDropZoneList:any[] = [];
   public rightDropZoneList:any[] = [];
   
 

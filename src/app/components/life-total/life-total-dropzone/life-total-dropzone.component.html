@@ -22,7 +22,7 @@
             @for (item of dropList; track item) {
             <div cdkDrag [cdkDragData]="item" class="overflow-visible mb-2 flex items-end" (cdkDragStarted)="onDragStart()"
                 (cdkDragEnded)="onDragEnd()"
-                [ngClass]="{'opacity-0': isHiddenFunction(item.title), 'mb-1': !isHorizontal, 'mb-2': isHorizontal, 'justify-end': justifyEnd}">
+                [ngClass]="{'opacity-0': isHiddenFunction(item.title), 'pointer-events-none': isHiddenFunction(item.title), 'h-0':isHiddenFunction(item.title),  'mb-1': !isHorizontal, 'mb-2': isHorizontal, 'justify-end': justifyEnd}">
                 <div *ngIf="item.title == 'Blank'" class="w-36">
 
                 </div>
@@ -36,7 +36,7 @@
     </div>
 </div>
 
-<div *ngIf="hideButtonLocation && dropList && dropList.length > 0" type="button" class="hoverContainer" [ngClass]="{'flex': hideButtonLocation == 'right', 'justify-end': hideButtonLocation == 'right'}">
+<div *ngIf="showCollapseButton" type="button" class="hoverContainer" [ngClass]="{'flex': hideButtonLocation == 'right', 'justify-end': hideButtonLocation == 'right'}">
     <button  (click)="toggleTopBar()" class=" text-md text-white hover:text-yellow-400">
         <div *ngIf="showDropZone" class="flex items-center"><ng-icon class="text-xl"
             name="{{hideButtonLocation == 'right' ? 'bootstrapChevronDoubleRight' : 'bootstrapChevronDoubleLeft'}}"></ng-icon></div>

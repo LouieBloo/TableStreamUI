@@ -76,5 +76,15 @@ export class LifeTotalDropzoneComponent {
 
   trackByTitle(index: number, item: any): string {
     return item.title;
-  } 
+  }
+
+  get showCollapseButton(): boolean {
+    // 1. Check if hideButtonLocation is true
+    // 2. Check if dropList exists and has items
+    // 3. Check if ANY item in dropList has a title that makes isHiddenFunction return true
+    return (this.hideButtonLocation &&
+           this.dropList &&
+           this.dropList.length > 0 &&
+           this.dropList.some(item => !this.isHiddenFunction(item.title))) == true;
+  }
 }
