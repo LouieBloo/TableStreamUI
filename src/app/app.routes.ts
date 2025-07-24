@@ -13,6 +13,7 @@ import { CardTestComponent } from './components/pages/card-test/card-test.compon
 import { VerifyEmailComponent } from './components/pages/verify-email/verify-email.component';
 import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
 import { UserEditComponent } from './components/pages/user-edit/user-edit.component';
+import { DevDragComponent } from './components/pages/dev-drag/dev-drag.component';
 
 export const routes: Routes = [
     {
@@ -54,5 +55,8 @@ export const routes: Routes = [
     },
     {
         path: 'user', component: UserEditComponent
+    },
+    {
+        path: 'dev-drag', component: DevDragComponent
     }
 ];

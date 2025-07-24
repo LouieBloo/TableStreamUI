@@ -70,3 +70,7 @@
 .yugiohBackground{
     background-image: url("/assets/images/yugioh-background.jpg");
 }
+
+.yugioh-domainBackground{
+    background-image: url("/assets/images/yugioh-domain-background.jpg");
+}

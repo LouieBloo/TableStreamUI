@@ -10,6 +10,8 @@
     </div>
     <div class="absolute top-1 w-full text-white  flex flex-col items-center">
         <app-life-total
+          id="magicLifeTotal"
+          class="w-full"
           *ngIf="gameService.isMagicGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"
@@ -17,25 +19,23 @@
           [modifyPoisonCallback]="modifyPoisonTotal"
           [modifyEnergyCallback]="modifyEnergyTotal"
           [modifyRadiationCallback]="modifyRadiationTotal"
-          [toggleCommanderDamages]="toggleCommanderDamages">
+          [toggleCommanderDamages]="toggleCommanderDamages" >
         </app-life-total>
-        <app-pokemon-prize-tracker
+        <app-life-total
           *ngIf="gameService.isPokemonGame()"
           [player]="player"
-          [modifyPrizeCardsCallback]="modifyPrizeCardTotal"
+          [modifyCallback]="modifyPrizeCardTotal"
           [editable]="localStream">
-        </app-pokemon-prize-tracker>
+        </app-life-total>
         <app-life-total *ngIf="gameService.isYugiohGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"
           [editable]="localStream"
-          [modifyPoisonCallback]="modifyPoisonTotal"
-          [modifyEnergyCallback]="modifyEnergyTotal"
-          [toggleCommanderDamages]="toggleCommanderDamages">
+        >
         </app-life-total>
     </div>
     <div class="absolute left-2 text-white flex flex-col leftPanel">
-        <div class="text-xs">
+        <div class="text-xs max-w-24">
             <p>Turn: <app-timer [date]="player.currentTurnStartTime"></app-timer></p>
             <p>Avg: <app-timer [date]="(player.totalTurnTime/ ( (player.totalTurns) || 1 ) )"></app-timer></p>
         </div>
@@ -45,15 +45,49 @@
             <app-set-commander *ngIf="gameService.isCommanderGame()" [player]="player" [editable]="localStream" [commander]="player.commanders[1]" [index]="1"></app-set-commander>
         </div>
 
+        <div *ngIf="magicLifeTotalComponent != null" class="mt-2">
+            <app-life-total-dropzone
+                [id]="'leftDropZone' + player.id"
+                [dropList]="magicLifeTotalComponent.leftDropZoneList"
+                [editable]="localStream"
+                [totalFunction]="magicLifeTotalComponent.getTotal"
+                [modifyCallbackFunction]="magicLifeTotalComponent.getCallback"
+                [isDragging]="magicLifeTotalComponent.isDragging"
+                (draggingChanged)="magicLifeTotalComponent.onDraggingChanged($event)"
+                [isHiddenFunction]="magicLifeTotalComponent.getHidden"
+                [isHorizontal]="false"
+                [cdkDropListConnectedTo]="['topLeftDropZone' + player.id, 'topRightDropZone' + player.id, 'rightDropZone' + player.id]"
+                [hideButtonLocation]="'left'"
+            ></app-life-total-dropzone>
+        </div>
+
         <div class="flex flex-col max-w-44 mt-1" style="width: fit-content;" *ngIf="showCommanderDamage">
             <app-commander-side-bar [player]="this.player" [localStream]="localStream" [getModifyCommanderDamageCallback]="getModifyCommanderDamageCallback"></app-commander-side-bar>
         </div>
+        
     </div>
 
     <!-- Status bar -->
     <div class="flex flex-col absolute mt-2.5 mr-1.5" id="statusBar">
         <!-- Magic -->
         <div *ngIf="gameService.isMagicGame()">
+            <div *ngIf="magicLifeTotalComponent != null" class="mt-2">
+                <app-life-total-dropzone
+                    [id]="'rightDropZone' + player.id"
+                    [dropList]="magicLifeTotalComponent.rightDropZoneList"
+                    [editable]="localStream"
+                    [totalFunction]="magicLifeTotalComponent.getTotal"
+                    [modifyCallbackFunction]="magicLifeTotalComponent.getCallback"
+                    [isDragging]="magicLifeTotalComponent.isDragging"
+                    (draggingChanged)="magicLifeTotalComponent.onDraggingChanged($event)"
+                    [isHiddenFunction]="magicLifeTotalComponent.getHidden"
+                    [isHorizontal]="false"
+                    [cdkDropListConnectedTo]="['topLeftDropZone' + player.id, 'topRightDropZone' + player.id, 'leftDropZone' + player.id]"
+                    [hideButtonLocation]="'right'"
+                    [justifyEnd]="true"
+                ></app-life-total-dropzone>
+            </div>
+
             <div *ngIf="player.hasCitiesBlessing">
                 <p class="text-center text-4xl relative"  appTooltip="This player has the Cities Blessing" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
                     <img src="assets/images/icons/cities-blessing-icon.png" alt="Cities Blessing" class="w-12">
