@@ -1,52 +1,39 @@
 
+.dropZone {
+    min-height: 50px;
+    min-width: 200px;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+    transition: background-color 0.2s;
+}
+
+.dropZoneBorder{
+    border: 2px dashed #ccc;;
+    border-radius: 8px;
+}
+
+.dropZone.cdk-drop-list-dragging {
+    background-color: #f0f8ff;
+}
+
 .subMenuLeft{
     left: 90%;
 }
 
-.poisonPanelEditable{
-    right:-126px;
-    top:0px;
+.topBarContainer {
+  transition: opacity 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
 }
 
-.poisonPanel{
-    right:-78px;
-    top:2px;
+.topBarContainer:hover{
+  opacity: 1;
 }
 
-.energyPanel{
-    left:-78px;
-    top:0px;
+.topBarContainerOpen{
+    opacity: 0;
 }
 
-.energyPanelEditable{
-    left:-128px;
-    top:0px;
-}
-
-.radiationPanelRightEditable{
-    right:-112px;
-    top:0px;
-}
-
-.radiationPanelRight{
-    right:-61px;
-    top:2px;
-}
-
-.radiationPanelLeftEditable{
-    left:-111px;
-    top:0px;
-}
-
-.radiationPanelLeft{
-    left:-61px;
-    top:2px;
-}
-
-.radiationPanelLower{
-    top:45px !important;
-}
-
-.radiationPanelFarRight{
-    right:-139px !important;
+.topBarContainerOpen:hover{
+  opacity: 1;
 }

@@ -3,11 +3,11 @@ import { IPlayer } from '../../interfaces/IPlayer';
 import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 import { NgIcon } from '@ng-icons/core';
-
+import {CdkDrag} from '@angular/cdk/drag-drop';
 @Component({
   selector: 'app-property-counter',
   standalone: true,
-  imports: [NgIf,NgClass,TitleCasePipe,TooltipDirective,NgIcon],
+  imports: [NgIf,NgClass,TitleCasePipe,TooltipDirective,NgIcon, CdkDrag],
   templateUrl: './property-counter.component.html',
   styleUrl: './property-counter.component.css'
 })

@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, NgZone, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
@@ -15,7 +15,6 @@ import { LoggerService } from '../../../services/logger/logger.service';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { environment } from '../../../../environments/environment';
 import { CoinFlipperComponent } from '../../coin-flip/coin-flipper/coin-flipper.component';
-import { PokemonPrizeTrackerComponent } from '../../pokemon/pokemon-prize-tracker/pokemon-prize-tracker.component';
 import { ReactionsComponent } from '../../effects/reactions/reactions.component';
 import { TimerComponent } from '../../timer/timer.component';
 import { IPlayingCard } from '../../../interfaces/IPlayingCard';
@@ -25,6 +24,9 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
 import { CommanderSideBarComponent } from "../../commander/commander-side-bar/commander-side-bar.component";
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
+import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand, gameTorch, gameModernCity, gameSunCloud, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
 
 @Component({
   selector: 'app-user-stream',
@@ -39,15 +41,30 @@ import { CommanderSideBarComponent } from "../../commander/commander-side-bar/co
     SetCommanderComponent,
     TooltipDirective,
     CoinFlipperComponent,
-    PokemonPrizeTrackerComponent,
     ReactionsComponent,
     TimerComponent,
     BoundingBoxComponent,
-    CommanderSideBarComponent
+    CommanderSideBarComponent,
+    LifeTotalDropzoneComponent
 ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
-  viewProviders: [provideIcons({ bootstrapGearFill })],
+  viewProviders: [provideIcons({ 
+    bootstrapGearFill,
+    gameCrown,
+    gameHealthNormal,
+    gamePoisonBottle,
+    gamePowerLightning,
+    gameBrokenHeart,
+    gameDiceSixFacesFive,
+    gameFairyWand,
+    gameTorch,
+    gameModernCity,
+    gameSunCloud,
+    gameDeathSkull,
+    gameRadioactive,
+    gameHearts
+  })],
 })
 export class UserStreamComponent {
   @Input() player!: IPlayer;
@@ -56,6 +73,9 @@ export class UserStreamComponent {
   @Output() reportPlayerEvent: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
+  @ViewChildren(LifeTotalComponent) lifeTotalComponents!: QueryList<LifeTotalComponent>;
+
+  magicLifeTotalComponent!:LifeTotalComponent; 
 
   private subscriptions: Subscription = new Subscription();
   showCommanderDamage: boolean = true;
@@ -70,6 +90,7 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification: boolean = false;
   boundingBox: any;
+  
 
   constructor(
     private webRTC: WebRTCService,
@@ -144,6 +165,16 @@ export class UserStreamComponent {
     }
 
     this.setFlip();
+
+    //so we dont get a ngAfter change error
+    setTimeout(() => {
+      this.lifeTotalComponents.forEach(child => {
+      if(child.id == 'magicLifeTotal'){
+        this.magicLifeTotalComponent = child;
+      }
+    });
+    }, 100);
+    
   }
 
   initLocalStream() {

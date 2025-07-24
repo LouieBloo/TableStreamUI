@@ -1,0 +1,46 @@
+<div class="relative transition-all duration-300 ease-in-out" (transitionend)="onTransitionEnd()" [ngClass]="{
+      'h-0 opacity-0 pointer-events-none': dropZoneHidden,
+      'hidden': dropZoneHidden && hideButtonLocation && hideButtonLocation == 'right',
+      'h-auto': !dropZoneHidden,
+      'opacity-0': !showDropZone,
+      'opacity-100': showDropZone
+    }">
+    <div class="transition-transform duration-300 ease-in-out " [ngClass]="{
+          'translate-x-0 h-full': showDropZone,
+          '-translate-x-full': !showDropZone,
+          'translate-x-full': !showDropZone && hideButtonLocation && hideButtonLocation == 'right'
+    }">
+        <div class="dropZone overflow-visible gap-x-1 min-h-10 min-w-36" id="{{id}}" cdkDropList
+            [cdkDropListOrientation]="isHorizontal ? 'horizontal' : 'vertical'" [cdkDropListData]="dropList"
+            [cdkDropListConnectedTo]="cdkDropListConnectedTo" (cdkDropListDropped)="drop($event)"
+            [ngClass]="{ 
+            'dropZoneBorder': isDragging, 
+            'flex-row': isHorizontal, 
+            'flex': isHorizontal,
+            'justify-end': justifyEnd,
+    }">
+            @for (item of dropList; track item) {
+            <div cdkDrag [cdkDragData]="item" class="overflow-visible mb-2 flex items-end" (cdkDragStarted)="onDragStart()"
+                (cdkDragEnded)="onDragEnd()"
+                [ngClass]="{'opacity-0': isHiddenFunction(item.title), 'pointer-events-none': isHiddenFunction(item.title), 'h-0':isHiddenFunction(item.title),  'mb-1': !isHorizontal, 'mb-2': isHorizontal, 'justify-end': justifyEnd}">
+                <div *ngIf="item.title == 'Blank'" class="w-36">
+
+                </div>
+                <app-property-counter *ngIf="item.title != 'Blank'" [editable]="editable" [title]="item.title" [iconClass]="item.iconClass"
+                    [iconColor]="item.iconColor" [total]="totalFunction(item.title)"
+                    [modifyCallback]="modifyCallbackFunction(item.title)">
+                </app-property-counter>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div *ngIf="showCollapseButton" type="button" class="hoverContainer" [ngClass]="{'flex': hideButtonLocation == 'right', 'justify-end': hideButtonLocation == 'right'}">
+    <button  (click)="toggleTopBar()" class="text-md text-white hover:text-yellow-400">
+        <div *ngIf="showDropZone" class="flex items-center"><ng-icon class="text-xl"
+            name="{{hideButtonLocation == 'right' ? 'bootstrapChevronDoubleRight' : 'bootstrapChevronDoubleLeft'}}"></ng-icon></div>
+        <div *ngIf="!showDropZone" class="flex items-center"><ng-icon class="text-xl"
+            name="{{hideButtonLocation == 'right' ? 'bootstrapChevronDoubleLeft' : 'bootstrapChevronDoubleRight'}}"></ng-icon></div>
+    </button>
+</div>

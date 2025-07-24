@@ -217,8 +217,10 @@ export class HomeComponent {
       return "mana-vault"
     } else if (this.player.gameType == GameType.MTGPauperCommander) {
       return "pauper"
-    } else if (this.player.gameType == GameType.YugiohStandard || this.player.gameType == GameType.YugiohDomain) {
+    } else if (this.player.gameType == GameType.YugiohStandard) {
       return "yugioh"
+    } else if(this.player.gameType == GameType.YugiohDomain){
+      return "yugioh-domain"
     }
 
     return "magic"
