@@ -1,12 +1,12 @@
 <div class="flex flex-col pt-1 items-center">
 
-  <div class="flex justify-center " *ngIf="player.isMonarch || player.hasInitiative">
-    <div *ngIf="player.isMonarch" appTooltip="Take The Monarch" [tooltipDirection]="'bottom'">
+  <div class="flex justify-center z-10" *ngIf="player.isMonarch || player.hasInitiative">
+    <div *ngIf="player.isMonarch" appTooltip="Take The Monarch" [tooltipDirection]="'right'">
       <img src="crown.png" class="w-16 animate__animated animate__bounceInDown cursor-pointer"
         (click)="toggleMonarch()">
     </div>
 
-    <div *ngIf="player.hasInitiative" appTooltip="Take The Initiative" [tooltipDirection]="'bottom'">
+    <div *ngIf="player.hasInitiative" appTooltip="Take The Initiative" [tooltipDirection]="'right'">
       <img src="initiative.png" class="w-16 animate__animated animate__bounceIn cursor-pointer"
         (click)="toggleInitiative()">
     </div>
