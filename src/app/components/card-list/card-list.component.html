@@ -79,7 +79,7 @@
         <div class="absolute inset-x-0 bottom-0 top-0 overflow-y-auto" id="scrollableDiv">
 
             @if(sharedCards && sharedCards.length > 0){
-                <app-card [card]="sharedCards[0]" (deleteClicked)="deleteCardFromSearchHistory(sharedCards[0])" [maximumRightMargin]="260" ></app-card>
+                <app-card [card]="sharedCards[0]" (deleteClicked)="deleteCardFromSearchHistory(sharedCards[0])" [maximumRightMargin]="260" [allGuesses]="sharedCards[0].allGuesses" ></app-card>
             }
 
             <div class="flex justify-center" *ngIf="sharedCards != null && sharedCards.length > 1">

@@ -1,19 +1,21 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
-import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-card',
   standalone: true,
-  imports: [NgIf, NgClass, DecimalPipe, NgStyle],
+  imports: [NgIf, NgFor, NgClass, DecimalPipe, NgStyle],
   templateUrl: './card.component.html',
   styleUrl: './card.component.css'
 })
 export class CardComponent {
   @Input() card!:IPlayingCard | null;
+  @Input() allGuesses!:IPlayingCard[] | undefined;
   @Input() showPopup:boolean = true;
   @Input() showPurchaseInfo:boolean = true;
+  @Input() showMatchConfidence: boolean = true;
   @Input() maximumRightMargin:number = 0;
   @Input() hoverMinDistance:number = 50;
 
@@ -23,6 +25,7 @@ export class CardComponent {
 
   flipped:boolean = false;
   loadingCard:boolean = true;
+  showGuesses: boolean = false;
 
   imageUrl = ()=>{
     if(!this.card){return "";}
@@ -80,6 +83,11 @@ export class CardComponent {
 
   flipImage = ()=>{
     this.flipped = !this.flipped;
+  }
+
+  toggleGuesses(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showGuesses = !this.showGuesses;
   }
 
   onImageLoad(): void {

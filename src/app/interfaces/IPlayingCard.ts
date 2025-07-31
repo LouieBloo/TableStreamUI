@@ -50,7 +50,8 @@ export interface IPlayingCard {
     digital: boolean;                   // Whether the card is available digitally (MTGO)
     classificationConfidence: number;
     castAmount?:number;
-    card_faces?:IPlayingCard[]
+    card_faces?:IPlayingCard[];
+    allGuesses?:IPlayingCard[];
   }
   
 export interface Token{

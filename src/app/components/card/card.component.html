@@ -1,30 +1,35 @@
-<div class="relative group inline-block">
-  <!-- Card content (e.g., card name, image, etc.) -->
-  <div class="cursor-pointer" (click)="flipImage()" (mouseenter)="onMouseEnter($event)">
-    <div class="">
-      <!-- <h2 class="card-title">{{card?.name}}</h2> -->
-      <div *ngIf="loadingCard" class="cardLoad">
-        <p class="text-center">Loading image...</p>
-      </div>
-      <div *ngIf="hasDeleteHandler" class="absolute right-0 bg-slate-900 hidden group-hover:block"><button type="button" class="text-white pl-1 pr-1" (click)="onDeleteClicked()">✕</button></div>
-      <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl" (load)="onImageLoad()" [ngClass]="{'hidden': loadingCard}">
-      <div id="purchasePanel" *ngIf="showPurchaseButtons" class="absolute text-white bg-black bg-opacity-50">
-        <a [href]="tcgAffiliateLink" target="_blank" rel="noopener">Buy <span *ngIf="card?.prices?.usd">${{card?.prices?.usd}}</span></a>
-      </div>
-      <div *ngIf="card && card.classificationConfidence > 0" id="classificationMatch" class="absolute text-white bg-black bg-opacity-50">
-        {{ card.classificationConfidence * 100.0 | number : '1.2-2'}}% Match
-      </div>
-      <!-- <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl"> -->
-    </div>
-  </div>
-
-  <div *ngIf="showPopup" >
-    <!-- Popup content -->
-    <div class="cardHover hidden group-hover:block z-10" [ngStyle]="popupStyle" >
+<div class="inline-block">
+  <div class="relative group inline-block">
+    <!-- Card content (e.g., card name, image, etc.) -->
+    <div class="cursor-pointer" (click)="flipImage()" (mouseenter)="onMouseEnter($event)">
       <div class="">
-        <img [src]="imageUrl()" alt="Card Image" class="cardHoverImg w-full rounded-xl">
+        <!-- <h2 class="card-title">{{card?.name}}</h2> -->
+        <div *ngIf="loadingCard" class="cardLoad">
+          <p class="text-center">Loading image...</p>
+        </div>
+        <div *ngIf="hasDeleteHandler" class="absolute right-0 bg-slate-900 hidden group-hover:block"><button type="button" class="text-white pl-1 pr-1" (click)="onDeleteClicked()">✕</button></div>
+        <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl" (load)="onImageLoad()" [ngClass]="{'hidden': loadingCard}">
+        <div id="purchasePanel" *ngIf="showPurchaseButtons" class="absolute text-white bg-black bg-opacity-50">
+          <a [href]="tcgAffiliateLink" target="_blank" rel="noopener">Buy <span *ngIf="card?.prices?.usd">${{card?.prices?.usd}}</span></a>
+        </div>
+        <div *ngIf="card && card.classificationConfidence > 0 && showMatchConfidence" id="classificationMatch"
+            (click)="toggleGuesses($event)"
+            class="absolute text-white bg-black bg-opacity-50 flex items-center space-x-1 p-1 rounded-tr-md rounded-bl-md">
+            <span>{{ card.classificationConfidence * 100.0 | number : '1.2-2'}}% Match</span>
+        </div>
+        <!-- <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl"> -->
       </div>
     </div>
-  </div>
 
-</div>
+    <div *ngIf="showPopup" >
+      <!-- Popup content -->
+      <div class="cardHover hidden group-hover:block z-10" [ngStyle]="popupStyle" >
+        <div class="">
+          <img [src]="imageUrl()" alt="Card Image" class="cardHoverImg w-full rounded-xl">
+        </div>
+      </div>
+    </div>
+
+  </div>
+  
+</div>  

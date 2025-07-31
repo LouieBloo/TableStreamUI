@@ -468,7 +468,7 @@ export class UserStreamComponent {
                   (response:any) => {
                     this.ngZone.run(() => {
                       if(response && response.scryfall_data){
-                        this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence}});
+                        this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence, allGuesses: response.all_guesses}});
                         this.boundingBox = response.bounding_box;
                       }
                       this.loadingCardIdentification = false;
