@@ -14,8 +14,14 @@
         </div>
         <div *ngIf="card && card.classificationConfidence > 0 && showMatchConfidence" id="classificationMatch"
             (click)="toggleGuesses($event)"
-            class="absolute text-white bg-black bg-opacity-50 flex items-center space-x-1 p-1 rounded-tr-md rounded-bl-md">
+            class="absolute text-white bg-black bg-opacity-50 cursor-pointer flex items-center space-x-1 p-1 rounded-tr-md rounded-bl-md">
             <span>{{ card.classificationConfidence * 100.0 | number : '1.2-2'}}% Match</span>
+            <!-- Chevron Icon that rotates on click -->
+            <svg class="w-4 h-4 transition-transform duration-300" [ngClass]="{'rotate-180': showGuesses}"
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
         </div>
         <!-- <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl"> -->
       </div>
@@ -31,5 +37,17 @@
     </div>
 
   </div>
-  
+
+
+  <!-- It uses max-height for a smooth slide-down/up animation -->
+  <div *ngIf="allGuesses && allGuesses.length > 1" class="transition-all duration-500 ease-in-out overflow-hidden"
+    [style.max-height]="showGuesses && allGuesses && allGuesses.length > 0 ? '1000px' : '0px'">
+    <div class="mt-2 space-y-2">
+      <!-- Using slice to only show the next two guesses -->
+      <div *ngFor="let guess of allGuesses.slice(1)">
+        <!-- Recursive call to the component for each guess -->
+        <app-card [card]="guess" [showPopup]="true" [showMatchConfidence]="true" [maximumRightMargin]="260" ></app-card>
+      </div>
+    </div>
+  </div>
 </div>  
