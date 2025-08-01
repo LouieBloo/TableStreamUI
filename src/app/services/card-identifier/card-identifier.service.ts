@@ -19,7 +19,7 @@ export class CardIdentifierService {
     formData.append('y', y.toString());
     formData.append('roomId', this.gameService.room.id + "")
     formData.append('playerId', playerId)
-    formData.append('useV2', true + "")
+    formData.append('classifier', "CNN_V2")
 
     // Replace this with your backend API endpoint
     const backendUrl = environment.cardIdentifierUrl + '/classify';
