@@ -27,6 +27,7 @@ import { CommanderSideBarComponent } from "../../commander/commander-side-bar/co
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
 import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand, gameTorch, gameModernCity, gameSunCloud, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
+import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-classified-popup.component';
 
 @Component({
   selector: 'app-user-stream',
@@ -45,7 +46,8 @@ import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, game
     TimerComponent,
     BoundingBoxComponent,
     CommanderSideBarComponent,
-    LifeTotalDropzoneComponent
+    LifeTotalDropzoneComponent,
+    CardClassifiedPopupComponent
 ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
@@ -90,6 +92,10 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification: boolean = false;
   boundingBox: any;
+
+  classifiedCard: IPlayingCard | null = null;
+  popupPosition = { x: 0, y: 0 };
+  showCardPopup = false;
   
 
   constructor(
@@ -451,6 +457,8 @@ export class UserStreamComponent {
         context.translate(-canvas.width, -canvas.height); // Move the context back to the origin after flipping
       }
 
+      this.dismissCardPopup();
+
       // Draw the current frame of the video onto the canvas
       context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
@@ -468,7 +476,9 @@ export class UserStreamComponent {
                   (response:any) => {
                     this.ngZone.run(() => {
                       if(response && response.scryfall_data){
-                        this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: {...response.scryfall_data, classificationConfidence: response.classification_confidence}});
+                        this.classifiedCard = { ...response.scryfall_data, classificationConfidence: response.classification_confidence };
+                        this.popupPosition = { x: event.clientX, y: event.clientY}; 
+                        this.showCardPopup = true; // This will make the popup appear
                         this.boundingBox = response.bounding_box;
                       }
                       this.loadingCardIdentification = false;
@@ -490,5 +500,23 @@ export class UserStreamComponent {
         1.0
       );
     }
+  }
+
+  /**
+   * Handles the (share) event emitted from the card popup.
+   * @param card The card data to be shared.
+   */
+  shareCard(card: IPlayingCard) {
+    this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: card});
+    this.dismissCardPopup();
+  }
+
+  /**
+   * Hides the popup and clears its data.
+   * Can be called from the (dismiss) event or manually.
+   */
+  dismissCardPopup() {
+    this.showCardPopup = false;
+    this.classifiedCard = null;
   }
 }
