@@ -1,8 +1,12 @@
 <div *ngIf="card" 
-     class="w-64 bg-slate-800 rounded-xl shadow-2xl p-2 flex flex-col gap-2 border border-white/10">
+     class="w-64 bg-slate-800 rounded-xl shadow-2xl p-2 flex flex-col border border-white/10">
 
   <!-- Renders your existing card component -->
   <app-card [card]="card" [showPopup]="false" [hoverMinDistance]="130"></app-card>
+
+  <div *ngIf="card && card.classificationConfidence < .5" class="mb-2">
+    <p class="text-sm text-pop">Low confidence. Try scanning again or adjusting the card so its right side up</p>
+  </div>
 
   <!-- Container for the action buttons -->
   <div class="flex justify-between">
