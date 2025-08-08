@@ -56,5 +56,6 @@ export enum PlayerProperties{
     sharingImages,
     commanderCastAmount,
     initiative,
-    radiationTotal
+    radiationTotal,
+    isAdmin
 }

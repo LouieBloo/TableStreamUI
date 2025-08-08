@@ -5,7 +5,6 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { InputService } from '../../services/input/input.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { WebRTCService } from '../../services/webRTC/web-rtc.service';
-import { PropertyCounterComponent } from '../property-counter/property-counter.component';
 import { Subscription } from 'rxjs';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 import { GameService } from '../../services/game/game.service';
@@ -13,13 +12,12 @@ import { IPlayer, PlayerProperties } from '../../interfaces/IPlayer';
 import { GameEvent, GameProperties, IModifyGameProperty, IModifyPlayerProperty } from '../../interfaces/IGame';
 import { gameBrokenHeart, gameCrown, gameDiceSixFacesFive, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameFairyWand, gameModernCity, gameSunCloud, gameTorch, gameDeathSkull, gameRadioactive, gameHearts, gameEyeTarget } from '@ng-icons/game-icons';
 import { FormsModule } from '@angular/forms';
-import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { LifeTotalDropzoneComponent } from './life-total-dropzone/life-total-dropzone.component';
 
 @Component({
   selector: 'app-life-total',
   standalone: true,
-  imports: [NgClass, NgIf, TitleCasePipe, PropertyCounterComponent, LifeTotalDropzoneComponent, TooltipDirective, NgIcon,FormsModule, CdkDrag, CdkDropList],
+  imports: [NgClass, NgIf, TitleCasePipe, LifeTotalDropzoneComponent, TooltipDirective, NgIcon,FormsModule],
   templateUrl: './life-total.component.html',
   styleUrl: './life-total.component.css',
   viewProviders: [provideIcons({

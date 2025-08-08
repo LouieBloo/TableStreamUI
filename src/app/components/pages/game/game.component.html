@@ -119,7 +119,7 @@
     </div>
 
     <app-report-modal></app-report-modal>
-    <app-sound-effect-modal [localPlayer]="localPlayer"></app-sound-effect-modal>
+    <app-sound-effect-modal *ngIf="localPlayer" [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>
