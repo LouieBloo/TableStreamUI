@@ -6,7 +6,6 @@ import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/IPlayer';
 import { GameEvent, IGameEvent, IModifyPlayerProperty, LocalGameEvent } from '../../../interfaces/IGame';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf } from '@angular/common';
-import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 import { GameService } from '../../../services/game/game.service';
 import { SetCommanderComponent } from '../../commander/set-commander/set-commander.component';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
@@ -24,7 +23,6 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
 import { CommanderSideBarComponent } from "../../commander/commander-side-bar/commander-side-bar.component";
-import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
 import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand, gameTorch, gameModernCity, gameSunCloud, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
 import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-classified-popup.component';
@@ -38,7 +36,6 @@ import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-c
     NgClass,
     NgIf,
     CommonModule,
-    PropertyCounterComponent,
     SetCommanderComponent,
     TooltipDirective,
     CoinFlipperComponent,
@@ -293,6 +290,18 @@ export class UserStreamComponent {
       remoteStream.getAudioTracks().forEach((track) => (track.enabled = true));
       this.muted = false;
     }
+  }
+
+  makeAdmin = (player: IPlayer) => {
+    const payload: IModifyPlayerProperty = {
+      property: PlayerProperties.isAdmin,
+      value: player.id
+    }
+    this.webRTC.sendGameEvent({
+      event: GameEvent.ModifyPlayerProperty,
+      payload: payload,
+    });
+    this.alertService.addAlert("success","Admin given to " + player.name);
   }
 
   modifyLifeTotal = (amount: number) => {

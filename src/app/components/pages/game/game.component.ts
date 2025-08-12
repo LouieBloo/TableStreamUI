@@ -19,7 +19,6 @@ import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-mo
 import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
 import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { TokenModalComponent } from '../../modals/token-modal/token-modal.component';
-import { TimerComponent } from '../../timer/timer.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
@@ -49,7 +48,6 @@ import { ReportUserModalComponent } from '../../modals/report-user-modal/report-
     PlayerTurnOrderModalComponent,
     CardTokenComponent,
     TokenModalComponent,
-    TimerComponent,
     DonationButtonComponent,
     DonationModalComponent,
     NgStyle,
@@ -74,11 +72,14 @@ export class GameComponent {
 
   private subscriptions: Subscription = new Subscription();
   localPlayerId: string = '';
-  localPlayer!: IPlayer;
   roomId!: string;
   showingHotkeys: boolean = false;
   focusedLayout: boolean = false;
   initialLoad: boolean = true;
+
+  get localPlayer() {
+    return this.gameService.getPlayerById(this.localPlayerId) ?? null
+  }
 
   constructor(
     private webRTC: WebRTCService,
@@ -195,7 +196,6 @@ export class GameComponent {
         });
 
         if (me.type == UserType.Player) {
-          this.localPlayer = me as IPlayer;
           this.addPlayer(me as IPlayer);
         }
 
@@ -228,7 +228,7 @@ export class GameComponent {
         this.gameService.sortPlayers();
         break;
       case GameEvent.ModifyPlayerProperty:
-        this.updatePlayers([event.response]);
+        this.updatePlayers(event.response);
         break;
       case GameEvent.ModifyGameProperty:
         this.gameService.room.game?.modifyProperty(event.response);
@@ -366,7 +366,7 @@ export class GameComponent {
   flipCoins = (coinsToFlip: number) => {
     this.webRTC.sendLocalGameEvent({
       event: LocalGameEvent.FlipCoins,
-      callingPlayer: this.localPlayer,
+      callingPlayer: this.localPlayer!,
       payload: { coinsToFlip: coinsToFlip },
     });
   };
