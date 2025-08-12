@@ -129,7 +129,7 @@
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
                 <li *ngIf="!localStream && gameService.room.allowPlayerKicking" (click)="kickPlayer(player.id)" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
-                <li *ngIf="!localStream && !player.admin" (click)="makeAdmin(player.id)" class="text-slate-800">
+                <li *ngIf="!localStream && !player.admin" (click)="makeAdmin(player)" class="text-slate-800">
                     <a>Make admin</a>
                 </li>
                 <!-- Local Stream Controls -->

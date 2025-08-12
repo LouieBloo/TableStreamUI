@@ -286,15 +286,16 @@ export class UserStreamComponent {
     }
   }
 
-  makeAdmin = (playerId: string) => {
+  makeAdmin = (player: IPlayer) => {
     const payload: IModifyPlayerProperty = {
       property: PlayerProperties.isAdmin,
-      value: playerId
+      value: player.id
     }
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyPlayerProperty,
       payload: payload,
     });
+    this.alertService.addAlert("success","Admin given to " + player.name);
   }
 
   modifyLifeTotal = (amount: number) => {
