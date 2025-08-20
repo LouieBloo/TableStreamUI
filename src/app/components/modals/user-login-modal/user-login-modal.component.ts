@@ -46,8 +46,8 @@ export class UserLoginModalComponent {
 
   ngOnInit(): void {
     this.subscriptions.add(
-      this.inputService.subscribe((userAction: UserInputAction) => {
-        if (userAction == UserInputAction.OpenUserLogin) {
+      this.inputService.subscribe(({ action, payload }: { action: UserInputAction; payload?: any }) => {
+        if (action == UserInputAction.OpenUserLogin) {
           this.open();
         }
       })

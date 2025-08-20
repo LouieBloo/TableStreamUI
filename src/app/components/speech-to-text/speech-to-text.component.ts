@@ -44,8 +44,8 @@ export class SpeechToTextComponent {
   ) { }
 
   ngOnInit(){
-    this.inputSubscription = this.inputService.subscribe((userAction: UserInputAction)=>{
-      if(userAction == UserInputAction.Transcribe){
+    this.inputSubscription = this.inputService.subscribe(({ action, payload }: { action: UserInputAction; payload?: any })=>{
+      if(action == UserInputAction.Transcribe){
         this.toggleRecording();
       }
     })

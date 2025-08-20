@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { filter, fromEvent, Subject } from 'rxjs';
+import { filter, fromEvent, Subject, Subscription } from 'rxjs';
 import { UserInputAction } from '../../interfaces/inputs';
 import { FormGroup } from '@angular/forms';
 
@@ -8,7 +8,7 @@ import { FormGroup } from '@angular/forms';
 })
 export class InputService {
 
-  private inputEventSubject = new Subject<UserInputAction>();
+  private inputEventSubject = new Subject<{ action: UserInputAction, payload?: any }>();
 
   constructor() {
     fromEvent<KeyboardEvent>(window, 'keydown')
@@ -19,31 +19,41 @@ export class InputService {
   }
 
   private handleKeyboardEvent(event: KeyboardEvent) {
+    // If user is typing letters/numbers/punctuation
+    if (event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) {
+      // Send StartTyping with the pressed key
+      this.inputEventSubject.next({
+        action: UserInputAction.StartTyping,
+        payload: event.key
+      });
+      return; // Don't process as hotkey
+    }
+
     //console.log(event.key)
     switch (event.key) {
       case ' ':
         event.preventDefault();
-        this.inputEventSubject.next(UserInputAction.PassTurn)
+        this.inputEventSubject.next({action: UserInputAction.PassTurn})
         break;
       case 'ArrowUp':
-        this.inputEventSubject.next(UserInputAction.ModifyHealth1)
+        this.inputEventSubject.next({action: UserInputAction.ModifyHealth1})
         break;
       case 'ArrowDown':
-        this.inputEventSubject.next(UserInputAction.ModifyHealthMinus1)
+        this.inputEventSubject.next({action: UserInputAction.ModifyHealthMinus1})
         break;
       case 'r':
-        this.inputEventSubject.next(UserInputAction.Transcribe)
+        this.inputEventSubject.next({action: UserInputAction.Transcribe})
         break;
       case 'q':
         if (event.ctrlKey || event.altKey) {
-          this.inputEventSubject.next(UserInputAction.JumpToSearch)
+          this.inputEventSubject.next({action: UserInputAction.JumpToSearch})
         }
         break;
     }
   }
 
-  public triggerEvent(action:UserInputAction){
-    this.inputEventSubject.next(action)
+  public triggerEvent(action:UserInputAction, payload?:any){
+    this.inputEventSubject.next({action: action, payload: payload})
   }
 
   private isInputFocused(): boolean {
@@ -62,27 +72,8 @@ export class InputService {
       !activeElement.classList.contains('drawer-toggle') ? true : false;
   }
 
-  // public triggerInput(input: string) {
-  //   switch (input) {
-  //     case ' ':
-  //       this.inputEventSubject.next(UserInputAction.PassTurn)
-  //       break;
-  //     case 'ArrowUp':
-  //       this.inputEventSubject.next(UserInputAction.ModifyHealth1)
-  //       break;
-  //     case 'ArrowDown':
-  //       this.inputEventSubject.next(UserInputAction.ModifyHealthMinus1)
-  //       break;
-  //     case 'ctrl-i':
-  //       this.inputEventSubject.next(UserInputAction.JumpToSearch)
-  //       break;
-  //   }
-  // }
-
-  subscribe(callback: (userInputAction: UserInputAction) => void) {
-    return this.inputEventSubject.asObservable().subscribe(event => {
-      callback(event);
-    });
+  public subscribe(callback: (value: { action: UserInputAction, payload?: any }) => void): Subscription {
+    return this.inputEventSubject.subscribe(callback);
   }
 
   clearServerErrors = (form: FormGroup) => {

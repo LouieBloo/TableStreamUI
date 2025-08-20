@@ -54,11 +54,13 @@
                     
                     <div *ngIf="showingHotkeys" class="mb-4">
                         <ul class="text-white ">
+                            
                             <li>(Space Bar) - pass turn</li>
                             <li>(Up Arrow) - add health</li>
                             <li>(Down Arrow) - remove health</li>
                             <li>(Ctrl + q) - search cards</li>
                             <li>(alt + q)  - search cards</li>
+                            <li>Typing will also auto search cards</li>
                             <li *ngIf="gameService.room?.game?.transcribeActive">(r) - voice to search cards</li>
                         </ul>
                     </div>
