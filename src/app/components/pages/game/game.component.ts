@@ -77,6 +77,7 @@ export class GameComponent {
   focusedLayout: boolean = false;
   initialLoad: boolean = true;
   showChatbox: boolean = true;
+  unreadMessages: number = 0;
 
   get localPlayer() {
     return this.gameService.getPlayerById(this.localPlayerId) ?? null
@@ -519,4 +520,7 @@ export class GameComponent {
     }
   }
 
+  handleUnreadCount(count: number): void {
+    this.unreadMessages = count;
+  }
 }

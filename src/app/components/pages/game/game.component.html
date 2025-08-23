@@ -49,9 +49,14 @@
                               <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
                             </ul>
                         </div>
-                        <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showChatbox ? 'Hide Chat' : 'Show Chat'}}</button>
 
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
+
+                        <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
+                            {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
+                            <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
+                        </button>
+                        
                     </div>
                     
                     <div *ngIf="showingHotkeys" class="mb-4">
@@ -68,7 +73,7 @@
                     </div>
                 </div>
 
-                <app-messenger [showChatbox]="showChatbox"></app-messenger>
+                <app-messenger [showChatbox]="showChatbox" (unreadCountChange)="handleUnreadCount($event)"></app-messenger>
 
                 <div class="justify-center mt-2 grid grid-cols-2">
                     <div class="flex flex-row">
