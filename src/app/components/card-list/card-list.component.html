@@ -3,7 +3,7 @@
         <button class="hidden" onclick="searchModal.showModal()" id="toggleModal">hidden</button>
         <div class="join flex w-full">
             <app-speech-to-text *ngIf="gameService.room.game?.transcribeActive"></app-speech-to-text>
-            <button class="btn btn-sm btn-outline text-white join-item rounded-none flex-1" (click)="openSearchModal()" appTooltip="Search cards (ctrl+q)" [tooltipDirection]="'bottom'">Search Cards</button>
+            <button class="btn btn-sm btn-outline text-white join-item rounded-none flex-1" (click)="openSearchModal()" appTooltip="Search cards (ctrl+q) or just start typing" [tooltipDirection]="'left'">Search Cards</button>
             <button class="btn btn-sm btn-outline text-white join-item rounded-none" (click)="clearSearchHistory()"><ng-icon name="bootstrapTrash3"></ng-icon></button>
         </div>
     </div>
@@ -18,7 +18,7 @@
             <p class="text-sm">Select to share</p>
 
             <form #searchForm="ngForm" (ngSubmit)="sendSearch()" class="mb-2">
-                <input (ngModelChange)="searchStringChanged($event)" type="text" id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="popupColors mt-1 p-2 w-full border rounded-md shadow-sm">
+                <input (ngModelChange)="searchStringChanged($event)" type="text" #cardInput id="cardInput" name="cardInput" [(ngModel)]="searchString" required class="popupColors mt-1 p-2 w-full border rounded-md shadow-sm">
                 <div class="flex flex-row">
                     <label *ngIf="gameService.isMagicGame()" class="mr-4 flex flex-row items-center cursor-pointer">
                         <span class="mr-1">Tokens only</span>
@@ -42,6 +42,8 @@
                 </div>
                 
             </form>
+
+            <p class="text-xs text-pop">Tip: Typing while in game will auto open the search window</p>
 
             <div *ngIf="!searching && searchResults && searchResults.length > 0">
                 <div class="flex flex-row">

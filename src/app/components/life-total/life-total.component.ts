@@ -89,10 +89,10 @@ export class LifeTotalComponent {
 
   ngAfterViewInit() {
     if (this.editable) {
-      this.inputSubscription = this.inputService.subscribe((userInputAction: UserInputAction) => {
-        if (userInputAction == UserInputAction.ModifyHealth1) {
+      this.inputSubscription = this.inputService.subscribe(({ action, payload }: { action: UserInputAction; payload?: any }) => {
+        if (action == UserInputAction.ModifyHealth1) {
           this.modifyCallback(1);
-        } else if (userInputAction == UserInputAction.ModifyHealthMinus1) {
+        } else if (action == UserInputAction.ModifyHealthMinus1) {
           this.modifyCallback(-1);
         }
       })

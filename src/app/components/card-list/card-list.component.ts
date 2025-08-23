@@ -29,7 +29,7 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
 })
 export class CardListComponent {
 
-  @ViewChild('cardInput') cardInput!: any;
+  @ViewChild('cardInput', { static: false }) cardInput!: ElementRef<HTMLInputElement>;
 
   private subscriptions: Subscription = new Subscription();
   cards:IPlayingCard[] = []
@@ -59,6 +59,17 @@ export class CardListComponent {
     this.adjustHeight();
   }
 
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscape(event: KeyboardEvent) {
+    const modal = document.getElementById('searchModal') as HTMLDialogElement;
+    if (modal && modal.open) {
+      // Blur the search input so typing will be detected again
+      if (this.cardInput?.nativeElement) {
+        this.cardInput.nativeElement.blur();
+      }
+    }
+  }
+
   ngAfterViewInit(): void {
     this.subscriptions.add(
       this.webRtc.gameEvent.subscribe((event:IGameEvent)=>{
@@ -70,11 +81,20 @@ export class CardListComponent {
   }
 
   ngOnInit(): void {
-    this.subscriptions.add(this.inputService.subscribe((userAction: UserInputAction)=>{
-      if(userAction == UserInputAction.JumpToSearch){
-        this.openSearchModal();
-      }
-    }))
+    this.subscriptions.add(
+      this.inputService.subscribe(({ action, payload }: { action: UserInputAction; payload?: any }) => {
+        if (action === UserInputAction.JumpToSearch) {
+          this.openSearchModal();
+        }
+        if (action === UserInputAction.StartTyping) {
+          const modal = document.getElementById('searchModal') as HTMLDialogElement;
+          // if (!modal || !modal.open) {
+            // Modal closed — open and start with first char
+            this.openSearchModal(payload);
+          // }
+        }
+      })
+    );
 
     this.subscribeToSearch();
   }
@@ -137,8 +157,8 @@ export class CardListComponent {
     scrollableDiv.style.height = `${windowHeight - topOffset}px`;
   }
 
-  openSearchModal = ()=>{
-    this.searchString = "";
+  openSearchModal = (initialText: string = '')=>{
+    this.searchString = initialText;
     this.includeOption = '';
     this.searchResults = [];
 
@@ -150,12 +170,22 @@ export class CardListComponent {
       dialogCheckbox.click();
     }
 
-    setTimeout(this.focusInput,100)
+    setTimeout(() => {
+      this.focusInput();
+      if (initialText) {
+        // Put cursor at end
+        const inputEl = document.getElementById('cardInput') as HTMLInputElement;
+        if (inputEl) {
+          inputEl.value = initialText;
+          this.searchStringChanged(initialText);
+        }
+      }
+    }, 0);
   }
 
-  focusInput(): void {
-    if (this.cardInput) {
-      this.cardInput.focus();
+  focusInput = ()=> {
+    if (this.cardInput?.nativeElement) {
+      this.cardInput.nativeElement.focus();
     }
   }
 

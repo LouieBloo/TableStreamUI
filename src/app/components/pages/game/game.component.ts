@@ -142,8 +142,8 @@ export class GameComponent {
   
   subscribeToPassTurn(){
     this.subscriptions.add(
-      this.inputService.subscribe((userAction: UserInputAction) => {
-        if (userAction == UserInputAction.PassTurn) {
+      this.inputService.subscribe(({ action, payload }: { action: UserInputAction; payload?: any }) => {
+        if (action == UserInputAction.PassTurn) {
           this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn });
         }
       })
