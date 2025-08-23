@@ -76,6 +76,8 @@ export class GameComponent {
   showingHotkeys: boolean = false;
   focusedLayout: boolean = false;
   initialLoad: boolean = true;
+  showChatbox: boolean = true;
+  unreadMessages: number = 0;
 
   get localPlayer() {
     return this.gameService.getPlayerById(this.localPlayerId) ?? null
@@ -516,5 +518,9 @@ export class GameComponent {
         this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
         break;
     }
+  }
+
+  handleUnreadCount(count: number): void {
+    this.unreadMessages = count;
   }
 }
