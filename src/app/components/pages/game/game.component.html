@@ -49,22 +49,31 @@
                               <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
                             </ul>
                         </div>
+
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
+
+                        <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
+                            {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
+                            <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
+                        </button>
+                        
                     </div>
                     
                     <div *ngIf="showingHotkeys" class="mb-4">
                         <ul class="text-white ">
+                            
                             <li>(Space Bar) - pass turn</li>
                             <li>(Up Arrow) - add health</li>
                             <li>(Down Arrow) - remove health</li>
                             <li>(Ctrl + q) - search cards</li>
                             <li>(alt + q)  - search cards</li>
+                            <li>Typing will also auto search cards</li>
                             <li *ngIf="gameService.room?.game?.transcribeActive">(r) - voice to search cards</li>
                         </ul>
                     </div>
                 </div>
 
-                <app-messenger></app-messenger>
+                <app-messenger [showChatbox]="showChatbox" (unreadCountChange)="handleUnreadCount($event)"></app-messenger>
 
                 <div class="justify-center mt-2 grid grid-cols-2">
                     <div class="flex flex-row">
@@ -119,7 +128,7 @@
     </div>
 
     <app-report-modal></app-report-modal>
-    <app-sound-effect-modal [localPlayer]="localPlayer"></app-sound-effect-modal>
+    <app-sound-effect-modal *ngIf="localPlayer" [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>

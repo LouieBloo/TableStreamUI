@@ -4,5 +4,6 @@ export enum UserInputAction{
     ModifyHealthMinus1,
     JumpToSearch,
     Transcribe,
-    OpenUserLogin
+    OpenUserLogin,
+    StartTyping
 }

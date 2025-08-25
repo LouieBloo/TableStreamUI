@@ -1,31 +1,39 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { IMessage } from '../../../interfaces/IMessage';
 import { FormsModule } from '@angular/forms';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { MessageComponent } from '../message/message.component';
 
 @Component({
   selector: 'app-messenger',
   standalone: true,
-  imports: [FormsModule, NgFor, MessageComponent],
+  imports: [FormsModule, NgFor, MessageComponent, NgIf],
   templateUrl: './messenger.component.html',
   styleUrl: './messenger.component.css'
 })
 export class MessengerComponent {
   messages: Array<IMessage> = [];
   newMessage: string = '';
+  unreadMessageCount:number = 0;
+  
+  @Input() showChatbox: boolean = true;
+  @Output() unreadCountChange = new EventEmitter<number>();
 
   @ViewChild('messageBox') private messageBox!: ElementRef;
 
   constructor(private webRtc: WebRTCService){}
 
-  // ngAfterViewChecked() {
-  //   this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;
-  // }
-
   ngOnInit(){
     this.webRtc.onMessage.push(this.messageReceived)
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['showChatbox'] && changes['showChatbox'].currentValue === true) {
+      this.unreadMessageCount = 0;
+      this.unreadCountChange.emit(this.unreadMessageCount);
+      setTimeout(()=>{this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;},100)
+    }
   }
 
   sendMessage(): void {
@@ -38,7 +46,13 @@ export class MessengerComponent {
   messageReceived = (newMessage: IMessage)=>{
     this.messages.push(newMessage);
 
-    setTimeout(()=>{this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;},100)
-    
+    if (!this.showChatbox) {
+      this.unreadMessageCount++;
+      this.unreadCountChange.emit(this.unreadMessageCount); 
+    }
+
+    if(this.showChatbox){
+      setTimeout(()=>{this.messageBox.nativeElement.scrollTop = this.messageBox.nativeElement.scrollHeight;},100)
+    }
   }
 }
