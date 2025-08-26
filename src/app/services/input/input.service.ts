@@ -20,7 +20,7 @@ export class InputService {
 
   private handleKeyboardEvent(event: KeyboardEvent) {
     // If user is typing letters/numbers/punctuation
-    if (event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) {
+    if (event.key.length === 1 && event.key !== ' ' && !event.ctrlKey && !event.altKey && !event.metaKey) {
       // Send StartTyping with the pressed key
       this.inputEventSubject.next({
         action: UserInputAction.StartTyping,
