@@ -151,10 +151,10 @@ export class CardListComponent {
   }
 
   private adjustHeight(): void {
-    const scrollableDiv = this.elRef.nativeElement.querySelector('#scrollableDiv');
-    const topOffset = scrollableDiv.getBoundingClientRect().top;
-    const windowHeight = window.innerHeight;
-    scrollableDiv.style.height = `${windowHeight - topOffset}px`;
+    // const scrollableDiv = this.elRef.nativeElement.querySelector('#scrollableDiv');
+    // const topOffset = scrollableDiv.getBoundingClientRect().top;
+    // const windowHeight = window.innerHeight;
+    // scrollableDiv.style.height = `${windowHeight - topOffset}px`;
   }
 
   openSearchModal = (initialText: string = '')=>{
@@ -209,7 +209,7 @@ export class CardListComponent {
 
     const closeModalButton = document.getElementById('closeModal');
     if (closeModalButton) {
-      closeModalButton.click();
+      //closeModalButton.click();
     }
   }
 
