@@ -2,7 +2,7 @@ import { NgClass, NgFor, NgIf, NgStyle, SlicePipe } from '@angular/common';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject, catchError, debounceTime, EMPTY, filter, of, Subject, Subscription, switchMap, tap } from 'rxjs';
-import { GameEvent, IGameEvent } from '../../interfaces/IGame';
+import { GameEvent, IGameEvent, LocalGameEvent } from '../../interfaces/IGame';
 import { UserInputAction } from '../../interfaces/inputs';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { GameService } from '../../services/game/game.service';
@@ -54,11 +54,6 @@ export class CardListComponent {
     private logger: LoggerService){
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize() {
-    this.adjustHeight();
-  }
-
   @HostListener('document:keydown.escape', ['$event'])
   onEscape(event: KeyboardEvent) {
     const modal = document.getElementById('searchModal') as HTMLDialogElement;
@@ -75,7 +70,6 @@ export class CardListComponent {
       this.webRtc.gameEvent.subscribe((event:IGameEvent)=>{
         if(event.event == GameEvent.ShareCard && event.response){
           this.sharedCards.unshift(event.response);
-          this.adjustHeight();
         }
     }));
   }
@@ -92,6 +86,20 @@ export class CardListComponent {
             // Modal closed — open and start with first char
             this.openSearchModal(payload);
           // }
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.webRtc.localGameEvent.subscribe((localGameEvent:IGameEvent)=>{
+        if (localGameEvent.event === LocalGameEvent.ShareCard) {
+          if(localGameEvent.payload.card){
+            if(localGameEvent.payload.sharePublic){
+              this.shareCardPublic(localGameEvent.payload.card);
+            }else{
+              this.shareCardPrivate(localGameEvent.payload.card);
+            }
+          }
         }
       })
     );
@@ -150,11 +158,13 @@ export class CardListComponent {
     this.searchSubject.next(value);
   }
 
-  private adjustHeight(): void {
-    // const scrollableDiv = this.elRef.nativeElement.querySelector('#scrollableDiv');
-    // const topOffset = scrollableDiv.getBoundingClientRect().top;
-    // const windowHeight = window.innerHeight;
-    // scrollableDiv.style.height = `${windowHeight - topOffset}px`;
+  selectCard(card: IPlayingCard) {
+    //this.selectedCard = this.selectedCard === card ? null : card;
+    card.selected = !card.selected;
+
+    if(this.currentCallback != null){
+      this.shareCard(false, true)
+    }
   }
 
   openSearchModal = (initialText: string = '')=>{
@@ -195,13 +205,17 @@ export class CardListComponent {
     this.cardBeingHovered = card;
   }
 
-  shareCard = (imageClicked:boolean)=>{
+  shareCard = (imageClicked:boolean, share:boolean = true)=>{
     //valid card
     if(!this.cardBeingHovered){return;}
     //since cards can have multipe faces if the user clicks on a double sided one we dont trigger the share
     if(imageClicked &&  (this.cardBeingHovered.card_faces && this.cardBeingHovered.card_faces.length > 1)){return;}
 
-    this.webRtc.sendGameEvent({event:GameEvent.ShareCard, payload: this.cardBeingHovered});
+    if(share){
+      this.shareCardPublic(this.cardBeingHovered);
+    }else{
+      this.shareCardPrivate(this.cardBeingHovered);
+    }
 
     if(this.currentCallback != null){
       this.currentCallback(this.cardBeingHovered);
@@ -209,8 +223,16 @@ export class CardListComponent {
 
     const closeModalButton = document.getElementById('closeModal');
     if (closeModalButton) {
-      //closeModalButton.click();
+      closeModalButton.click();
     }
+  }
+
+  shareCardPublic = (card:IPlayingCard)=>{
+    this.webRtc.sendGameEvent({event:GameEvent.ShareCard, payload: card});
+  }
+
+  shareCardPrivate = (card:IPlayingCard) => {
+    this.sharedCards.unshift(card);
   }
 
   clearSearchHistory = ()=>{

@@ -48,15 +48,25 @@
             <div *ngIf="!searching && searchResults && searchResults.length > 0">
                 <div class="flex flex-row">
                     <div class="grow" [ngClass]="{'overflow-hidden': !searchResults || searchResults.length <= 8, 'overflow-y-scroll': searchResults && searchResults.length > 8}" id="cardResults">
-                        <div  *ngFor="let card of searchResults"
-                                tabindex="0" 
-                                (mouseenter)="onCardHover(card)"
-                                (mouseleave)="onCardHover(null)"
-                                (focus)="onCardHover(card)" 
-                                (blur)="onCardHover(null)"
-                                (keydown.enter)="$event.preventDefault();shareCard(false)" 
-                                (click)="shareCard(false)" >
+                        <div *ngFor="let card of searchResults"
+                            tabindex="0"
+                            (mouseenter)="onCardHover(card)"
+                            (mouseleave)="onCardHover(null)"
+                            (focus)="onCardHover(card)"
+                            (blur)="onCardHover(null)"
+                            (keydown.enter)="$event.preventDefault();selectCard(card)"
+                            (click)="selectCard(card)"
+                            class="">
+
                             <app-card-list-item [card]="card"></app-card-list-item>
+
+                            <!-- Action buttons when this card is selected -->
+                            <div *ngIf="card.selected" class="flex ml-2.5 mr-2.5 mb-2">
+                                <button class="btn btn-xs btn-outline btn-action grow text-pop"
+                                        (click)="shareCard(false, true)">Share</button>
+                                <button class="btn btn-xs btn-outline btn-action grow text-white"
+                                        (click)="shareCard(false, false)">Save</button>
+                            </div>
                         </div>
                     </div>
                     <div class="max-w-64  ml-3">

@@ -35,7 +35,8 @@ export enum GameEvent{
 export enum LocalGameEvent{
     FlipCoins,
     PlayReaction,
-    RejoinGame 
+    RejoinGame,
+    ShareCard
 }
 
 

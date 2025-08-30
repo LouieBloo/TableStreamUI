@@ -10,25 +10,24 @@
 
   <!-- Container for the action buttons -->
   <div class="flex justify-between">
-    <!-- Share Button -->
     <button 
-      (click)="onShare()"
-      class="flex-grow rounded-none cursor-pointer 
-             transition-all duration-200 ease-in-out
-             btn btn-sm btn-outline text-pop
-             hover:-translate-y-0.5 hover:shadow-lg hover:bg-slate-600
-             active:translate-y-0 active:shadow-none ">
+      (click)="onShare(true)"
+      class="flex-grow rounded-none 
+             btn btn-sm btn-outline btn-action text-pop">
       Share
     </button>
+
+    <button 
+      (click)="onShare(false)"
+      class="flex-grow rounded-none 
+             btn btn-sm btn-outline btn-action text-white">
+      Save
+    </button>
     
-    <!-- Dismiss Button -->
     <button 
       (click)="onDismiss()"
-      class="flex-grow rounded-none cursor-pointer 
-             transition-all duration-200 ease-in-out
-             btn btn-sm btn-outline text-white
-             hover:-translate-y-0.5 hover:shadow-lg hover:bg-slate-600
-             active:translate-y-0 active:shadow-none">
+      class="flex-grow rounded-none 
+             btn btn-sm btn-outline btn-action text-white">
       Dismiss
     </button>
   </div>
