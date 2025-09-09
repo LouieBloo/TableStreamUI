@@ -17,6 +17,7 @@ export interface IRoom {
     reactionsEnabled?:boolean;
     allowPlayerKicking?:boolean;
     iceServerList?: any[];
+    history?: IRoomHistoryEvent[];
 }
 
 export interface PasswordCheckResponse {
@@ -27,4 +28,16 @@ export interface IKickPlayerResponse {
     kickedPlayer:IPlayer;
     players: IPlayer[];
     removedTokens: Token[];
+}
+
+export interface IRoomHistoryEvent {
+    createdAt: Date;
+    player: {
+        id: string;
+        name: string;
+    }
+    property?:string;
+    type?: string;
+    value?: any;
+    currentValue?:any;
 }

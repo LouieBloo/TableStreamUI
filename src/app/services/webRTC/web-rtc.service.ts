@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environment';
 import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent, LocalGameEvent } from '../../interfaces/IGame';
 import { IMessage } from '../../interfaces/IMessage';
 import { IUser, UserType } from '../../interfaces/IPlayer';
-import { IRoom } from '../../interfaces/IRoom';
+import { IRoom, IRoomHistoryEvent } from '../../interfaces/IRoom';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
 import { IVideoQualify } from '../../interfaces/IVideoQualify';
@@ -13,6 +13,7 @@ import { LocalStorageService } from '../local-storage/local-storage.service';
 import { Router } from '@angular/router';
 import { TwilioService } from '../twilio/twilio.service';
 import { UserService } from '../user/user.service';
+import { GameService } from '../game/game.service';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +57,8 @@ export class WebRTCService {
     private logger: LoggerService, 
     private localStorageService: LocalStorageService, 
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private gameService: GameService
   ) {
     
   }
@@ -345,6 +347,13 @@ export class WebRTCService {
     this.socket.on('message', this.handleMessage);
     this.socket.on('gameEvent', this.handleGameEvent);
     this.socket.on('errorResponse', this.handleErrorResponse);
+    this.socket.on('historyEvent', (historyEvent:IRoomHistoryEvent)=>{
+      console.log("HISTORY: ", historyEvent)
+      //handle history adding, probably should live somewhere else
+      if(this.gameService.room && this.gameService.room.history && historyEvent){
+        this.gameService.room.history.push(historyEvent);
+      }}
+    );
 
     this.remoteStreams = {};
     this.peerConnections = {};

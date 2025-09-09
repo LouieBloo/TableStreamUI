@@ -1,5 +1,6 @@
 import { IPlayer, PlayerProperties } from "./IPlayer";
 import { IPlayingCard } from "./IPlayingCard";
+import { IRoomHistoryEvent } from "./IRoom";
 
 export interface IGameEvent {
     callingPlayer?:IPlayer;

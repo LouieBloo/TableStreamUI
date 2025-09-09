@@ -36,6 +36,7 @@
                     <div class="justify-center mb-2 grid grid-cols-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
                         <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
+                        <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Game Log</button>
                         <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
                         <div class="relative inline-block dropdown">
                             <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none">
@@ -131,6 +132,7 @@
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>
     <app-report-user-modal></app-report-user-modal>
+    <app-game-log-modal></app-game-log-modal>
 
     <app-donation-modal></app-donation-modal>
     <div class="absolute bottom-3 left-3">
