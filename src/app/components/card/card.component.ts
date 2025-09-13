@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { DecimalPipe, NgClass, NgIf, NgStyle } from '@angular/common';
 import { environment } from '../../../environments/environment';
@@ -22,7 +22,14 @@ export class CardComponent {
   popupStyle: any = {};
 
   flipped:boolean = false;
+  canFlip:boolean = false;
   loadingCard:boolean = true;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['card']) {
+      this.canFlip = (this.card && this.card.card_faces && this.card.card_faces.length > 1) == true;
+    }
+  }
 
   imageUrl = ()=>{
     if(!this.card){return "";}
