@@ -35,6 +35,17 @@ export class GameLogModalComponent {
     }
   }
 
+  formatPropertyName(propertyName: string | undefined): string {
+    if (!propertyName) {
+      return '';
+    }
+    // Add a space before capital letters and convert to lowercase
+    return propertyName
+      .replace(/([A-Z])/g, ' $1')
+      .toLowerCase()
+      .trim();
+  }
+
   formatTime(dateString: Date): string {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });

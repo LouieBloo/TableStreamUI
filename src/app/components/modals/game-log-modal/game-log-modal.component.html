@@ -35,8 +35,8 @@
                     @case ('ModifyPlayerCommanderDamage') {
                     <p>
                         <span class="font-bold text-blue-400">{{ item.player.name }}</span> took
-                        <span class="font-bold text-yellow-400">{{ item.value.amount}} ({{item.value.total}})</span> took
-                        <span class="font-semibold text-purple-400">commander damage</span> from 
+                        <span class="font-bold text-yellow-400">{{ item.value.amount}} ({{item.value.total}})</span> 
+                        <span class="font-semibold text-purple-400"> commander damage</span> from 
                         <span class="font-bold text-blue-400">{{ item.value.damagingPlayer.name }}'s </span> 
                         <span class="font-bold text-green-400">{{ item.value.damagingPlayer.card.name}}</span> and is now at 
                         <span class="font-bold text-yellow-400">{{ item.value.lifeTotal}}</span>
@@ -45,10 +45,21 @@
                     }
                     @case ('ModifyPlayerProperty') {
                     <p>
-                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> changed
-                        <span class="font-semibold text-purple-400">{{ item.property }}</span> by
-                        <span class="font-bold" [ngClass]="item.value > 0 ? 'text-green-400' : 'text-red-400'">
-                            {{ item.value > 0 ? '+' : '' }}{{ item.value }} </span> <span class="font-bold text-white" *ngIf="item.currentValue">({{item.currentValue}})</span>.
+                        @switch(item.property) {
+                            @case ('commanderCastAmount'){
+                                <span class="font-bold text-blue-400">{{ item.player.name }}</span> changed
+                                <span class="font-bold text-green-400">{{ item.value.commander.name}}</span>
+                                <span class="font-semibold text-purple-400"> commander tax</span> by 
+                                <span class="font-bold" [ngClass]="item.value.amount > 0 ? 'text-green-400' : 'text-red-400'">
+                                    {{ item.value.amount > 0 ? '+' : '' }}{{ item.value.amount }} </span> <span class="font-bold text-white" *ngIf="item.currentValue">({{item.currentValue}})</span>.
+                            }
+                            @default {
+                                <span class="font-bold text-blue-400">{{ item.player.name }}</span> changed
+                                <span class="font-semibold text-purple-400">{{ formatPropertyName(item.property) }}</span> by
+                                <span class="font-bold" [ngClass]="item.value > 0 ? 'text-green-400' : 'text-red-400'">
+                                    {{ item.value > 0 ? '+' : '' }}{{ item.value }} </span> <span class="font-bold text-white" *ngIf="item.currentValue">({{item.currentValue}})</span>.
+                            }
+                        }
                     </p>
                     }
                     @case ('RandomizePlayerOrder') {
