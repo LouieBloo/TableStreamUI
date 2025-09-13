@@ -8,6 +8,11 @@
       </div>
       <div *ngIf="hasDeleteHandler" class="absolute right-0 bg-slate-900 hidden group-hover:block"><button type="button" class="text-white pl-1 pr-1" (click)="onDeleteClicked()">✕</button></div>
       <img [src]="imageUrl()" alt="Card Image" class="w-full rounded-xl" (load)="onImageLoad()" [ngClass]="{'hidden': loadingCard}">
+      <div *ngIf="canFlip" class="absolute inset-0 z-10 hidden items-center justify-center group-hover:flex pointer-events-none">
+        <span class="rounded-lg bg-black/70 px-4 py-2 text-white">
+          Flip
+        </span>
+      </div>
       <div id="purchasePanel" *ngIf="showPurchaseButtons" class="absolute text-white bg-black bg-opacity-50">
         <a [href]="tcgAffiliateLink" target="_blank" rel="noopener">Buy <span *ngIf="card?.prices?.usd">${{card?.prices?.usd}}</span></a>
       </div>

@@ -22,7 +22,7 @@ export class CardClassifiedPopupComponent {
   }
   private _visible = false;
 
-  @Output() share = new EventEmitter<IPlayingCard>();
+  @Output() share = new EventEmitter<{ card: IPlayingCard; sharePublic: boolean }>();
   @Output() dismiss = new EventEmitter<void>();
 
   private adjustedPosition = { x: 0, y: 0 };
@@ -185,9 +185,9 @@ export class CardClassifiedPopupComponent {
   }
 
  
-  onShare(): void {
+  onShare(sharePublic:boolean): void {
     if (this.card) {
-      this.share.emit(this.card);
+      this.share.emit({card: this.card, sharePublic});
     }
     this.onDismiss(); // Dismiss after sharing
   }

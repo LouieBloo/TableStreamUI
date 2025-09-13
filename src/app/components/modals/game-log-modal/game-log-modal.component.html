@@ -1,0 +1,132 @@
+<button class="hidden" onclick="gameLogModal.showModal()" id="gameLogToggle">toggle</button>
+<dialog id="gameLogModal" class="modal">
+
+    <div class="modal-box bg-slate-800 text-white absolute top-2 max-w-3xl">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeGameLog">✕</button>
+        </form>
+
+        <div class="flex justify-between items-center mb-4 mt-2">
+            <h3 class="text-lg font-bold mb-2">Game Log</h3>
+            <!-- <button (click)="copyHistory()"
+                class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg text-sm inline-flex items-center transition-colors">
+                <span>Copy</span>
+            </button> -->
+        </div>
+
+        <!-- Scrollable History Container -->
+        <div class="bg-slate-900 p-4 rounded-lg max-h-[60vh] overflow-y-auto text-sm" #historyContainer id="historyContainer">
+            <!-- History Items -->
+            @for (item of gameService.room.history; track item.createdAt) {
+            <div class="flex items-start p-2 mb-2 rounded-md hover:bg-slate-800 transition-colors">
+                <span class="text-slate-500 font-mono text-xs mr-4 mt-1 min-w-20">{{ formatTime(item.createdAt) }}</span>
+                <div class="flex-grow">
+                    @switch (item.type) {
+                    @case ('FlipCoins') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> flipped {{ item.value.length
+                        }} coin(s):
+                        <span class="font-semibold text-yellow-400">{{ item.value.join(', ') }}</span>.
+                    </p>
+                    }
+                    @case ('KickPlayer') {
+                    <p><span class="font-bold text-red-400">{{ item.value.name }}</span> was kicked from the game.</p>
+                    }
+                    @case ('ModifyPlayerCommanderDamage') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> took
+                        <span class="font-bold text-yellow-400">{{ item.value.amount}} ({{item.value.total}})</span> 
+                        <span class="font-semibold text-purple-400"> commander damage</span> from 
+                        <span class="font-bold text-blue-400">{{ item.value.damagingPlayer.name }}'s </span> 
+                        <span class="font-bold text-green-400">{{ item.value.damagingPlayer.card.name}}</span> and is now at 
+                        <span class="font-bold text-yellow-400">{{ item.value.lifeTotal}}</span>
+                        <span class="font-bold text-red-400"> health.</span>
+                    </p>
+                    }
+                    @case ('ModifyPlayerProperty') {
+                    <p>
+                        @switch(item.property) {
+                            @case ('commanderCastAmount'){
+                                <span class="font-bold text-blue-400">{{ item.player.name }}</span> changed
+                                <span class="font-bold text-green-400">{{ item.value.commander.name}}</span>
+                                <span class="font-semibold text-purple-400"> commander tax</span> by 
+                                <span class="font-bold" [ngClass]="item.value.amount > 0 ? 'text-green-400' : 'text-red-400'">
+                                    {{ item.value.amount > 0 ? '+' : '' }}{{ item.value.amount }} </span> <span class="font-bold text-white" *ngIf="item.currentValue">({{item.currentValue}})</span>.
+                            }
+                            @default {
+                                <span class="font-bold text-blue-400">{{ item.player.name }}</span> changed
+                                <span class="font-semibold text-purple-400">{{ formatPropertyName(item.property) }}</span> by
+                                <span class="font-bold" [ngClass]="item.value > 0 ? 'text-green-400' : 'text-red-400'">
+                                    {{ item.value > 0 ? '+' : '' }}{{ item.value }} </span> <span class="font-bold text-white" *ngIf="item.currentValue">({{item.currentValue}})</span>.
+                            }
+                        }
+                    </p>
+                    }
+                    @case ('RandomizePlayerOrder') {
+                    <p><span class="font-bold text-blue-400">{{ item.player.name }}</span> randomized the player order.
+                        <br> New order: <span class="text-slate-300">{{ item.value }}</span>
+                    </p>
+                    }
+                    @case ('ResetGame') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> reset the game.
+                    </p>
+                    }
+                    @case ('RollDice') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> rolled a <span class="font-semibold text-pop">D{{ item.property}}</span>:
+                        <span class="font-semibold text-yellow-400">{{ item.value.join(', ') }}</span>.
+                    </p>
+                    }
+                    @case ('PlayerAdded') {
+                    <p><span class="font-bold text-green-400">{{ item.value.name }}</span> joined the game.</p>
+                    }
+                    @case ('PlayerRemoved') {
+                    <p><span class="font-bold text-red-400">{{ item.value.name }}</span> left the game.</p>
+                    }
+                    @case ('SetCommander') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> set their 
+                        <span class="font-semibold text-purple-400">commander</span> to 
+                        <span class="font-bold text-green-400">{{ item.value }}</span>.
+                    </p>
+                    }
+                    @case ('SetPlayerTurnOrders') {
+                    <p><span class="font-bold text-blue-400">{{ item.player.name }}</span> set the player order. <br>
+                        New order: <span class="text-slate-300">{{ item.value }}</span></p>
+                    }
+                    @case ('StartGame') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> started the game.
+                    </p>
+                    }
+                    @case ('ToggleInitiative') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> toggled
+                        <span class="font-semibold text-purple-400">initiative</span> to 
+                        <span class="font-bold" [ngClass]="item.value == true ? 'text-green-400' : 'text-red-400'">{{ item.value }}</span>.
+                    </p>
+                    }
+                    @case ('ToggleMonarch') {
+                    <p>
+                        <span class="font-bold text-blue-400">{{ item.player.name }}</span> toggled
+                        <span class="font-semibold text-purple-400">monarch</span> to 
+                        <span class="font-bold" [ngClass]="item.value == true ? 'text-green-400' : 'text-red-400'">{{ item.value }}</span>.
+                    </p>
+                    }
+                    @default {
+                    <p class="text-slate-400">Unhandled event type: {{ item.type }}</p>
+                    }
+                    }
+                </div>
+            </div>
+            } @empty {
+            <div class="text-slate-500 text-center p-4">No game history yet.</div>
+            }
+        </div>
+
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>

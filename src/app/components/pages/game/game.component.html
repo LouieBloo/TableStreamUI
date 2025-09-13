@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <div class="flex flex-col p-1  min-w-64 max-w-64 pl-2 pr-2 bg-slate-900 bgTransition" [ngClass]="{'bgDay': gameService.isDay}">
+            <div class="flex flex-col p-1 h-screen  min-w-64 max-w-64 pl-2 pr-2 bg-slate-900 bgTransition" [ngClass]="{'bgDay': gameService.isDay}">
                 <div class="">
 
                     <app-sidebar-game-info></app-sidebar-game-info>
@@ -36,6 +36,7 @@
                     <div class="justify-center mb-2 grid grid-cols-2">
                         <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
                         <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
+                        <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Game Log</button>
                         <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
                         <div class="relative inline-block dropdown">
                             <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none">
@@ -108,9 +109,7 @@
                     <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
                 </div>
 
-                <div class="mt-2">
-                    <app-card-list></app-card-list>
-                </div>
+                <app-card-list class="flex-1 min-h-0"></app-card-list>
                 
             </div>
             
@@ -133,6 +132,7 @@
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>
     <app-report-user-modal></app-report-user-modal>
+    <app-game-log-modal></app-game-log-modal>
 
     <app-donation-modal></app-donation-modal>
     <div class="absolute bottom-3 left-3">

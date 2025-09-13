@@ -515,8 +515,8 @@ export class UserStreamComponent {
    * Handles the (share) event emitted from the card popup.
    * @param card The card data to be shared.
    */
-  shareCard(card: IPlayingCard) {
-    this.webRTC.sendGameEvent({event:GameEvent.ShareCard, payload: card});
+  shareCard = ({ card, sharePublic }: { card: IPlayingCard, sharePublic: boolean }) => {
+    this.webRTC.sendLocalGameEvent({event:LocalGameEvent.ShareCard, payload: {card, sharePublic }});
     this.dismissCardPopup();
   }
 
