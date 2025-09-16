@@ -65,6 +65,16 @@ export class CardTokenComponent implements OnInit {
     );
   }
 
+  modifyPower(increment: number){
+    this.token.power_mod += increment
+    this.updateToken();
+  }
+
+  modifyToughness(increment: number){
+    this.token.toughness_mod += increment
+    this.updateToken();
+  }
+
   ngOnDestroy(){
     this.clearMouseListeners();
     this.subscriptions.unsubscribe();

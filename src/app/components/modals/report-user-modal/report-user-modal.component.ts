@@ -4,14 +4,14 @@ import { IReportUserPayload } from '../../../interfaces/IUser';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { LoggerService } from '../../../services/logger/logger.service';
 import { UserService } from '../../../services/user/user.service';
-import { CommonModule, NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent } from '../../../interfaces/IGame';
 
 @Component({
   selector: 'app-report-user-modal',
   standalone: true,
-  imports: [NgClass, NgIf, FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [NgIf, FormsModule, CommonModule, ReactiveFormsModule],
   templateUrl: './report-user-modal.component.html',
   styleUrl: './report-user-modal.component.css'
 })
