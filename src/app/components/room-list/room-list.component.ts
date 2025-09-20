@@ -11,11 +11,12 @@ import { TimerComponent } from '../timer/timer.component';
 import { UserService } from '../../services/user/user.service';
 import { UserInputAction } from '../../interfaces/inputs';
 import { InputService } from '../../services/input/input.service';
+import { HomeAnalyticComponent } from '../home-analytic/home-analytic.component';
 
 @Component({
   selector: 'app-room-list',
   standalone: true,
-  imports: [NgIf, NgFor, NgIcon, TimerComponent],
+  imports: [NgIf, NgFor, NgIcon, TimerComponent, HomeAnalyticComponent],
   templateUrl: './room-list.component.html',
   styleUrl: './room-list.component.css',
   viewProviders: [provideIcons({ gameCombinationLock, bootstrapUnlock, bootstrapLock, bootstrapLockFill })]

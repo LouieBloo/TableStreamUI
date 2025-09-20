@@ -1,24 +1,22 @@
-import { CommonModule, NgClass, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Validators, FormBuilder, FormsModule, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { UserService } from '../../../services/user/user.service';
-import { Router, RouterLink, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { InputErrorComponent } from '../../forms/input-error/input-error.component';
 import { InputService } from '../../../services/input/input.service';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { Subscription } from 'rxjs';
-import { GameEvent } from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
-import { bootstrapDiscord, bootstrapInfoSquareFill, bootstrapPersonCircle, bootstrapPlayFill, bootstrapReddit, bootstrapShop } from '@ng-icons/bootstrap-icons';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { gameAxeSword, gameBoba, gameBookmarklet, gameCoffeeCup, gameDreadSkull, gameDrippingSword, gameDwarfFace, gameEvilBat, gameFairyWand, gameWingfoot, gameWitchFlight, gameWolfHowl, gameWoodenPegleg, gameWrappedHeart, gameWyvern, gameYinYang, gameZeusSword } from '@ng-icons/game-icons';
+import { bootstrapPersonCircle } from '@ng-icons/bootstrap-icons';
+import { provideIcons } from '@ng-icons/core';
 import { ProfileIconComponent } from '../../users/profile-icon/profile-icon.component';
 
 @Component({
   selector: 'app-user-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, RouterLink, NgIcon, ProfileIconComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, InputErrorComponent, ProfileIconComponent],
   templateUrl: './user-login-modal.component.html',
   styleUrl: './user-login-modal.component.css',
   viewProviders: [provideIcons({ 
