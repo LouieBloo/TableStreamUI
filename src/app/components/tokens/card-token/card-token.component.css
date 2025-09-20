@@ -11,9 +11,9 @@
 
 #buttonPanel{
     position: absolute;
-    bottom:-80px;
+    bottom:-30px;
 
-    font-size: 12px;
+    font-size: 20px;
     background-color: #00000099;
 }
 
@@ -42,5 +42,5 @@
 }
 
 .increment-btn {
-    font-size: 14px;
+    font-size: 27px;
 }
