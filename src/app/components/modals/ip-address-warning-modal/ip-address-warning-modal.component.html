@@ -3,7 +3,7 @@
 
 <dialog id="ipAddressWarningModal" class="modal">
     <div class="modal-box top-2 bg-white">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onclick="ipAddressWarningModal.close()" id="closeipAddressingWarningModal" >✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 btn-action" onclick="ipAddressWarningModal.close()" id="closeipAddressingWarningModal" >✕</button>
             <div class="bg-white text-black">
                 <h2>Important Notice</h2>
                 <p><strong>Your IP Address May Be Exposed</strong></p>
@@ -19,8 +19,8 @@
                     By continuing to use this app, you acknowledge that you understand the potential privacy implications.
                 </p>
             </div>
-            <button (click)="iAgree()" class="w-full btn btn-neutral text-white py-2 px-4 rounded mt-3" id="iAgreeBtn" >I agree</button>
-            <button onclick="ipAddressWarningModal.close()" class="w-full btn btn-outline btn-ghost py-2 px-4 rounded mt-3" id="iAgreeBtn" >Take me back</button>
+            <button (click)="iAgree()" class="w-full btn btn-neutral text-white py-2 px-4 rounded mt-3 btn-action" id="iAgreeBtn" >I agree</button>
+            <button onclick="ipAddressWarningModal.close()" class="w-full btn btn-outline btn-ghost py-2 px-4 rounded mt-3 btn-action" id="iAgreeBtn" >Take me back</button>
     </div>
     <form method="dialog" class="modal-backdrop">
         <button>close</button>

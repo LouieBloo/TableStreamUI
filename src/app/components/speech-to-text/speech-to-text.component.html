@@ -1,5 +1,5 @@
 <div>
-    <button class="btn btn-sm btn-outline text-white join-item rounded-none" (click)="toggleRecording()" appTooltip="Speak to search cards (r)" [tooltipDirection]="'bottom'">
+    <button class="btn btn-sm btn-outline text-white join-item rounded-none btn-action" (click)="toggleRecording()" appTooltip="Speak to search cards (r)" [tooltipDirection]="'bottom'">
         <ng-icon *ngIf="status == 'IDLE'" name="bootstrapRecord" ></ng-icon>
         <ng-icon *ngIf="status == 'RECORDING'" name="bootstrapRecordFill" class="text-red-600"></ng-icon>
         <ng-icon *ngIf="status == 'PROCESSING'" name="bootstrapClockHistory" ></ng-icon>
