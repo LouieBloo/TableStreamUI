@@ -1,122 +1,103 @@
 <div class="drawer drawer-end">
-    <input id="my-drawer" type="checkbox" class="drawer-toggle" />
-
+  <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="w-screen h-screen flex flex-col drawer-content ">
-
-        <div class="flex flex-row flex-grow">
-           
-            <div id="userStreams" class="flex flex-wrap h-screen flex-grow">
-                <div
-                  *ngFor="let player of gameService.room.players; let i = index"
-                  class="bg-slate-800 bgTransition"
-                  [class.bgDayLight]="gameService.isDay"
-                  [style.order]="getOrder(i)"
-                  [ngStyle]="computeFlexStyles(i)"
-                >
-                  <app-user-stream
-                    [player]="player"
-                    [localStream]="player.id === localPlayerId"
-                    [focusedLayout]="focusedLayout"
-                    (reportPlayerEvent)="openReportUserModal($event)"
-                  ></app-user-stream>
-                </div>
+      <div class="flex flex-row flex-grow">
+        <div id="userStreams" class="flex flex-wrap h-screen flex-grow">
+          <div *ngFor="let player of gameService.room.players; let i = index"
+            class="bg-slate-800 bgTransition"
+            [class.bgDayLight]="gameService.isDay"
+            [style.order]="getOrder(i)"
+            [ngStyle]="computeFlexStyles(i)">
+              <app-user-stream
+                [player]="player"
+                [localStream]="player.id === localPlayerId"
+                [focusedLayout]="focusedLayout"
+                (reportPlayerEvent)="openReportUserModal($event)">
+              </app-user-stream>
             </div>
-
-            <div>
-                <div *ngFor="let token of gameService.room?.game?.tokens">
-                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayerId"></app-card-token>
-                </div>
+          </div>
+          <div>
+            <div *ngFor="let token of gameService.room?.game?.tokens">
+              <app-card-token [token]="token" [editable]="token.ownerId == localPlayerId"></app-card-token>
             </div>
-
-            <div class="flex flex-col p-1 h-screen  min-w-64 max-w-64 pl-2 pr-2 bg-slate-900 bgTransition" [ngClass]="{'bgDay': gameService.isDay}">
-                <div class="">
-
-                    <app-sidebar-game-info></app-sidebar-game-info>
-
-                    <div class="justify-center mb-2 grid grid-cols-2">
-                        <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
-                        <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
-                        <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Game Log</button>
-                        <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
-                        <div class="relative inline-block dropdown">
-                            <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none">
-                              Layout
-                            </button>
-                            <ul
-                              tabindex="0"
-                              class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10"
-                            >
+          </div>
+          <div *ngIf="!showSideBar" class="bg-slate-800 p-2">
+            <ng-icon (click)="showSideBar = true" class="text-xl text-white hover:text-yellow-400 cursor-pointer" name="bootstrapChevronDoubleLeft"></ng-icon>
+            <span *ngIf="unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
+          </div>
+          <div [hidden]="!showSideBar">
+             <div class="flex flex-col p-1 h-screen min-w-64 max-w-64 pl-2 pr-2 bg-slate-900 bgTransition" [ngClass]="{'bgDay': gameService.isDay}">
+               <div>
+                  <app-sidebar-game-info></app-sidebar-game-info>
+                  <div class="justify-center mb-2 grid grid-cols-2">
+                    <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
+                      <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
+                      <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Game Log</button>
+                      <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
+                      <div class="relative inline-block dropdown">
+                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none">Layout</button>
+                           <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10">
                               <li><a (click)="setLayout('DEFAULT')"><ng-icon *ngIf="!focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Default</a></li>
                               <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
                             </ul>
-                        </div>
-
-                        <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
-
-                        <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
-                            {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
-                            <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
-                        </button>
-                        
+                      </div>
+                      <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
+                      <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
+                        {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
+                          <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
+                      </button>
+                      <button (click)="showSideBar = !showSideBar" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">Hide sidebar</button>
                     </div>
-                    
                     <div *ngIf="showingHotkeys" class="mb-4">
-                        <ul class="text-white ">
-                            
-                            <li>(Space Bar) - pass turn</li>
-                            <li>(Up Arrow) - add health</li>
-                            <li>(Down Arrow) - remove health</li>
-                            <li>(Ctrl + q) - search cards</li>
-                            <li>(alt + q)  - search cards</li>
-                            <li>Typing will also auto search cards</li>
-                            <li *ngIf="gameService.room?.game?.transcribeActive">(r) - voice to search cards</li>
+                      <ul class="text-white">
+                        <li>(Space Bar) - pass turn</li>
+                        <li>(Up Arrow) - add health</li>
+                        <li>(Down Arrow) - remove health</li>
+                        <li>(Ctrl + q) - search cards</li>
+                        <li>(alt + q)  - search cards</li>
+                        <li>Typing will also auto search cards</li>
+                        <li *ngIf="gameService.room?.game?.transcribeActive">(r) - voice to search cards</li>
                         </ul>
                     </div>
-                </div>
-
-                <app-messenger [showChatbox]="showChatbox" (unreadCountChange)="handleUnreadCount($event)"></app-messenger>
-
-                <div class="justify-center mt-2 grid grid-cols-2">
+                  </div>
+                  <app-messenger [showChatbox]="showChatbox" [showSidebar]="showSideBar" (unreadCountChange)="handleUnreadCount($event)"></app-messenger>
+                  <div class="justify-center mt-2 grid grid-cols-2">
                     <div class="flex flex-row">
-                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
-                        <div class="dropdown dropdown-left text-white rounded-none " >
-                            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                                <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
-                            </div>
-                            <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                                <li (click)="flipCoins(2)"><a>2</a></li>
-                                <li (click)="flipCoins(3)"><a>3</a></li>
-                                <li (click)="flipCoins(4)"><a>4</a></li>
-                                <li (click)="flipCoins(5)"><a>5</a></li>
-                            </ul>
+                      <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
+                      <div class="dropdown dropdown-left text-white rounded-none0">
+                        <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+                          <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
                         </div>
+                        <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                          <li (click)="flipCoins(2)"><a>2</a></li>
+                          <li (click)="flipCoins(3)"><a>3</a></li>
+                          <li (click)="flipCoins(4)"><a>4</a></li>
+                          <li (click)="flipCoins(5)"><a>5</a></li>
+                        </ul>
+                      </div>
                     </div>
                     <div class="flex flex-row">
-                        <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Roll Dice</button>
-                        <div class="dropdown dropdown-left text-white rounded-none " >
-                            <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                                <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
-                            </div>
-                            <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                                <li (click)="rollDice(1,4)"><a>D4</a></li>
-                                <li (click)="rollDice(1,8)"><a>D8</a></li>
-                                <li (click)="rollDice(1,12)"><a>D12</a></li>
-                                <li (click)="rollDice(1,20)"><a>D20</a></li>
-                            </ul>
+                      <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Roll Dice</button>
+                      <div class="dropdown dropdown-left text-white rounded-none " >
+                        <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
+                          <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
                         </div>
+                        <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
+                          <li (click)="rollDice(1,4)"><a>D4</a></li>
+                          <li (click)="rollDice(1,8)"><a>D8</a></li>
+                          <li (click)="rollDice(1,12)"><a>D12</a></li>
+                          <li (click)="rollDice(1,20)"><a>D20</a></li>
+                        </ul>
+                      </div>
                     </div>
                     <button *ngIf="gameService.room.reactionsEnabled" (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
                     <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
+                  </div>
+                  <app-card-list class="flex-1 min-h-0"></app-card-list>
                 </div>
-
-                <app-card-list class="flex-1 min-h-0"></app-card-list>
-                
-            </div>
-            
+          </div>
         </div>
-        
     </div>
-
     <div class="drawer-side ">
         <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
         <ul class="menu popupColors min-h-full w-80 p-4">
@@ -141,17 +122,17 @@
 </div>
 
 <div *ngIf="!localStorageService.hasUserInteractedWithSite" id="splashScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
-    <div class="text-white text-center">
-        <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
-            Rejoin Game
-        </button>
-    </div>
+  <div class="text-white text-center">
+    <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
+      Rejoin Game
+    </button>
+  </div>
 </div>
 
 <div *ngIf="initialLoad" id="loadingScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
-    <div class="text-white text-center">
-        <p class="text-white w-full rounded-none text-4xl py-4 h-full">
-            Loading
-        </p>
-    </div>
+  <div class="text-white text-center">
+    <p class="text-white w-full rounded-none text-4xl py-4 h-full">
+        Loading
+    </p>
+  </div>
 </div>
