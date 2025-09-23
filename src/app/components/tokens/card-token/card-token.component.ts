@@ -6,14 +6,14 @@ import { CardComponent } from '../../card/card.component';
 import { ModalServiceService, ModalType } from '../../../services/modal/modal-service.service';
 import { bootstrapSearch, bootstrapArrowsMove, bootstrapTrash3Fill, bootstrapEyeSlashFill, bootstrapEyeFill, bootstrapCopy, bootstrapArrowClockwise } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { NgClass, NgIf } from '@angular/common';
+import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SettingsService } from '../../../services/settings/settings.service';
 
 @Component({
   selector: 'app-card-token',
   standalone: true,
-  imports: [CardComponent,NgIf,NgClass,NgIcon],
+  imports: [CommonModule, CardComponent,NgIf,NgClass,NgIcon],
   templateUrl: './card-token.component.html',
   styleUrl: './card-token.component.css',
   viewProviders: [provideIcons({ 
@@ -63,6 +63,16 @@ export class CardTokenComponent implements OnInit {
     this.subscriptions.add(
       this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
     );
+  }
+
+  modifyPower(increment: number){
+    this.token.power += increment
+    this.updateToken();
+  }
+
+  modifyToughness(increment: number){
+    this.token.toughness += increment
+    this.updateToken();
   }
 
   ngOnDestroy(){

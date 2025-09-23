@@ -1,16 +1,15 @@
 import { CdkDrag, CdkDropList, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { NgClass, NgIf, TitleCasePipe } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { PropertyCounterComponent } from '../../property-counter/property-counter.component';
 import { bootstrapChevronDoubleRight, bootstrapChevronDoubleLeft } from '@ng-icons/bootstrap-icons';
 
 @Component({
   selector: 'app-life-total-dropzone',
   standalone: true,
-  imports: [NgClass, NgIf, TitleCasePipe, PropertyCounterComponent, TooltipDirective, NgIcon, FormsModule, CdkDrag, CdkDropList],
+  imports: [NgClass, NgIf, PropertyCounterComponent, NgIcon, FormsModule, CdkDrag, CdkDropList],
   templateUrl: './life-total-dropzone.component.html',
   styleUrl: './life-total-dropzone.component.css',
   viewProviders: [provideIcons({

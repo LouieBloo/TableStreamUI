@@ -62,4 +62,6 @@ export interface Token{
   xPosition:number;
   yPosition:number;
   tapped?:boolean;
+  power: number;
+  toughness: number;
 }

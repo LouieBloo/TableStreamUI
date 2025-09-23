@@ -2,7 +2,6 @@
     position: absolute;
     right: 0px;
     top:0px;
-    /* background-color: #00000099; */
 }
 
 .arrowsMove ng-icon{
@@ -30,7 +29,7 @@
 
 .token{
     transition: transform 0.3s ease; /* Smooth rotation transition */
-    width: 114px;
+    width: 115px;
     height: 160px;
 }
 
@@ -39,5 +38,9 @@
 }
 
 .token.tapped {
-    transform: rotate(90deg); /* Rotate 90 degrees */
+    transform: rotate(90deg);
+}
+
+.increment-btn {
+    font-size: 27px;
 }
