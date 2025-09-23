@@ -22,10 +22,6 @@
       Players
       <span *ngIf="sortField === 'currentPlayers'">({{ sortDirectionSymbol }})</span>
     </div>
-    <!-- <div class="cursor-pointer  w-40 text-center" (click)="toggleSort('maxPlayers')">
-      Max Players
-      <span *ngIf="sortField === 'maxPlayers'">({{ sortDirection }})</span>
-    </div> -->
     <div class="flex flex-row gap-x-2">
       <button (click)="startListUpdater()" class="text-white p-2  hover:bg-slate-800 w-28">
         <span>Refresh: <app-timer [date]="countDownTimerDate" [countDown]="true"></app-timer></span>
@@ -66,4 +62,6 @@
       <div class="p-4 text-center">No Public Rooms. <button type="button" (click)="createGameClickedCallback()" class="text-pop hover:underline">Create One Now!</button></div>
     </div>
   </ng-template>
+<app-home-analytic></app-home-analytic>
+
 </div>
