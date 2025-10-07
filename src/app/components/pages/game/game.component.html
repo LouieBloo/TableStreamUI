@@ -42,11 +42,11 @@
                             </ul>
                       </div>
                       <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
+                      <button (click)="showSideBar = !showSideBar" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">Hide sidebar</button>
                       <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
                         {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
                           <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
                       </button>
-                      <button (click)="showSideBar = !showSideBar" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">Hide sidebar</button>
                     </div>
                     <div *ngIf="showingHotkeys" class="mb-4">
                       <ul class="text-white">
