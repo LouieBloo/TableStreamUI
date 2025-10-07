@@ -27,7 +27,7 @@ import { DonationButtonComponent } from '../../donations/donation-button/donatio
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 import { SettingsService } from '../../../services/settings/settings.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { bootstrapCheck } from '@ng-icons/bootstrap-icons';
+import { bootstrapCheck, bootstrapChevronDoubleLeft } from '@ng-icons/bootstrap-icons';
 import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
 import { ReportUserModalComponent } from '../../modals/report-user-modal/report-user-modal.component';
 import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-modal.component';
@@ -59,7 +59,7 @@ import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-moda
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
-  viewProviders: [provideIcons({ bootstrapCheck })]
+  viewProviders: [provideIcons({ bootstrapCheck, bootstrapChevronDoubleLeft })]
 })
 export class GameComponent {
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
@@ -81,6 +81,7 @@ export class GameComponent {
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
+  showSideBar: boolean = true;
 
   get localPlayer() {
     return this.gameService.getPlayerById(this.localPlayerId) ?? null
@@ -527,4 +528,5 @@ export class GameComponent {
   handleUnreadCount(count: number): void {
     this.unreadMessages = count;
   }
+
 }
