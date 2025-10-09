@@ -37,9 +37,9 @@
                       <div class="relative inline-block dropdown">
                         <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none btn-action">Layout</button>
                            <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10">
-                              <li><a (click)="setLayout('DEFAULT')"><ng-icon *ngIf="!focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Default</a></li>
-                              <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
-                            </ul>
+                              tabindex="0"
+                              class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10"
+                            >
                       </div>
                       <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
                       <button (click)="showSideBar = !showSideBar" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative btn-action">Hide sidebar</button>
@@ -47,6 +47,12 @@
                         {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
                           <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
                       </button>
+                            <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
+                        </button>
+                        
+                            <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
+                        </button>
+                        
                     </div>
                     <div *ngIf="showingHotkeys" class="mb-4">
                       <ul class="text-white">
@@ -57,12 +63,6 @@
                         <li>(alt + q)  - search cards</li>
                         <li>Typing will also auto search cards</li>
                         <li *ngIf="gameService.room?.game?.transcribeActive">(r) - voice to search cards</li>
-                        </ul>
-                    </div>
-                  </div>
-                  <app-messenger [showChatbox]="showChatbox" [showSidebar]="showSideBar" (unreadCountChange)="handleUnreadCount($event)"></app-messenger>
-                  <div class="justify-center mt-2 grid grid-cols-2">
-                    <div class="flex flex-row">
                       <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow btn-action" style="border-right: none;">Flip Coin</button>
                       <div class="dropdown dropdown-left text-white rounded-none">
                         <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
@@ -75,6 +75,12 @@
                           <li (click)="flipCoins(5)"><a>5</a></li>
                         </ul>
                       </div>
+                                <li (click)="flipCoins(5)"><a>5</a></li>
+                            </ul>
+                        </div>
+                                <li (click)="flipCoins(5)"><a>5</a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="flex flex-row">
                       <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow btn-action" style="border-right: none;">Roll Dice</button>
@@ -108,7 +114,7 @@
     </div>
 
     <app-report-modal></app-report-modal>
-    <app-sound-effect-modal *ngIf="localPlayer" [localPlayer]="localPlayer"></app-sound-effect-modal>
+    <app-sound-effect-modal *ngIf="localPlayer$ | async as localPlayer" [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>

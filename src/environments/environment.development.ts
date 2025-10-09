@@ -1,5 +1,5 @@
 export const environment = {
-    socketUrl: "http://localhost:3001",
+    socketUrl: "http://192.168.1.77:3001",
     cardIdentifierActive: true,
     cardIdentifierUrl: "http://localhost:3001",
     //cardIdentifierUrl: "https://api.table-stream.com",

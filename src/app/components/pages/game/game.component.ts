@@ -1,7 +1,7 @@
-import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, of, shareReplay, Subscription, tap } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
@@ -31,6 +31,7 @@ import { bootstrapCheck, bootstrapChevronDoubleLeft } from '@ng-icons/bootstrap-
 import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
 import { ReportUserModalComponent } from '../../modals/report-user-modal/report-user-modal.component';
 import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-modal.component';
+import { QrCodeComponent } from "../../qr-code/qr-code.component";
 
 @Component({
   selector: 'app-game',
@@ -55,7 +56,9 @@ import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-moda
     NgIcon,
     SidebarGameInfoComponent,
     ReportUserModalComponent,
-    GameLogModalComponent
+    GameLogModalComponent,
+    AsyncPipe,
+    QrCodeComponent
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -74,18 +77,14 @@ export class GameComponent {
   @ViewChild(GameLogModalComponent) gameLogModal!: GameLogModalComponent;
 
   private subscriptions: Subscription = new Subscription();
-  localPlayerId: string = '';
   roomId!: string;
   showingHotkeys: boolean = false;
   focusedLayout: boolean = false;
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
+  localPlayer$: Observable<IPlayer|null|undefined> = of(null);
   showSideBar: boolean = true;
-
-  get localPlayer() {
-    return this.gameService.getPlayerById(this.localPlayerId) ?? null
-  }
 
   constructor(
     private webRTC: WebRTCService,
@@ -102,6 +101,8 @@ export class GameComponent {
       players: [],
       messages: [],
     };
+
+    this.localPlayer$ = this.gameService.localPlayer$;
   }
 
   ngOnInit() {
@@ -181,17 +182,9 @@ export class GameComponent {
     );
   };
 
-
-  loadIntoGame(password: string|null) {
-    this.localStorageService.setPassword(password + "");
-
-    this.webRTC.joinRoom(
-      this.roomId,
-      password,
-      (me: IUser, roomName: string, room: IRoom) => {
-        this.gameService.setRoom(room);
+ onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
+        this.gameService.setRoom(room, me.id);
         this.passwordModal.close();
-        this.localPlayerId = me.id;
 
         this.localStorageService.setRoomId(room.id + "");
         this.localStorageService.setPlayerId(me.id);
@@ -213,6 +206,14 @@ export class GameComponent {
 
         this.initialLoad = false;
       }
+
+  loadIntoGame(password: string|null) {
+    this.localStorageService.setPassword(password + "");
+
+    this.webRTC.joinRoom(
+      this.roomId,
+      password,
+      this.onSuccessfulLoadIntoGame
     );
   }
 
@@ -370,10 +371,10 @@ export class GameComponent {
     this.router.navigate(['/join']);
   }
 
-  flipCoins = (coinsToFlip: number) => {
+  flipCoins = (coinsToFlip: number, player: IPlayer) => {
     this.webRTC.sendLocalGameEvent({
       event: LocalGameEvent.FlipCoins,
-      callingPlayer: this.localPlayer!,
+      callingPlayer: player!,
       payload: { coinsToFlip: coinsToFlip },
     });
   };

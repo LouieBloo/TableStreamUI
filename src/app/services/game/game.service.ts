@@ -10,7 +10,7 @@ import { MTGLegacy } from '../../classes/game/MTGLegacy';
 import { MTGVintage } from '../../classes/game/MTGVintage';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { PokemonStandard } from '../../classes/game/PokemonStandard';
 import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
 import { YugiohStandard } from '../../classes/game/YugiohStandard';
@@ -22,20 +22,31 @@ import { OncePiece } from '../../classes/game/OnePiece';
 })
 export class GameService {
   public room!: IRoom;
+  _localPlayer$ = new BehaviorSubject<IPlayer|null|undefined>(null);
+
+  get localPlayer$() {
+    return this._localPlayer$.asObservable();
+  }
 
   constructor(private http: HttpClient) {
   }
 
-  public setRoom(room:IRoom){
+  public setRoom(room:IRoom, localPlayerId: string){
     if(room.game?.gameType){
       let newGame = GameService.createGame(room.game?.gameType);
       room.game = Object.assign(newGame,room.game);
     }
 
     this.room = room;
+    this.setLocalPlayer(localPlayerId);
   }
 
-  public getPlayerById = (playerId:string):IPlayer | undefined=>{
+  public setLocalPlayer(localPlayerId: string) {
+    const localPlayer = this.getPlayerById(localPlayerId);
+    this._localPlayer$.next(localPlayer);
+  }
+
+  public getPlayerById = (playerId:string | null):IPlayer | undefined=>{
     if(this.room && this.room.players){
       return this.room.players.find(p=> p.id == playerId);
     }

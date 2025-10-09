@@ -18,6 +18,7 @@ import { UserService } from '../../../services/user/user.service';
 import { IRoom } from '../../../interfaces/IRoom';
 import { RoomListComponent } from '../../room-list/room-list.component';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -34,8 +35,8 @@ import { TooltipDirective } from '../../../directives/tooltip.directive';
     DonationButtonComponent,
     DonationModalComponent,
     RoomListComponent,
-    TooltipDirective
-  ],
+    TooltipDirective,
+],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
