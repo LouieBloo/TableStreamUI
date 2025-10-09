@@ -14,6 +14,7 @@ import { VerifyEmailComponent } from './components/pages/verify-email/verify-ema
 import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
 import { UserEditComponent } from './components/pages/user-edit/user-edit.component';
 import { DevDragComponent } from './components/pages/dev-drag/dev-drag.component';
+import { QrCodeComponent } from './components/qr-code/qr-code.component';
 
 export const routes: Routes = [
     {
@@ -58,5 +59,8 @@ export const routes: Routes = [
     },
     {
         path: 'dev-drag', component: DevDragComponent
+    },
+    {
+        path: 'remote-camera/:id', component: QrCodeComponent
     }
 ];

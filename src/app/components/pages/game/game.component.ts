@@ -180,14 +180,7 @@ export class GameComponent {
     );
   };
 
-
-  loadIntoGame(password: string|null) {
-    this.localStorageService.setPassword(password + "");
-
-    this.webRTC.joinRoom(
-      this.roomId,
-      password,
-      (me: IUser, roomName: string, room: IRoom) => {
+ onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
         this.gameService.setRoom(room);
         this.passwordModal.close();
         this.localPlayerId = me.id;
@@ -212,6 +205,14 @@ export class GameComponent {
 
         this.initialLoad = false;
       }
+
+  loadIntoGame(password: string|null) {
+    this.localStorageService.setPassword(password + "");
+
+    this.webRTC.joinRoom(
+      this.roomId,
+      password,
+      this.onSuccessfulLoadIntoGame
     );
   }
 
