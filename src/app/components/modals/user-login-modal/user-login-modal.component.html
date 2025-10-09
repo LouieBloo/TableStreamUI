@@ -2,7 +2,7 @@
     <button
       (click)="open()"
       type="button"
-      class="btn btn-outline h-10 rounded-full flex items-center justify-center text-white"
+      class="btn btn-outline h-10 rounded-full flex items-center justify-center text-white btn-action"
       [title]="userService.isLoggedIn ? userService.user?.name : 'Signup / Login'"
     >
       <ng-container *ngIf="userService.isLoggedIn; else loggedOut">
@@ -18,7 +18,7 @@
 
     <div class="absolute w-96  width shadow-md bg-slate-800 ">
         <form method="dialog" class="">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white"
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white btn-action"
                 id="closeUserLoginModal">✕</button>
         </form>
 
@@ -50,11 +50,11 @@
                         class="mt-1 p-2 w-full border rounded-md shadow-sm popupColors" />
                     <app-input-error [inputForm]="loginForm" [inputKey]="'password'"></app-input-error>
                 </div>
-                <button type="button" class="text-white mt-1 text-sm" (click)="onForgotPassword()">
+                <button type="button" class="text-white mt-1 text-sm btn-action" (click)="onForgotPassword()">
                     Forgot Password
                 </button>
                 <button type="submit"
-                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed btn-action"
                     [disabled]="loginForm.invalid">
                     Login
                 </button>
@@ -82,7 +82,7 @@
                 </div>
                 <button type="submit"
                     *ngIf="!showEmailVerificationMessage"
-                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+                    class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed btn-action"
                     [disabled]="signupForm.invalid">
                     Create Account
                 </button>

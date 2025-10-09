@@ -30,20 +30,20 @@
                <div>
                   <app-sidebar-game-info></app-sidebar-game-info>
                   <div class="justify-center mb-2 grid grid-cols-2">
-                    <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" >Game</label></div>
-                      <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Share Link</button>
-                      <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Game Log</button>
-                      <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Report Issue</button>
+                    <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action" >Game</label></div>
+                      <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Share Link</button>
+                      <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Game Log</button>
+                      <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Report Issue</button>
                       <div class="relative inline-block dropdown">
-                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none">Layout</button>
+                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none btn-action">Layout</button>
                            <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10">
                               <li><a (click)="setLayout('DEFAULT')"><ng-icon *ngIf="!focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Default</a></li>
                               <li><a (click)="setLayout('FOCUSED')"><ng-icon *ngIf="focusedLayout" class="mr-1" name="bootstrapCheck"></ng-icon> Focused</a></li>
                             </ul>
                       </div>
-                      <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
-                      <button (click)="showSideBar = !showSideBar" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">Hide sidebar</button>
-                      <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
+                      <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
+                      <button (click)="showSideBar = !showSideBar" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative btn-action">Hide sidebar</button>
+                      <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative btn-action">
                         {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
                           <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
                       </button>
@@ -63,10 +63,10 @@
                   <app-messenger [showChatbox]="showChatbox" [showSidebar]="showSideBar" (unreadCountChange)="handleUnreadCount($event)"></app-messenger>
                   <div class="justify-center mt-2 grid grid-cols-2">
                     <div class="flex flex-row">
-                      <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
-                      <div class="dropdown dropdown-left text-white rounded-none0">
+                      <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow btn-action" style="border-right: none;">Flip Coin</button>
+                      <div class="dropdown dropdown-left text-white rounded-none">
                         <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                          <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
+                          <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">+</button>
                         </div>
                         <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
                           <li (click)="flipCoins(2)"><a>2</a></li>
@@ -77,10 +77,10 @@
                       </div>
                     </div>
                     <div class="flex flex-row">
-                      <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Roll Dice</button>
+                      <button (click)="rollDice(1,6)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow btn-action" style="border-right: none;">Roll Dice</button>
                       <div class="dropdown dropdown-left text-white rounded-none " >
                         <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
-                          <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
+                          <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">+</button>
                         </div>
                         <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
                           <li (click)="rollDice(1,4)"><a>D4</a></li>
@@ -90,8 +90,8 @@
                         </ul>
                       </div>
                     </div>
-                    <button *ngIf="gameService.room.reactionsEnabled" (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Reactions</button>
-                    <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Tokens</button>
+                    <button *ngIf="gameService.room.reactionsEnabled" (click)="soundEffectModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Reactions</button>
+                    <button (click)="tokenModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Tokens</button>
                   </div>
                   <app-card-list class="flex-1 min-h-0"></app-card-list>
                 </div>
@@ -123,7 +123,7 @@
 
 <div *ngIf="!localStorageService.hasUserInteractedWithSite" id="splashScreen" class="w-full h-screen absolute top-0 z-[100] bg-slate-900 flex items-center justify-center">
   <div class="text-white text-center">
-    <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full">
+    <button type="button" (click)="rejoinGame()" class="btn btn-outline text-white w-full rounded-none text-4xl py-4 h-full btn-action">
       Rejoin Game
     </button>
   </div>

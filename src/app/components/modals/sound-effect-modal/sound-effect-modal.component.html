@@ -3,7 +3,7 @@
 
     <div class="modal-box bg-slate-800 text-white absolute top-2">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeSoundEffectModal">✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 btn-action" id="closeSoundEffectModal">✕</button>
         </form>
 
         <h3 class="text-lg font-bold">Play Sounds</h3>
@@ -13,7 +13,7 @@
             <h4 class="font-semibold text-md mb-2">{{ group }}</h4>
             <ul class="grid grid-cols-3">
                 <li *ngFor="let sound of soundList[group]" class="mb-2">
-                    <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none" (click)="playSoundLocal(sound)">{{sound.icon}} {{ sound.name }}</button>
+                    <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action" (click)="playSoundLocal(sound)">{{sound.icon}} {{ sound.name }}</button>
                 </li>
             </ul>
         </div>

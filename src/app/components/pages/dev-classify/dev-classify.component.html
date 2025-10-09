@@ -1,13 +1,13 @@
 <div *ngIf="!password.initialSubmit" class="text-white">
   <label for="password">Password</label>
   <input name="password" type="text" class="text-black bg-white" [(ngModel)]="password.value">
-  <button type="button" (click)="password.initialSubmit = true; loadImages()" class="btn ">Submit</button>
+  <button type="button" (click)="password.initialSubmit = true; loadImages()" class="btn btn-action">Submit</button>
 </div>
 <div *ngIf="password.initialSubmit" class="flex flex-col">
   <div>
     <div>
-      <button type="button" (click)="removeSeenImagesFromStorage()" class="btn btn-sm btn-danger mr-2">Clear Local Cache</button>
-      <button type="button" (click)="showHints = !showHints;" class="btn btn-sm btn-primary">Toggle Rules</button>
+      <button type="button" (click)="removeSeenImagesFromStorage()" class="btn btn-sm btn-danger mr-2 btn-action">Clear Local Cache</button>
+      <button type="button" (click)="showHints = !showHints;" class="btn btn-sm btn-primary btn-action">Toggle Rules</button>
     </div>
     <div *ngIf="showHints">
       <ul class="list-disc list-inside mb-4 text-white">
@@ -40,18 +40,18 @@
     <div class="p-4 flex flex-row flex-wrap" style="">
 
       <div>
-        <button type="button" (click)="imNotSure()" class="btn btn-sm btn-primary mr-2"
+        <button type="button" (click)="imNotSure()" class="btn btn-sm btn-primary mr-2 btn-action"
           [disabled]="loadingMoreImages">Im not sure</button>
         <!-- <button type="button" (click)="voteToDelete()" class="btn btn-sm btn-danger">Vote to delete</button> -->
-        <button type="button" (click)="overrideDelete()" class="btn btn-sm btn-danger mr-8"
+        <button type="button" (click)="overrideDelete()" class="btn btn-sm btn-danger mr-8 btn-action"
           [disabled]="loadingMoreImages">DELETE</button>
 
-        <button type="button" (click)="previousImage()" class="btn btn-primary mr-2"
+        <button type="button" (click)="previousImage()" class="btn btn-primary mr-2 btn-action"
           [disabled]="loadingMoreImages || currentIndex <= 0">Prev</button>
-        <button type="button" (click)="nextImage()" class="btn btn-primary mr-4"
+        <button type="button" (click)="nextImage()" class="btn btn-primary mr-4 btn-action"
           [disabled]="loadingMoreImages">Next</button>
 
-        <button type="button" (click)="isFlipped = !isFlipped" class="btn btn-primary"
+        <button type="button" (click)="isFlipped = !isFlipped" class="btn btn-primary btn-action"
           [disabled]="loadingMoreImages">Flip</button>
 
         <div *ngIf="currentImage" class="text-center w-full">
@@ -73,7 +73,7 @@
 
         <div>
           <button  id="submitButton" type="button" (click)="submitMatch(selectedCard?.id, true)"
-            class="btn btn-primary mr-2" [disabled]="loadingMoreImages || !selectedCard">Submit {{selectedCard?.name}}</button>
+            class="btn btn-primary mr-2 btn-action" [disabled]="loadingMoreImages || !selectedCard">Submit {{selectedCard?.name}}</button>
         </div>
       </div>
 
@@ -85,9 +85,9 @@
 
         <div *ngIf="cardClassifierGuessed">
           <button type="button" (click)="classifierGuessedIncorrectly()"
-            class="btn btn-primary mr-2">Incorrect</button>
+            class="btn btn-primary mr-2 btn-action">Incorrect</button>
           <button   type="button" (click)="classifierGuessedCorrectly()"
-            class="btn btn-primary mr-2">Corrrect</button>
+            class="btn btn-primary mr-2 btn-action">Corrrect</button>
         </div>
       </div>
 

@@ -23,10 +23,10 @@
       <span *ngIf="sortField === 'currentPlayers'">({{ sortDirectionSymbol }})</span>
     </div>
     <div class="flex flex-row gap-x-2">
-      <button (click)="startListUpdater()" class="text-white p-2  hover:bg-slate-800 w-28">
+      <button (click)="startListUpdater()" class="text-white p-2  hover:bg-slate-800 w-28 btn-action">
         <span>Refresh: <app-timer [date]="countDownTimerDate" [countDown]="true"></app-timer></span>
       </button>
-      <button (click)="createGameClickedCallback()" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800">
+      <button (click)="createGameClickedCallback()" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800 btn-action">
         <span>Create Game</span>
       </button>
     </div>
