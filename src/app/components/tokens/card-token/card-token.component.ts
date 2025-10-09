@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnChanges, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { IPlayingCard, Token } from '../../../interfaces/IPlayingCard';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, IGameEvent } from '../../../interfaces/IGame';
@@ -9,6 +9,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { SettingsService } from '../../../services/settings/settings.service';
+import { GameService } from '../../../services/game/game.service';
 
 @Component({
   selector: 'app-card-token',
@@ -47,7 +48,8 @@ export class CardTokenComponent implements OnInit {
     private renderer: Renderer2,
     private webRTC: WebRTCService,
     private modalService:ModalServiceService,
-    public settingService:SettingsService
+    public settingService:SettingsService,
+    private gameService: GameService
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +63,7 @@ export class CardTokenComponent implements OnInit {
     this.updateCardPositionFromNormalized();
 
     this.subscriptions.add(
-      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+      this.gameService.gameEvent.subscribe(event => this.handleGameEvent(event))
     );
   }
 

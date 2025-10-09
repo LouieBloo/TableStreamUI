@@ -1,7 +1,7 @@
 import { NgClass, NgFor, NgIf, NgStyle, SlicePipe } from '@angular/common';
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BehaviorSubject, catchError, debounceTime, EMPTY, filter, of, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, debounceTime, EMPTY, filter, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { GameEvent, IGameEvent, LocalGameEvent } from '../../interfaces/IGame';
 import { UserInputAction } from '../../interfaces/inputs';
 import { IPlayingCard } from '../../interfaces/IPlayingCard';
@@ -46,7 +46,6 @@ export class CardListComponent {
 
   constructor(
     private cardSearchService: CardSearchService,
-    private elRef: ElementRef,
     private inputService: InputService,
     private webRtc: WebRTCService,
     private modalService: ModalServiceService,
@@ -67,7 +66,7 @@ export class CardListComponent {
 
   ngAfterViewInit(): void {
     this.subscriptions.add(
-      this.webRtc.gameEvent.subscribe((event: IGameEvent) => {
+      this.gameService.gameEvent.subscribe((event: IGameEvent) => {
         if (event.event == GameEvent.ShareCard && event.response) {
           this.sharedCards.unshift(event.response);
         }
@@ -81,15 +80,12 @@ export class CardListComponent {
           this.openSearchModal(undefined, payload);
         }
         if (action === UserInputAction.StartTyping) {
-          const modal = document.getElementById('searchModal') as HTMLDialogElement;
-          // if (!modal || !modal.open) {
-          // Modal closed — open and start with first char
           this.openSearchModal(payload);
-          // }
         }
       })
     );
 
+    //subscribes to share card
     this.subscriptions.add(
       this.webRtc.localGameEvent.subscribe((localGameEvent: IGameEvent) => {
         if (localGameEvent.event === LocalGameEvent.ShareCard) {
@@ -117,7 +113,7 @@ export class CardListComponent {
           return this.cardSearchService.searchCards(
             this.searchString,
             true,
-            this.gameService.room.game!,
+            this.gameService.game!,
             this.searchOptions
           ).pipe(
             catchError((error: any) => {

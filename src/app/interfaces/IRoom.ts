@@ -1,7 +1,7 @@
 import { Game } from '../classes/game/game';
 import { GameType } from './IGame';
 import { IMessage } from './IMessage';
-import {IPlayer} from './IPlayer';
+import {IPlayer, ISpectator, IUser} from './IPlayer';
 import { Token } from './IPlayingCard';
 
 export interface IRoom {
@@ -18,6 +18,7 @@ export interface IRoom {
     allowPlayerKicking?:boolean;
     iceServerList?: any[];
     history?: IRoomHistoryEvent[];
+    spectators?: ISpectator[]
 }
 
 export interface PasswordCheckResponse {

@@ -4,8 +4,8 @@ import { NgFor, NgIf } from '@angular/common';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { GameEvent, ICoinFlipResults, IGameEvent, LocalGameEvent } from '../../../interfaces/IGame';
 import { Subscription } from 'rxjs';
-import { SoundEffectModalComponent } from '../../modals/sound-effect-modal/sound-effect-modal.component';
 import { SoundService } from '../../../services/sounds/sound.service';
+import { GameService } from '../../../services/game/game.service';
 
 @Component({
   selector: 'app-coin-flipper',
@@ -25,11 +25,11 @@ export class CoinFlipperComponent {
   private clearCoinTimeout: any;
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private webRTC: WebRTCService, private soundService:SoundService) {}
+  constructor(private webRTC: WebRTCService, private soundService:SoundService, private gameService: GameService) {}
 
   ngOnInit() {
     this.subscriptions.add(
-      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+      this.gameService.gameEvent.subscribe(event => this.handleGameEvent(event))
     );
 
     this.subscriptions.add(

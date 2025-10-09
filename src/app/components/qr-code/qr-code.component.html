@@ -1,0 +1,13 @@
+<qrcode *ngIf="validated" [qrdata]="(url$ | async)!" [width]="256" [allowEmptyString]="true" [errorCorrectionLevel]="'M'"></qrcode>
+
+<div
+  (mouseenter)="showPassword = true"
+  (mouseleave)="showPassword = false"
+>
+  Feature coming soon!
+
+  <app-check-password
+    *ngIf="showPassword && !validated"
+    (passwordOutput)="getQrCode($event)">
+  </app-check-password>
+</div>

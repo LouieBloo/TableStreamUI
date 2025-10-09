@@ -1,0 +1,14 @@
+<button class="hidden" onclick="toggleqrCodeModal.showModal()" id="toggleqrCodeModalOpen">toggle</button>
+<button class="hidden" onclick="toggleqrCodeModal.close()" id="toggleqrCodeModalClose">toggle</button>
+
+<dialog id="toggleqrCodeModal" class="modal">
+  <div class="modal-box top-2 bg-white">
+    <div class="bg-white text-black">
+      Scan the QR Code to Join the room by phone and override desktop camera
+    </div>
+    <app-qr-code *ngIf="player" [player]="player!"></app-qr-code>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

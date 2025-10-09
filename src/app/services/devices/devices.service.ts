@@ -1,0 +1,600 @@
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { IVideoQualify } from '../../interfaces/IVideoQualify';
+import { LocalStorageService } from '../local-storage/local-storage.service';
+import { LoggerService } from '../logger/logger.service';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class LocalDevicesService {
+  localStorageService = inject(LocalStorageService);
+  logger = inject(LoggerService);
+
+  private _audioDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
+  private _videoDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
+  private _videoQuality = new BehaviorSubject<string>(''); //set default?
+
+  public selectedVideoDeviceId = new BehaviorSubject<string>('');
+  public selectedAudioDeviceId = new BehaviorSubject<string>('');
+
+  public _localStream = new BehaviorSubject<MediaStream | null>(null);
+
+  audioDevices$ = this._audioDevices.asObservable();
+  videoDevices$ = this._videoDevices.asObservable();
+  selectedAudioDeviceId$ = this.selectedAudioDeviceId.asObservable();
+  selectedVideoDeviceId$ = this.selectedVideoDeviceId.asObservable();
+  localStream$ = this._localStream.asObservable();
+  videoQuality$ = this._videoQuality.asObservable();
+
+  public async setLocalStream(
+    videoDeviceId?: string,
+    audioDeviceId?: string
+  ): Promise<MediaStream | null> {
+    try {
+      const stream = await this.requestLocalMediaStream(videoDeviceId, audioDeviceId);
+      this._localStream.next(stream);
+
+      await this.setAvailableDeviceList();
+
+      if (videoDeviceId) {
+        this.selectedVideoDeviceId.next(videoDeviceId);
+      }
+
+      if (audioDeviceId) {
+        this.selectedAudioDeviceId.next(audioDeviceId!);
+      }
+
+      this.logAspectRatio(stream!);
+    } catch (err: any) {
+      if (this.isPermissionError(err)) {
+        this.logger.log('Permission error: Trying again without audio');
+
+        await this.setUserMediaWithoutAudio(videoDeviceId, audioDeviceId);
+      } else {
+        throw err;
+      }
+    }
+
+    return this._localStream.value;
+  }
+
+  setLocalStreamTest(stream: MediaStream) {
+    this._localStream.next(stream);
+  }
+
+  public buildLocalStreamFromSelectedDevices() {
+    return this.setLocalStream(
+      this.selectedVideoDeviceId.value,
+      this.selectedAudioDeviceId.value
+    );
+  }
+
+  public async buildStreamOnDeviceChange(videoDeviceId: string, audioDeviceId: string) {
+    const stream = await this.requestLocalMediaStream(videoDeviceId, audioDeviceId);
+    this._localStream.next(stream);
+    if (videoDeviceId) {
+      this.selectedVideoDeviceId.next(videoDeviceId);
+    }
+
+    if (audioDeviceId) {
+      this.selectedAudioDeviceId.next(audioDeviceId!);
+    }
+
+    return stream;
+  }
+
+  private isPermissionError(err: any) {
+    return err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+  }
+
+  async setAvailableDeviceList(): Promise<void> {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+
+    const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+    const audioDevices = devices.filter((device) => device.kind === 'audioinput');
+    this._videoDevices.next(videoDevices);
+    this._audioDevices.next(audioDevices);
+
+    //set default video and audio deviceIds
+    if (!this.selectedVideoDeviceId.value && videoDevices.length) {
+      this.selectedVideoDeviceId.next(videoDevices[0].deviceId);
+    }
+
+    if (!this.selectedAudioDeviceId.value && audioDevices.length) {
+      this.selectedAudioDeviceId.next(audioDevices[0].deviceId);
+    }
+  }
+
+  async requestLocalMediaStream(
+    videoDeviceId?: string,
+    audioDeviceId?: string,
+    withAudio: boolean = true
+  ): Promise<MediaStream | null> {
+    const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId);
+    if (!withAudio) constraints.audio = false;
+    return navigator.mediaDevices.getUserMedia(constraints);
+  }
+
+  public getMediaConstraints(
+    videoDeviceId?: string,
+    audioDeviceId?: string
+  ): MediaStreamConstraints {
+    const videoQuality = this.localStorageService.videoQuality;
+    const targetVideoQuality: IVideoQualify = this.getCameraVideoQuality(videoQuality!);
+
+    return {
+      video: videoDeviceId
+        ? {
+            deviceId: { exact: videoDeviceId },
+            width: { ideal: targetVideoQuality.idealWidth },
+            height: { ideal: targetVideoQuality.idealHeight },
+            aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
+          }
+        : {
+            width: { ideal: targetVideoQuality.idealWidth },
+            height: { ideal: targetVideoQuality.idealHeight },
+            aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
+          },
+      audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true,
+    };
+  }
+
+  private getLocalMediaStreamWithAudioConstraints(audioDeviceId: string) {
+    const constraints: MediaStreamConstraints = {
+      video: false,
+      audio: { deviceId: { exact: audioDeviceId } },
+    };
+    return navigator.mediaDevices.getUserMedia(constraints);
+  }
+
+  private getLocalMediaStreamWithVideoConstraints(videoDeviceId: string) {
+    const videoString = this.localStorageService.videoQuality;
+    const videoQuality = this.getCameraVideoQuality(videoString!);
+
+    const constraints: MediaStreamConstraints = {
+      video: {
+        deviceId: { exact: videoDeviceId },
+        width: { ideal: videoQuality.idealWidth },
+        height: { ideal: videoQuality.idealHeight },
+        aspectRatio: { ideal: videoQuality.idealAspectRatio },
+      },
+      audio: false,
+    };
+    return navigator.mediaDevices.getUserMedia(constraints);
+  }
+
+  private async getLocalMediaStreamWithConstraints(
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean,
+    videoDeviceId: string,
+    audioDeviceId: string
+  ) {
+    const constraints = this.getConstraints(
+      videoDeviceChanged,
+      audioDeviceChanged,
+      videoDeviceId,
+      audioDeviceId
+    );
+    return navigator.mediaDevices.getUserMedia(constraints);
+  }
+
+  /**
+   * Given a video quality stream return the ideal width, height, and aspect ratio.
+   * Ex videoQuality: '16/9-1080', '16/9-2k', '4/3-960', '4/3-25'
+   * @param videoQuality
+   * @returns
+   */
+
+  public changeCameraVideoQuality(videoQuality: string): IVideoQualify {
+    const [ratio, quality] = videoQuality.split('-');
+    let idealWidth: number;
+    let idealHeight: number;
+    let idealAspectRatio: number;
+
+    if (ratio === '4/3') {
+      idealAspectRatio = 4 / 3;
+      if (quality === '2k') {
+        idealWidth = 1600;
+        idealHeight = 1200;
+      } else if (quality === '720') {
+        idealWidth = 960;
+        idealHeight = 720;
+      } else {
+        // Default for 4:3
+        idealWidth = 1280;
+        idealHeight = 960;
+      }
+    } else {
+      idealAspectRatio = 16 / 9;
+      if (quality === '2k') {
+        idealWidth = 2560;
+        idealHeight = 1440;
+      } else if (quality === '720') {
+        idealWidth = 1280;
+        idealHeight = 720;
+      } else {
+        // Default 1080p for 16:9
+        idealWidth = 1920;
+        idealHeight = 1080;
+      }
+    }
+
+    return {
+      idealAspectRatio,
+      idealWidth,
+      idealHeight,
+    };
+  }
+  public getCameraVideoQuality(videoQuality?: string): IVideoQualify {
+    if (videoQuality == null) {
+      videoQuality = this.localStorageService.videoQuality || '16/9-1080';
+    }
+
+    const [ratio, quality] = videoQuality.split('-');
+    let idealWidth: number;
+    let idealHeight: number;
+    let idealAspectRatio: number;
+
+    if (ratio === '4/3') {
+      idealAspectRatio = 4 / 3;
+      if (quality === '2k') {
+        idealWidth = 1600;
+        idealHeight = 1200;
+      } else if (quality === '720') {
+        idealWidth = 960;
+        idealHeight = 720;
+      } else {
+        // Default for 4:3
+        idealWidth = 1280;
+        idealHeight = 960;
+      }
+    } else {
+      idealAspectRatio = 16 / 9;
+      if (quality === '2k') {
+        idealWidth = 2560;
+        idealHeight = 1440;
+      } else if (quality === '720') {
+        idealWidth = 1280;
+        idealHeight = 720;
+      } else {
+        // Default 1080p for 16:9
+        idealWidth = 1920;
+        idealHeight = 1080;
+      }
+    }
+
+    return {
+      idealAspectRatio,
+      idealWidth,
+      idealHeight,
+    };
+  }
+
+  public async attachTrackToPeerConnection(
+    peerConnection: RTCPeerConnection,
+    socketId: string
+  ) {
+    const localStream = await this.setLocalStream();
+    localStream!.getTracks().forEach((track) => {
+      this.logger.log('adding tracks for: ', socketId);
+      if (track.kind === 'audio') {
+        const micMuted = this.localStorageService.isMicMuted === 'true';
+        track.enabled = !micMuted;
+      }
+      peerConnection.addTrack(track, localStream!);
+    });
+  }
+
+  public stopAndRemoveAllLocalMediaTracks() {
+    if (this._localStream.value) {
+      this._localStream.value.getTracks().forEach((track) => {
+        track.stop();
+        track.enabled = false;
+      });
+      this._localStream.next(null);
+    }
+  }
+
+private setAudioEnabled(enabled: boolean): void {
+  const stream = this._localStream.value;
+  if (!stream) return;
+
+  stream.getAudioTracks().forEach(track => {
+    track.enabled = enabled;
+  });
+
+  this._localStream.next(stream);
+}
+
+  public muteSelf(): void {
+    this.setAudioEnabled(false);
+  }
+
+  public unmuteSelf(): void {
+    this.setAudioEnabled(true);
+  }
+
+public turnOffVideo(): void {
+  const current = this._localStream.value;
+  if (!current) return;
+
+  current.getVideoTracks().forEach(track => {
+    track.enabled = false;
+  });
+
+  const newStream = new MediaStream(current.getTracks());
+  this._localStream.next(newStream);
+}
+
+public turnOnVideo(): void {
+  const current = this._localStream.value;
+  if (!current) return;
+
+  current.getVideoTracks().forEach(track => {
+    track.enabled = true;
+  });
+
+  const newStream = new MediaStream(current.getTracks());
+  this._localStream.next(newStream);
+}
+
+public stopAndRemoveTrack(track: MediaStreamTrack) {
+  if (!track) return;
+
+  track.stop();
+
+  const stream = this._localStream.value;
+  if (!stream) return;
+
+  stream.removeTrack(track);
+  this._localStream.next(stream);
+}
+
+public addTrackToLocalStream(track: MediaStreamTrack) {
+  const stream = this._localStream.value;
+  if (!stream) return;
+
+  stream.addTrack(track);
+  this._localStream.next(stream);
+}
+
+  public getCurrentVideoTrack() {
+    return this._localStream.value?.getVideoTracks()[0];
+  }
+
+  public getFirstAudioTrack() {
+    return this._localStream.value?.getAudioTracks()[0];
+  }
+
+  private hasVideoDeviceChanged(
+    videoDeviceId: string,
+    currentVideoTrack?: MediaStreamTrack
+  ) {
+    const currentDeviceId = currentVideoTrack?.getSettings().deviceId;
+    return videoDeviceId !== undefined && videoDeviceId !== currentDeviceId;
+  }
+
+  private hasAudioDeviceChanged(
+    audioDeviceId: string,
+    currentAudioTrack?: MediaStreamTrack
+  ) {
+    const currentDeviceId = currentAudioTrack?.getSettings().deviceId;
+    return audioDeviceId !== undefined && audioDeviceId !== currentDeviceId;
+  }
+
+  private getConstraints(
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean,
+    videoDeviceId?: string,
+    audioDeviceId?: string
+  ) {
+    const videoString = this.localStorageService.videoQuality;
+    const videoQuality = this.getCameraVideoQuality(videoString!);
+
+    const constraints: MediaStreamConstraints = {
+      video: videoDeviceChanged
+        ? {
+            deviceId: { exact: videoDeviceId },
+            width: { ideal: videoQuality.idealWidth },
+            height: { ideal: videoQuality.idealHeight },
+            aspectRatio: { ideal: videoQuality.idealAspectRatio },
+          }
+        : false,
+      audio: audioDeviceChanged
+        ? {
+            deviceId: { exact: audioDeviceId },
+          }
+        : false,
+    };
+
+    return constraints;
+  }
+
+  public async changeVideoQuality(videoQuality: string) {
+    this.localStorageService.setVideoQuality(videoQuality);
+    const vq = this.getCameraVideoQuality(videoQuality);
+    const currentVideoTrack = this.getCurrentVideoTrack();
+
+    if (!currentVideoTrack) return;
+
+    try {
+      await currentVideoTrack.applyConstraints({
+        width: { ideal: vq.idealWidth },
+        height: { ideal: vq.idealHeight },
+        aspectRatio: { ideal: vq.idealAspectRatio },
+      });
+    } catch (err) {
+      console.error('Error applying constraints to video track:', err);
+    }
+    this.logAspectRatio(this._localStream.value!);
+  }
+
+  public async changeAudioDevice(audioDeviceId: string) {
+    const currentAudioTrack = this.getFirstAudioTrack();
+
+    const newAudioTrack = await this.acquireNewAudioTrack(audioDeviceId);
+
+    if (newAudioTrack) {
+      await this.replaceDeviceTrack(currentAudioTrack!, newAudioTrack);
+    }
+
+    this.logAspectRatio(this._localStream.value!);
+  }
+
+  public async changeVideoDevice(videoDeviceId: string) {
+    const currentVideoTrack = this.getCurrentVideoTrack();
+    const newVideoTrack = await this.acquireNewVideoTrack(videoDeviceId);
+    if (newVideoTrack) {
+      await this.replaceDeviceTrack(currentVideoTrack!, newVideoTrack);
+    }
+    this.logAspectRatio(this._localStream.value!);
+  }
+
+  public async changeDevice(videoDeviceId: string, audioDeviceId: string) {
+    const currentVideoTrack = this.getCurrentVideoTrack();
+    const currentAudioTrack = this.getFirstAudioTrack();
+    let videoDeviceChanged = false;
+
+    if (videoDeviceId != '') {
+      videoDeviceChanged = this.hasVideoDeviceChanged(videoDeviceId, currentVideoTrack);
+    }
+    const audioDeviceChanged = this.hasAudioDeviceChanged(
+      audioDeviceId,
+      currentAudioTrack
+    );
+
+    let newVideoTrack: MediaStreamTrack | null = null;
+    let newAudioTrack: MediaStreamTrack | null = null;
+
+    if (videoDeviceChanged || audioDeviceChanged) {
+      const tracks = await this.acquireNewMediaTracks(
+        videoDeviceChanged,
+        audioDeviceChanged,
+        videoDeviceId,
+        audioDeviceId
+      );
+      newVideoTrack = tracks.videoTrack;
+      newAudioTrack = tracks.audioTrack;
+    }
+    if (videoDeviceChanged && newVideoTrack) {
+      await this.replaceDeviceTrack(currentVideoTrack!, newVideoTrack);
+    }
+
+    if (audioDeviceChanged && newAudioTrack) {
+      await this.replaceDeviceTrack(currentAudioTrack!, newAudioTrack);
+    }
+
+    this.logAspectRatio(this._localStream.value!);
+  }
+
+  private async acquireNewVideoTrack(videoDeviceId: string) {
+    let videoTrack: MediaStreamTrack | null = null;
+    try {
+      const newStream = await this.getLocalMediaStreamWithVideoConstraints(videoDeviceId);
+      if (newStream) {
+        videoTrack = newStream.getVideoTracks()[0] || null;
+      }
+    } catch (err) {
+      console.error('Error getting new media stream:', err);
+    }
+
+    return videoTrack;
+  }
+
+  private async acquireNewAudioTrack(
+    audioDeviceId: string
+  ): Promise<MediaStreamTrack | null> {
+    let audioTrack: MediaStreamTrack | null = null;
+    try {
+      const newStream = await this.getLocalMediaStreamWithAudioConstraints(audioDeviceId);
+      if (newStream) {
+        audioTrack = newStream.getAudioTracks()[0] || null;
+      }
+    } catch (err) {
+      console.error('Error getting new media stream:', err);
+    }
+
+    return audioTrack;
+  }
+
+  private async acquireNewMediaTracks(
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean,
+    videoDeviceId: string,
+    audioDeviceId: string
+  ): Promise<{
+    videoTrack: MediaStreamTrack | null;
+    audioTrack: MediaStreamTrack | null;
+  }> {
+    let videoTrack: MediaStreamTrack | null = null;
+    let audioTrack: MediaStreamTrack | null = null;
+
+    try {
+      const newStream = await this.getLocalMediaStreamWithConstraints(
+        videoDeviceChanged,
+        audioDeviceChanged,
+        videoDeviceId,
+        audioDeviceId
+      );
+      if (newStream) {
+        if (videoDeviceChanged) {
+          videoTrack = newStream.getVideoTracks()[0] || null;
+        }
+        if (audioDeviceChanged) {
+          audioTrack = newStream.getAudioTracks()[0] || null;
+        }
+      }
+    } catch (err) {
+      console.error('Error getting new media stream:', err);
+    }
+
+    return { videoTrack, audioTrack };
+  }
+
+  private async replaceDeviceTrack(
+    currentTrack: MediaStreamTrack,
+    newTrack: MediaStreamTrack
+  ) {
+    this.stopAndRemoveTrack(currentTrack);
+    this.addTrackToLocalStream(newTrack);
+  }
+
+  private async setUserMediaWithoutAudio(videoDeviceId?: string, audioDeviceId?: string) {
+    try {
+      const stream = await this.requestLocalMediaStream(
+        videoDeviceId,
+        audioDeviceId,
+        false
+      );
+      this._localStream.next(stream);
+      this.logAspectRatio(this._localStream.value!);
+    } catch (err) {
+      this.logger.error('Error getting media stream without audio:', err);
+    }
+  }
+
+  private logAspectRatio(stream: MediaStream): void {
+    if (!stream) {
+      return;
+    }
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack) {
+      const settings = videoTrack.getSettings();
+      if (settings.width && settings.height) {
+        const aspectRatio = settings.width / settings.height;
+        this.logger.log(
+          `Camera aspect ratio: ${aspectRatio.toFixed(2)} (width: ${
+            settings.width
+          }, height: ${settings.height})`
+        );
+      } else {
+        this.logger.log(
+          'Could not determine camera aspect ratio (width/height not available in settings).'
+        );
+      }
+    } else {
+      this.logger.log('No video track available to determine aspect ratio.');
+    }
+  }
+}

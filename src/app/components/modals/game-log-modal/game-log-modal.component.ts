@@ -81,9 +81,9 @@ export class GameLogModalComponent {
   }
 
   copyHistory(): void {
-    if (!this.gameService.room.history || this.gameService.room.history.length < 1) { return; }
+    if (!this.gameService.doesRoomHaveHistory) { return; }
 
-    const historyText = this.gameService.room.history
+    const historyText = this.gameService.roomHistory!
       .map(item => this.formatHistoryForCopy(item))
       .join('\n');
 
