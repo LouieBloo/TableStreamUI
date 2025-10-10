@@ -2,15 +2,19 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { IAnalytic } from '../../interfaces/IAnalytic';
+import { IAdminAnalytic } from '../../interfaces/IAdminAnalytic';
 import { GameType } from '../../interfaces/IGame';
+import { IHomeAnalytic } from '../../interfaces/IHomeAnalytic';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AnalyticsService {
-  private _analytic: BehaviorSubject<IAnalytic | null> =
-    new BehaviorSubject<IAnalytic | null>(null);
+  private _adminAnalytic: BehaviorSubject<IAdminAnalytic | null> =
+    new BehaviorSubject<IAdminAnalytic | null>(null);
+
+  private _homeAnalytic: BehaviorSubject<IHomeAnalytic | null> =
+    new BehaviorSubject<IHomeAnalytic | null>(null);
 
   private _isAuthorized: boolean = false;
 
@@ -19,15 +23,19 @@ export class AnalyticsService {
   }
 
   get isAnalyticLoaded$(): Observable<boolean> {
-    return this.analytic$.pipe(map((analytic) => !!analytic));
+    return this.adminAnalytic$.pipe(map((analytic) => !!analytic));
   }
 
-  get analytic$() {
-    return this._analytic.asObservable();
+  get adminAnalytic$() {
+    return this._adminAnalytic.asObservable();
+  }
+
+  get homeAnalytic$() {
+    return this._homeAnalytic.asObservable();
   }
 
   get activePlayers$(): Observable<number> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
         return analytic?.redisAnalytic.activePlayers ?? 0;
       })
@@ -35,7 +43,7 @@ export class AnalyticsService {
   }
 
   get activeRooms$(): Observable<number> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
         return analytic?.redisAnalytic.activeRooms ?? 0;
       })
@@ -43,7 +51,7 @@ export class AnalyticsService {
   }
 
   get timeFrames$(): Observable<string[]> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
         let timeframes: string[] = [];
         analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) => {
@@ -66,7 +74,7 @@ export class AnalyticsService {
   }
 
   get roomDurationMinutes$(): Observable<number[]> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
         let roomDurationInMinutes: number[] = [];
         analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) => {
@@ -81,7 +89,7 @@ export class AnalyticsService {
   }
 
   get numberOfPlayers$(): Observable<number[]> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
         let numberOfPlayers: number[] = [];
         analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) =>
@@ -93,7 +101,7 @@ export class AnalyticsService {
   }
 
   get numberOfRooms$() {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
         let numberOfRooms: number[] = [];
         analytic?.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) =>
@@ -104,61 +112,76 @@ export class AnalyticsService {
     );
   }
 
-  get totalPlayersToday$(): Observable<number|null> {
-    return this.analytic$.pipe(
-      map((analytic)=> {
+  get totalPlayersToday$(): Observable<number | null> {
+    return this.adminAnalytic$.pipe(
+      map((analytic) => {
         return analytic?.mongoAnalytic.totalPlayersToday ?? null;
       })
-    )
+    );
   }
 
-  get totalRoomsToday$(): Observable<number|null> {
-    return this.analytic$.pipe(
-      map((analytic)=> {
-        return analytic?.mongoAnalytic.totalRoomsToday ?? null
+  get totalRoomsToday$(): Observable<number | null> {
+    return this.adminAnalytic$.pipe(
+      map((analytic) => {
+        return analytic?.mongoAnalytic.totalRoomsToday ?? null;
       })
-    )
+    );
   }
 
   get numberOfRoomsPerGameType$(): Observable<number[]> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
-        return analytic?.mongoAnalytic.gameAnalytics.map(gameAnalytic => gameAnalytic.numberOfRooms) ?? [];
+        return (
+          analytic?.mongoAnalytic.gameAnalytics.map(
+            (gameAnalytic) => gameAnalytic.numberOfRooms
+          ) ?? []
+        );
       })
     );
   }
-
 
   get gameTypes$(): Observable<string[]> {
-    return this.analytic$.pipe(
+    return this.adminAnalytic$.pipe(
       map((analytic) => {
-        return analytic?.mongoAnalytic.gameAnalytics
-          .map(gameAnalytic => {
+        return (
+          analytic?.mongoAnalytic.gameAnalytics.map((gameAnalytic) => {
             const enumValue = GameType[gameAnalytic.gameType as keyof typeof GameType];
-            return enumValue.toString()
-          }) ?? [];
+            return enumValue.toString();
+          }) ?? []
+        );
       })
     );
   }
-  
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.getHomeAnalytic().subscribe();
+  }
 
-  public getAnalytic(password: string): Observable<IAnalytic> {
+  public getAnalytic(password: string): Observable<IAdminAnalytic> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${password}`,
     });
     return this.http
-      .get<IAnalytic>(environment.socketUrl + '/analytics', { headers })
+      .get<IAdminAnalytic>(environment.socketUrl + '/analytics', { headers })
       .pipe(
-        tap((response: IAnalytic) => {
+        tap((response: IAdminAnalytic) => {
           response.mongoAnalytic.mongoAnalyticsByDate.forEach((ma) => {
             ma.startDate = new Date(ma.startDate);
             ma.endDate = new Date(ma.endDate);
           });
-          this._analytic.next(response);
+          this._adminAnalytic.next(response);
           this._isAuthorized = true;
         })
       );
   }
+
+  public getHomeAnalytic(): Observable<IHomeAnalytic> {
+    return this.http.get<IHomeAnalytic>(environment.socketUrl + '/homeAnalytic')
+    .pipe(
+      tap((analytic: IHomeAnalytic)=>{
+        this._homeAnalytic.next(analytic);
+      })
+    )
+  }
+
 }

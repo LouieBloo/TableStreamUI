@@ -1,0 +1,7 @@
+<div *ngIf="homeAnalytic$ | async as analytic" class="font-normal text-center bg-slate-900 bg-opacity-90">
+  <div class="flex items-center justify-center gap-x-4 p-3">
+    <div>Active Players: {{analytic.redisAnalytic.activePlayers}}</div>
+    <div>Active Rooms: {{analytic.redisAnalytic.activeRooms}}</div>
+    <div>Games Played: {{analytic.allRoomsCount}}</div>
+  </div>
+</div>

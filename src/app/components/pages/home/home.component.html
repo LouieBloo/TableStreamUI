@@ -8,13 +8,6 @@
     <div class="">
       <div *ngIf="!showRoomList || activeTab === 'create'"
         class="max-w-lg min-w-96 w-full mx-auto p-6 pb-3 shadow-md bg-slate-900 bg-opacity-90 text-white tabs tabs-lifted animate__animated animate__fadeIn">
-        <!-- Tab navigation -->
-        <!-- <div class="tabs ">
-          <a class="tab tab-bordered text-white bg-slate-800 bg-opacity-50 hover:bg-slate-800" [ngClass]="{ 'tab-active': activeTab === 'join' }"
-            (click)="setTab('join')">Join Game</a>
-          <a class="tab tab-bordered text-white bg-slate-800 bg-opacity-50 hover:bg-slate-800" [ngClass]="{ 'tab-active': activeTab === 'create' }"
-            (click)="setTab('create')">Create Game</a>
-        </div> -->
 
         <!-- Create Game Form -->
         <div *ngIf="activeTab === 'create'" class="animate__animated animate__fadeIn">
@@ -22,7 +15,7 @@
             <div class="grow">
               <h1 class="text-white text-2xl">Create Game</h1>
             </div>
-            <button (click)="setTab('join')" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800">
+            <button (click)="setTab('join')" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800 btn-action">
               <span>Back</span>
             </button>
           </div>
@@ -78,7 +71,7 @@
             </div>
             
             <button type="submit"
-              class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+              class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed btn-action"
               [disabled]="!createForm.valid">
               Create Game
             </button>
@@ -92,7 +85,7 @@
             <div class="grow">
               <h1 class="text-white text-2xl">Join Game</h1>
             </div>
-            <button (click)="setTab('join'); showRoomList = true;" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800">
+            <button (click)="setTab('join'); showRoomList = true;" class="text-white p-2 buttonOutlineBorderMuted hover:bg-slate-800 btn-action">
               <span>Back</span>
             </button>
           </div>
@@ -115,7 +108,7 @@
                 class="mt-1 ml-2">
             </div>
             <button type="submit"
-              class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed"
+              class="w-full btn btn-outline text-white py-2 px-4 rounded disabled:text-gray-500 disabled:border-slate-600 disabled:cursor-not-allowed btn-action"
               [disabled]="!joinForm.valid">
               Join Game
             </button>

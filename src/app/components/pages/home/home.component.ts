@@ -33,7 +33,6 @@ import { TooltipDirective } from '../../../directives/tooltip.directive';
     RecentDonationListComponent,
     DonationButtonComponent,
     DonationModalComponent,
-    UserLoginModalComponent,
     RoomListComponent,
     TooltipDirective
   ],

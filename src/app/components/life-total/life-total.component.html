@@ -43,7 +43,7 @@
             <button *ngIf="editable && (!gameService.isYugiohGame() && !gameService.isPokemonGame())" type="button"
               class=" button text-white p-1 join-item " (click)="modifyCallback(-10)">-10</button>
             <button *ngIf="editable && !gameService.isYugiohGame()" type="button"
-              class=" button text-white p-1 join-item" (click)="modifyCallback(-1)">-1</button>
+              class=" button text-white p-1 join-item " (click)="modifyCallback(-1)">-1</button>
 
             <div class="dropdown join-item button text-white pl-4 pr-4" appTooltip="Click to see more options"
               [tooltipDirection]="'bottom'" [tooltipStartOpen]="editable" >
@@ -64,8 +64,8 @@
                     <li class="flex flex-row items-center">
                       <input type="number" [(ngModel)]="setLifeTotalAmount" class="w-36 mr-2 text-center text-lg border border-gray-300 rounded px-0 py-2" />
                       <div class="flex flex-col" style="gap: 1px !important;">
-                        <button (click)="modifyCallback(setLifeTotalAmount); setLifeTotalAmount = 0;" class="text-xl text-white bg-violet-600 hover:bg-violet-700 w-6 h-6 p-0 m-0" style="line-height: inherit;">+</button>
-                        <button (click)="modifyCallback(-setLifeTotalAmount); setLifeTotalAmount = 0;" class="text-xl text-white bg-violet-600 hover:bg-violet-700 w-6 h-6 p-0 m-0" style="line-height: inherit;">-</button>
+                        <button (click)="modifyCallback(setLifeTotalAmount); setLifeTotalAmount = 0;" class="text-xl text-white bg-violet-600 hover:bg-violet-700 w-6 h-6 p-0 m-0 btn-action" style="line-height: inherit;">+</button>
+                        <button (click)="modifyCallback(-setLifeTotalAmount); setLifeTotalAmount = 0;" class="text-xl text-white bg-violet-600 hover:bg-violet-700 w-6 h-6 p-0 m-0 btn-action" style="line-height: inherit;">-</button>
                       </div>
                     </li>
                   </ul>

@@ -4,19 +4,19 @@
     <div>
         <label>Password</label>
         <input type="text" class="text-black" [(ngModel)]="password.value">
-        <button type="button" (click)="loadImages()">Search</button>
+        <button type="button btn-action" (click)="loadImages()">Search</button>
     </div>
 
     <div class="mt-4">
-        <button type="button" (click)="deleteImage()" class="btn btn-sm btn-danger mr-16">Delete</button>
+        <button type="button" (click)="deleteImage()" class="btn btn-sm btn-danger mr-16 btn-action">Delete</button>
         
 
-        <button type="button" (click)="previousImage()" class="btn btn-primary mr-2">Prev</button>
-        <button type="button" (click)="nextImage()" class="btn btn-primary mr-2">Next</button>
+        <button type="button" (click)="previousImage()" class="btn btn-primary mr-2 btn-action">Prev</button>
+        <button type="button" (click)="nextImage()" class="btn btn-primary mr-2 btn-action">Next</button>
         <a *ngIf="currentImage" [href]="currentImage.presignedUrl" target="_blank" download="currentImage.imageName" class="btn btn-primary download-button mr-2">
             <button>Download Image</button>
         </a>
-        <button type="button" (click)="markComplete()" class="btn btn-primary mr-2">Mark Completed</button>
+        <button type="button" (click)="markComplete()" class="btn btn-primary mr-2 btn-action">Mark Completed</button>
     </div>
     <div *ngIf="currentImage" class="flex flex-col items-center w-full mt-4">
         <!-- <h2>Current Image: {{ currentImage.imageName }}</h2>

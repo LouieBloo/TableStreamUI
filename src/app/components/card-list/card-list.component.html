@@ -3,15 +3,15 @@
         <button class="hidden" onclick="searchModal.showModal()" id="toggleModal">hidden</button>
         <div class="join flex w-full">
             <app-speech-to-text *ngIf="gameService.room.game?.transcribeActive"></app-speech-to-text>
-            <button class="btn btn-sm btn-outline text-white join-item rounded-none flex-1" (click)="openSearchModal()" appTooltip="Search cards (ctrl+q) or just start typing" [tooltipDirection]="'left'">Search Cards</button>
-            <button class="btn btn-sm btn-outline text-white join-item rounded-none" (click)="clearSearchHistory()"><ng-icon name="bootstrapTrash3"></ng-icon></button>
+            <button class="btn btn-sm btn-outline text-white join-item rounded-none flex-1 btn-action" (click)="openSearchModal()" appTooltip="Search cards (ctrl+q) or just start typing" [tooltipDirection]="'left'">Search Cards</button>
+            <button class="btn btn-sm btn-outline text-white join-item rounded-none btn-action" (click)="clearSearchHistory()"><ng-icon name="bootstrapTrash3"></ng-icon></button>
         </div>
     </div>
 
     <dialog id="searchModal" class="modal ">
         <div class="modal-box bg-slate-800 text-white absolute top-2">
             <form method="dialog">
-                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeModal" >✕</button>
+                <button class="btn btn-sm btn-circle btn-action btn-ghost absolute right-2 top-2" id="closeModal" >✕</button>
             </form>
 
             <h3 class="text-lg font-bold">Card Search <span class="text-sm">({{this.gameService.room.game?.searchTag}})</span></h3>
