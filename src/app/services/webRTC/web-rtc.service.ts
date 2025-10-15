@@ -608,7 +608,7 @@ public joinAsPhone = async (token: string) => {
     this.peerConnections[socketId] = peerConnection;
 
     peerConnection.onicecandidate = (event) => this.handleIceCandidateEvent(socketId, event);
-    peerConnection.ontrack = this.handleOnTrack(socketId, user);
+    peerConnection.ontrack = this.handleOnTrack(socketId, user, false);
     peerConnection.onnegotiationneeded = async () => this.handleNegotiationNeeded(peerConnection, socketId);
 
     return peerConnection;
@@ -645,15 +645,49 @@ public joinAsPhone = async (token: string) => {
     }
   }
 
-  private handleOnTrack(socketId: string, user: IUser) {
+  
+
+  private handleOnTrack(socketId: string, user: IUser, isPhoneUser: boolean) {
     return (event: RTCTrackEvent) => {
+      const incomingStream = event.streams[0];
       this.logger.log("on track: ", event);
       this.remoteStreams[socketId] = event.streams[0];
+      if (isPhoneUser) {
+        this.logger.log("Overriding localStream with phone stream");
+        this.localStream = incomingStream;
+        this.replaceAllTracksFromPhone(incomingStream);
+      }
       this.onStreamAdded.forEach(callback => {
         callback(socketId, this.remoteStreams[socketId], user);
       });
     };
   }
+
+  private async replaceAllTracksFromPhone(newStream: MediaStream) {
+  for (const socketId in this.peerConnections) {
+    const pc = this.peerConnections[socketId];
+
+    // Remove existing senders and add new tracks
+    const senders = pc.getSenders();
+
+    for (const track of newStream.getTracks()) {
+      const sender = senders.find(s => s.track?.kind === track.kind);
+      if (sender) {
+        await sender.replaceTrack(track);
+      } else {
+        pc.addTrack(track, newStream);
+      }
+    }
+
+    // Renegotiate if needed
+    if (pc.signalingState === 'stable') {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
+    }
+  }
+}
+
 
   private handleIceCandidateEvent(socketId: string, event: RTCPeerConnectionIceEvent) {
     this.logger.log("on ice candidate", event);

@@ -21,15 +21,18 @@ import { YugiohDomain } from '../../classes/game/YugiohStandardDomain';
 })
 export class GameService {
   public room!: IRoom;
-
+  public localPlayer?: IPlayer|null;
+  public localPlayerId?: string|null;
   constructor(private http: HttpClient) {
   }
 
-  public setRoom(room:IRoom){
+  public setRoom(room:IRoom, localPlayerId: string){
     if(room.game?.gameType){
       let newGame = GameService.createGame(room.game?.gameType);
       room.game = Object.assign(newGame,room.game);
     }
+
+    this.localPlayerId = localPlayerId;
 
     this.room = room;
   }

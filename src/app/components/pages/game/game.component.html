@@ -3,9 +3,9 @@
 
     <div class="w-screen h-screen flex flex-col drawer-content ">
 
-        <div class="flex flex-row flex-grow">
+        <div *ngIf="localPlayer$ | async as localPlayer" class="flex flex-row flex-grow">
            
-            <div id="userStreams" class="flex flex-wrap h-screen flex-grow">
+            <div  id="userStreams" class="flex flex-wrap h-screen flex-grow">
                 <div
                   *ngFor="let player of gameService.room.players; let i = index"
                   class="bg-slate-800 bgTransition"
@@ -15,16 +15,15 @@
                 >
                   <app-user-stream
                     [player]="player"
-                    [localStream]="player.id === localPlayerId"
+                    [localStream]="player.id === localPlayer.id"
                     [focusedLayout]="focusedLayout"
                     (reportPlayerEvent)="openReportUserModal($event)"
                   ></app-user-stream>
                 </div>
             </div>
-
             <div>
                 <div *ngFor="let token of gameService.room?.game?.tokens">
-                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayerId"></app-card-token>
+                    <app-card-token [token]="token" [editable]="token.ownerId == localPlayer.id"></app-card-token>
                 </div>
             </div>
 
@@ -78,16 +77,16 @@
 
                 <div class="justify-center mt-2 grid grid-cols-2">
                     <div class="flex flex-row">
-                        <button (click)="flipCoins(1)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
+                        <button (click)="flipCoins(1, localPlayer)" class="btn btn-sm btn-outline text-white drawer-button rounded-none grow" style="border-right: none;">Flip Coin</button>
                         <div class="dropdown dropdown-left text-white rounded-none " >
                             <div tabindex="0" role="button" class="flex flex-col h-full justify-center">
                                 <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none ">+</button>
                             </div>
                             <ul  tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-52 p-2 shadow text-slate-800">
-                                <li (click)="flipCoins(2)"><a>2</a></li>
-                                <li (click)="flipCoins(3)"><a>3</a></li>
-                                <li (click)="flipCoins(4)"><a>4</a></li>
-                                <li (click)="flipCoins(5)"><a>5</a></li>
+                                <li (click)="flipCoins(2, localPlayer)"><a>2</a></li>
+                                <li (click)="flipCoins(3, localPlayer)"><a>3</a></li>
+                                <li (click)="flipCoins(4, localPlayer)"><a>4</a></li>
+                                <li (click)="flipCoins(5, localPlayer)"><a>5</a></li>
                             </ul>
                         </div>
                     </div>
@@ -127,7 +126,7 @@
     </div>
 
     <app-report-modal></app-report-modal>
-    <app-sound-effect-modal *ngIf="localPlayer" [localPlayer]="localPlayer"></app-sound-effect-modal>
+    <app-sound-effect-modal *ngIf="localPlayer$ | async as localPlayer" [localPlayer]="localPlayer"></app-sound-effect-modal>
     <app-password-modal (joinGame)="loadIntoGame($event)" (goBackEvent)="goBack()"></app-password-modal>
     <app-player-turn-order-modal></app-player-turn-order-modal>
     <app-token-modal></app-token-modal>

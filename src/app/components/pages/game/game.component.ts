@@ -1,7 +1,7 @@
-import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
@@ -55,7 +55,8 @@ import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-moda
     NgIcon,
     SidebarGameInfoComponent,
     ReportUserModalComponent,
-    GameLogModalComponent
+    GameLogModalComponent,
+    AsyncPipe
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -74,17 +75,13 @@ export class GameComponent {
   @ViewChild(GameLogModalComponent) gameLogModal!: GameLogModalComponent;
 
   private subscriptions: Subscription = new Subscription();
-  localPlayerId: string = '';
   roomId!: string;
   showingHotkeys: boolean = false;
   focusedLayout: boolean = false;
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
-
-  get localPlayer() {
-    return this.gameService.getPlayerById(this.localPlayerId) ?? null
-  }
+  localPlayer$: Observable<IPlayer|null> = of(null);
 
   constructor(
     private webRTC: WebRTCService,
@@ -181,9 +178,8 @@ export class GameComponent {
   };
 
  onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
-        this.gameService.setRoom(room);
+        this.gameService.setRoom(room, me.id);
         this.passwordModal.close();
-        this.localPlayerId = me.id;
 
         this.localStorageService.setRoomId(room.id + "");
         this.localStorageService.setPlayerId(me.id);
@@ -370,10 +366,10 @@ export class GameComponent {
     this.router.navigate(['/join']);
   }
 
-  flipCoins = (coinsToFlip: number) => {
+  flipCoins = (coinsToFlip: number, player: IPlayer) => {
     this.webRTC.sendLocalGameEvent({
       event: LocalGameEvent.FlipCoins,
-      callingPlayer: this.localPlayer!,
+      callingPlayer: player!,
       payload: { coinsToFlip: coinsToFlip },
     });
   };
