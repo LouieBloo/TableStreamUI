@@ -83,7 +83,7 @@ export class GameComponent {
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
-  localPlayer$: Observable<IPlayer|null|undefined> = of(null).pipe(shareReplay());
+  localPlayer$: Observable<IPlayer|null|undefined> = of(null);
 
   constructor(
     private webRTC: WebRTCService,
@@ -182,6 +182,7 @@ export class GameComponent {
   };
 
  onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
+  debugger;
         this.gameService.setRoom(room, me.id);
         this.passwordModal.close();
 

@@ -37,11 +37,13 @@ export class GameService {
     }
 
     this.room = room;
+    debugger;
     this.setLocalPlayer(localPlayerId);
   }
 
   public setLocalPlayer(localPlayerId: string) {
     const localPlayer = this.getPlayerById(localPlayerId);
+    debugger;
     this._localPlayer$.next(localPlayer);
   }
 
