@@ -19,12 +19,16 @@ export class QrCodeComponent {
   readonly gameService = inject(GameService);
 
   readonly url$ = this.phoneCameraService
-    .getQrCode('', this.player?.id ?? null)
+    .getQrCode(this.player?.roomId, this.player?.id ?? null)
     .pipe(
       map((code: string) => {
+        debugger;
         return `http://192.168.1.77:4200/join/remote-camera/${code}?roomId=${this.player?.roomId}`;
       })
     );
-}
 
-//how to get roomId on a frontend player object
+    ngOnInit(){
+      console.log(this.player);
+      debugger;
+    }
+}

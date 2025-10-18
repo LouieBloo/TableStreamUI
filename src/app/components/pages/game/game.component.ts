@@ -1,7 +1,7 @@
 import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of, shareReplay, Subscription, tap } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
@@ -31,6 +31,7 @@ import { bootstrapCheck } from '@ng-icons/bootstrap-icons';
 import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
 import { ReportUserModalComponent } from '../../modals/report-user-modal/report-user-modal.component';
 import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-modal.component';
+import { QrCodeComponent } from "../../qr-code/qr-code.component";
 
 @Component({
   selector: 'app-game',
@@ -56,7 +57,8 @@ import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-moda
     SidebarGameInfoComponent,
     ReportUserModalComponent,
     GameLogModalComponent,
-    AsyncPipe
+    AsyncPipe,
+    QrCodeComponent
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -81,7 +83,7 @@ export class GameComponent {
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
-  localPlayer$: Observable<IPlayer|null> = of(null);
+  localPlayer$: Observable<IPlayer|null|undefined> = of(null).pipe(shareReplay());
 
   constructor(
     private webRTC: WebRTCService,
@@ -98,6 +100,8 @@ export class GameComponent {
       players: [],
       messages: [],
     };
+
+    this.localPlayer$ = this.gameService.localPlayer$;
   }
 
   ngOnInit() {

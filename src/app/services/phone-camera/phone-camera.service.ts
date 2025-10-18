@@ -19,11 +19,12 @@ export class PhoneCameraService {
   constructor() {}
 
   public getQrCode(
-    roomId: string | null,
+    roomId: string | null | undefined,
     playerId: string | null
   ): Observable<any> {
-    if (roomId == null || playerId == null) return of(null);
+    debugger;
 
+    if (roomId == null || playerId == null) return of(null);
     const body = {
       roomId: roomId,
       playerId: playerId,

@@ -2,9 +2,7 @@
     <input id="my-drawer" type="checkbox" class="drawer-toggle" />
 
     <div class="w-screen h-screen flex flex-col drawer-content ">
-
         <div *ngIf="localPlayer$ | async as localPlayer" class="flex flex-row flex-grow">
-           
             <div  id="userStreams" class="flex flex-wrap h-screen flex-grow">
                 <div
                   *ngFor="let player of gameService.room.players; let i = index"
@@ -51,7 +49,8 @@
                         </div>
 
                         <button (click)="showingHotkeys = !showingHotkeys" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">{{showingHotkeys ? 'Hide Hotkeys' : 'Show Hotkeys'}}</button>
-
+                        <button class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none">Join by phone</button>
+                        <app-qr-code *ngIf="localPlayer" [player]="localPlayer"></app-qr-code>
                         <button (click)="showChatbox = !showChatbox" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative ">
                             {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
                             <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
