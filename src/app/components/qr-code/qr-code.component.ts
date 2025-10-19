@@ -20,10 +20,6 @@ export class QrCodeComponent {
 
   url$: Observable<string | null> = of(null);
 
-  test(){
-    console.log(this.player);
-    debugger;
-  }
   ngOnInit() {
     this.url$ = this.phoneCameraService
       .getQrCode(this.player?.roomId, this.player?.id ?? null)

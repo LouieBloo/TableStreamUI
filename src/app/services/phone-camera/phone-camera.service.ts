@@ -22,7 +22,6 @@ export class PhoneCameraService {
     roomId: string | null | undefined,
     playerId: string | null
   ): Observable<any> {
-    debugger;
     if (roomId == null || playerId == null) return of(null);
     const body = {
       roomId: roomId,

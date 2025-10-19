@@ -182,7 +182,6 @@ export class GameComponent {
   };
 
  onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
-  debugger;
         this.gameService.setRoom(room, me.id);
         this.passwordModal.close();
 
