@@ -6,5 +6,6 @@ export class MTGCommander extends Game {
     override gameType:GameType = GameType.MTGCommander;
     override searchTag:string = "commander";
     override name:string = "Commander";
+    override commanderTitle:string = "Commander";
     override classifierActive:boolean = true;
 }
