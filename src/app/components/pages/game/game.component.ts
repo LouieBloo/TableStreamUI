@@ -1,5 +1,5 @@
 import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
@@ -30,6 +30,7 @@ import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sideba
 import { ReportUserModalComponent } from '../../modals/report-user-modal/report-user-modal.component';
 import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-modal.component';
 import { QrCodeComponent } from "../../qr-code/qr-code.component";
+import { LocalDevicesService } from '../../../services/devices/devices.service';
 
 @Component({
   selector: 'app-game',
@@ -83,7 +84,7 @@ export class GameComponent {
   localPlayer$: Observable<IPlayer|null|undefined> = of(null);
   showSideBar: boolean = true;
   showQrCode: boolean = false;
-
+  devicesService = inject(LocalDevicesService)
   get focusedIndex(): number {
     return this.gameService.getPlayerTakingTurnIndex();
   }

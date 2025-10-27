@@ -114,7 +114,7 @@ export class UserStreamComponent {
     private ngZone: NgZone,
     private localStorageService: LocalStorageService,
     private router: Router,
-    private devicesService: LocalDevicesService
+    public devicesService: LocalDevicesService
   ) {
     this.videoQuality = localStorageService.videoQuality || '16/9-1080'
     this.subscribeToEvents();

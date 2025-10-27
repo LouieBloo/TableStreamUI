@@ -35,7 +35,7 @@
                       <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Game Log</button>
                       <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Report Issue</button>
                       <div class="relative inline-block dropdown">
-                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none btn-action">Layout</button>
+                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none btn-action">Layout {{(devicesService.videoDevices$ | async)?.length}} </button>
                            <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10">
                             </ul>
                       </div>
