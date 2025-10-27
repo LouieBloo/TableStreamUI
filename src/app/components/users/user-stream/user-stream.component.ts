@@ -186,7 +186,7 @@ export class UserStreamComponent {
         }
       }),
       switchMap(() => 
-        from(this.webRTC.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
+        from(this.devicesService.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
       )
     ).subscribe({
       next: (stream: MediaStream | null) => {//TODO - what is the id on a MediaStream. Probabaly just a random id
@@ -244,7 +244,7 @@ export class UserStreamComponent {
 changeDeviceReactive() {
   from(this.webRTC.changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
     .pipe(
-      switchMap(() => from(this.webRTC.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId)))
+      switchMap(() => from(this.devicesService.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId)))
     )
     .subscribe({
       next: (stream: MediaStream | null) => {
@@ -272,18 +272,18 @@ changeDeviceReactive() {
     this.isMutedSelf = !this.isMutedSelf;
     this.localStorageService.setMicMuted(this.isMutedSelf + "");
     if (this.isMutedSelf) {
-      this.webRTC.muteSelf();
+      this.devicesService.muteSelf();
     } else {
-      this.webRTC.unmuteSelf();
+      this.devicesService.unmuteSelf();
     }
   }
 
   toggleVideo() {
     this.isVideoOff = !this.isVideoOff;
     if (this.isVideoOff) {
-      this.webRTC.turnOffVideo();
+      this.devicesService.turnOffVideo();
     } else {
-      this.webRTC.turnOnVideo();
+      this.devicesService.turnOnVideo();
     }
   }
 

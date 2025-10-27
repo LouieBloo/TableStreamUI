@@ -2,19 +2,103 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
+import { LoggerService } from '../logger/logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocalDevicesService {
   localStorageService = inject(LocalStorageService);
+  logger = inject(LoggerService);
 
   private _audioDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
   private _videoDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
 
   audioDevices$ = this._audioDevices.asObservable();
   videoDevices$ = this._videoDevices.asObservable();
+  localStream: MediaStream | null = null;
+
   constructor() {}
+
+  public logAspectRatio(stream: MediaStream): void {
+    if (!stream) {
+      return;
+    }
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack) {
+      const settings = videoTrack.getSettings();
+      if (settings.width && settings.height) {
+        const aspectRatio = settings.width / settings.height;
+        this.logger.log(
+          `Camera aspect ratio: ${aspectRatio.toFixed(2)} (width: ${
+            settings.width
+          }, height: ${settings.height})`
+        );
+      } else {
+        this.logger.log(
+          'Could not determine camera aspect ratio (width/height not available in settings).'
+        );
+      }
+    } else {
+      this.logger.log('No video track available to determine aspect ratio.');
+    }
+  }
+
+  public async buildLocalStream(
+    videoDeviceId?: string,
+    audioDeviceId?: string,
+    aspectRatio: string = '16/9'
+  ): Promise<MediaStream | null> {
+    if (this.localStream) {
+      this.logAspectRatio(this.localStream);
+      return this.localStream;
+    }
+
+    try {
+      this.localStream = await this.getLocalMediaStream(
+        videoDeviceId,
+        audioDeviceId,
+        aspectRatio
+      );
+      this.logAspectRatio(this.localStream!);
+    } catch (err: any) {
+      if (
+        err.name === 'NotAllowedError' ||
+        err.name === 'PermissionDeniedError'
+      ) {
+        this.logger.log('Permission error: Trying again without audio');
+
+        await this.getUserMediaWithoutAudio(
+          videoDeviceId,
+          audioDeviceId,
+          aspectRatio
+        );
+        this.logAspectRatio(this.localStream!);
+      } else {
+        // this.logger.error("Error getting media stream:", {error: err, constraints }, "WEB RTC initLocalStream")TODO
+        throw err;
+      }
+    }
+
+    return this.localStream;
+  }
+
+  private async getUserMediaWithoutAudio(
+    videoDeviceId?: string,
+    audioDeviceId?: string,
+    aspectRatio: string = '16/9'
+  ) {
+    try {
+      this.localStream = await this.getLocalMediaStream(
+        videoDeviceId,
+        audioDeviceId,
+        aspectRatio,
+        false
+      );
+    } catch (err) {
+      this.logger.error('Error getting media stream without audio:', err);
+    }
+  }
 
   async setDevices(): Promise<void> {
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -28,7 +112,9 @@ export class LocalDevicesService {
     this._videoDevices.next(videoDevices);
   }
 
-  async getLocalMediaStreamWithConstraints(constraints: MediaStreamConstraints){
+  async getLocalMediaStreamWithConstraints(
+    constraints: MediaStreamConstraints
+  ) {
     return navigator.mediaDevices.getUserMedia(constraints);
   }
   //confirm with luke that this name makes sense
@@ -43,7 +129,7 @@ export class LocalDevicesService {
       audioDeviceId,
       videoQuality
     );
-    if(!withAudio) constraints.audio = false;
+    if (!withAudio) constraints.audio = false;
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
@@ -118,4 +204,72 @@ export class LocalDevicesService {
       idealHeight,
     };
   }
+
+  public stopAndRemoveAllLocalMediaTracks() {
+    if (this.localStream) {
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
+        track.enabled = false;
+      });
+      this.localStream = null;
+    }
+  }
+
+  public muteSelf(): void {
+    if (this.localStream) {
+      this.localStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = false));
+    }
+  }
+
+  public unmuteSelf(): void {
+    if (this.localStream) {
+      this.localStream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+  }
+
+  public turnOffVideo(): void {
+    if (this.localStream) {
+      this.localStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = false));
+    }
+  }
+
+  public turnOnVideo(): void {
+    if (this.localStream) {
+      this.localStream
+        .getVideoTracks()
+        .forEach((track) => (track.enabled = true));
+    }
+  }
+
+  public removeTrack(mediaStreamTrack: MediaStreamTrack) {
+    this.localStream?.removeTrack(mediaStreamTrack);
+  }
+
+  public addTrack(mediaStreamTrack: MediaStreamTrack) {
+    this.localStream?.addTrack(mediaStreamTrack);
+  }
+
+  public getFirstVideoTrack(){
+    return this.localStream?.getVideoTracks()[0]
+  }
+
+  public getFirstAudioTrack(){
+    return this.localStream?.getAudioTracks()[0]
+  }
+
+
+  public async initializeLocalStream(videoDeviceId: string, audioDeviceId: string){
+    if(!this.localStream){
+      this.localStream = await this.getLocalMediaStream(videoDeviceId, audioDeviceId)
+    }
+    return this.localStream;
+  }
+
+
 }

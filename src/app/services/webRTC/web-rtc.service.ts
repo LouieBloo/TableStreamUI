@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
-import { GameErrorSeverity, GameErrorType, GameEvent, IGameError, IGameEvent } from '../../interfaces/IGame';
+import {
+  GameErrorSeverity,
+  GameErrorType,
+  GameEvent,
+  IGameError,
+  IGameEvent,
+} from '../../interfaces/IGame';
 import { IMessage } from '../../interfaces/IMessage';
 import { IUser, UserType } from '../../interfaces/IPlayer';
 import { IRoom, IRoomHistoryEvent } from '../../interfaces/IRoom';
@@ -32,316 +38,54 @@ export interface JoinRoomPayload {
   isSharingImages: boolean;
 }
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebRTCService {
   socket: Socket | null = null;
-  localStream: MediaStream | null = null;//TODO move localStream to deviceServices (maybe rename to localStreamService)
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {};
-
-  private iceServerList:any = null;
-
-  private userJoinedSubject = new Subject<{ id: string, user: IUser }>();
+  private iceServerList: any = null;
+  private userJoinedSubject = new Subject<{ id: string; user: IUser }>();
+  private gameEventSubject = new Subject<IGameEvent>();
   public userJoined = this.userJoinedSubject.asObservable();
-
   private localGameEventSubject = new Subject<IGameEvent>();
   public localGameEvent = this.localGameEventSubject.asObservable();
-
-  onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] = [];
+  onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] =
+    [];
   onStreamRemoved: ((id: string) => void)[] = [];
-
-  private gameEventSubject = new Subject<IGameEvent>();
   public gameEvent = this.gameEventSubject.asObservable();
 
   public kickedPlayerEvent$ = this.gameEventSubject.pipe(
-    filter((event => event.event === GameEvent.KickPlayer))
-  )
-  
+    filter((event) => event.event === GameEvent.KickPlayer)
+  );
+
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
+  private _roomPasswordValid: BehaviorSubject<boolean | null> =
+    new BehaviorSubject<boolean | null>(null);
 
-  private _roomPasswordValid: BehaviorSubject<boolean|null> = new BehaviorSubject<boolean|null>(null);
-
-
-  get roomPasswordValid(): Observable<boolean|null>{
+  get roomPasswordValid(): Observable<boolean | null> {
     return this._roomPasswordValid.asObservable();
   }
 
   constructor(
-    private alertService: AlertsService, 
-    private logger: LoggerService, 
-    private localStorageService: LocalStorageService, 
+    private alertService: AlertsService,
+    private logger: LoggerService,
+    private localStorageService: LocalStorageService,
     private router: Router,
     private userService: UserService,
     private gameService: GameService,
     private devicesService: LocalDevicesService
-  ) {
-    
-  }
+  ) {}
 
-  //adding this just for testing
-  private logAspectRatio(stream: any): void {
-    if(!stream){return;}
-    const videoTrack = stream.getVideoTracks()[0];
-    if (videoTrack) {
-      const settings = videoTrack.getSettings();
-      if (settings.width && settings.height) {
-        const aspectRatio = settings.width / settings.height;
-        this.logger.log(`Camera aspect ratio: ${aspectRatio.toFixed(2)} (width: ${settings.width}, height: ${settings.height})`);
-      } else {
-        this.logger.log("Could not determine camera aspect ratio (width/height not available in settings).");
-      }
-    } else {
-      this.logger.log("No video track available to determine aspect ratio.");
-    }
-  }
-  
-  public async buildLocalStream(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9'): Promise<MediaStream|null> {
-    if (this.localStream) { 
-      this.logAspectRatio(this.localStream);
-      return this.localStream;
-    }
-    //this is the piece that will be removed
-    // const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId, aspectRatio);
-  
-    try {
-      this.localStream = await this.devicesService.getLocalMediaStream(videoDeviceId, audioDeviceId, aspectRatio);
-      this.logAspectRatio(this.localStream);
-    } catch (err:any) {
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        this.logger.log("Permission error: Trying again without audio")
-
-        await this.getUserMediaWithoutAudio(videoDeviceId, audioDeviceId, aspectRatio)
-        this.logAspectRatio(this.localStream);
-      }
-       else {
-        // this.logger.error("Error getting media stream:", {error: err, constraints }, "WEB RTC initLocalStream")TODO
-        throw err;
-      }
-    }
-  
-    return this.localStream;
-  }
-
-  private async getUserMediaWithoutAudio(videoDeviceId?: string, audioDeviceId?: string, aspectRatio: string = '16/9') {
-    try {
-      this.localStream = await this.devicesService.getLocalMediaStream(videoDeviceId, audioDeviceId, aspectRatio, false);
-    } catch (err) {
-      this.logger.error("Error getting media stream without audio:", err);
-    }
-  }
-
-  //TODO fix the constraints in this
-  public async changeDevice(
-    videoDeviceId?: string,
-    audioDeviceId?: string,
-  ): Promise<void> {
-    if (!this.localStream) {
-      this.localStream = await this.devicesService.getLocalMediaStream(videoDeviceId, audioDeviceId);
-      await this.updatePeerConnections();
-      return;
-    }
-  
-    // Get current tracks and device IDs
-    const currentVideoTrack = this.localStream.getVideoTracks()[0];
-    const currentAudioTrack = this.localStream.getAudioTracks()[0];
-  
-    const currentVideoDeviceId = currentVideoTrack?.getSettings().deviceId;
-    const currentAudioDeviceId = currentAudioTrack?.getSettings().deviceId;
-  
-    const videoDeviceChanged: boolean = videoDeviceId !== undefined && videoDeviceId !== currentVideoDeviceId;
-    const audioDeviceChanged: boolean = audioDeviceId !== undefined && audioDeviceId !== currentAudioDeviceId;
-
-    const targetVideoQuality:IVideoQualify = this.devicesService.getCameraVideoQuality();
-  
-    // Apply new constraints to existing video track if device hasn't changed
-    if (!videoDeviceChanged && currentVideoTrack) {
-      try {
-        await currentVideoTrack.applyConstraints({
-          width: { ideal: targetVideoQuality.idealWidth },
-          height: { ideal: targetVideoQuality.idealHeight },
-          aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
-        });
-      } catch (err) {
-        console.error('Error applying constraints to video track:', err);
-      }
-    }
-  
-    // If we need new tracks, get them before stopping existing tracks
-    let newVideoTrack: MediaStreamTrack | null = null;
-    let newAudioTrack: MediaStreamTrack | null = null;
-  
-    if (videoDeviceChanged || audioDeviceChanged) {
-      const constraints: MediaStreamConstraints = {
-        video: videoDeviceChanged
-          ? {
-              deviceId: { exact: videoDeviceId },
-              width: { ideal: targetVideoQuality.idealWidth },
-              height: { ideal: targetVideoQuality.idealHeight },
-              aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
-            }
-          : false,
-        audio: audioDeviceChanged
-          ? {
-              deviceId: { exact: audioDeviceId },
-            }
-          : false,
-      };
-  
-      try {//TODO these constraints are different. should be moved out of here into devicesService
-        const newStream = await this.devicesService.getLocalMediaStreamWithConstraints(constraints);
-        if(newStream){
-          if (videoDeviceChanged) {
-            newVideoTrack = newStream.getVideoTracks()[0];
-          }
-          if (audioDeviceChanged) {
-            newAudioTrack = newStream.getAudioTracks()[0];
-          }
-        }
-      } catch (err) {
-        console.error('Error getting new media stream:', err);
-        // Handle error appropriately
-        return;
-      }
-    }
-  
-    // Now we can stop existing tracks and replace them
-    if (videoDeviceChanged && newVideoTrack) {
-      currentVideoTrack?.stop();
-      this.localStream.removeTrack(currentVideoTrack);
-      this.localStream.addTrack(newVideoTrack);
-      await this.replaceTrackInPeerConnections('video', newVideoTrack);
-    }
-  
-    if (audioDeviceChanged && newAudioTrack) {
-      currentAudioTrack?.stop();
-      this.localStream.removeTrack(currentAudioTrack);
-      this.localStream.addTrack(newAudioTrack);
-      await this.replaceTrackInPeerConnections('audio', newAudioTrack);
-    }
-  
-    // Log aspect ratio
-    this.logAspectRatio(this.localStream);
-  }
-
-  private async updatePeerConnections(): Promise<void> {
-    for (const socketId in this.peerConnections) {
-      const pc = this.peerConnections[socketId];
-  
-      // Replace tracks in peer connections
-      const senders = pc.getSenders();
-      this.localStream!.getTracks().forEach((track) => {
-        const sender = senders.find((s) => s.track?.kind === track.kind);
-        if (sender) {
-          sender.replaceTrack(track);
-        } else {
-          pc.addTrack(track, this.localStream!);
-        }
-      });
-  
-      // Renegotiate the connection if necessary
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
-    }
-  }
-
-  private async replaceTrackInPeerConnections(kind: 'video' | 'audio', newTrack: MediaStreamTrack) {
-    for (const socketId in this.peerConnections) {
-      const pc = this.peerConnections[socketId];
-      const sender = pc.getSenders().find((s) => s.track?.kind === kind);
-      if (sender) {
-        await sender.replaceTrack(newTrack);
-      } else {
-        pc.addTrack(newTrack, this.localStream!);
-      }
-    }
-  }
-
-  public subscribeToStreamAdd(callback: (id: string, stream: MediaStream, user: IUser) => void) {
-    this.onStreamAdded.push(callback);
-  }
-
-  public subscribeToStreamRemove(callback: (id: string) => void) {
-    this.onStreamRemoved.push(callback);
-  }
-
-  private getJoinRoomPayload(roomId: string, password: string|null): JoinRoomPayload {
-    return {
-        playerId: this.localStorageService.playerId,
-        roomId: roomId,
-        gameType: this.localStorageService.gameType,
-        roomName: this.localStorageService.roomName,
-        playerName: this.localStorageService.playerName,
-        password: password && password != "null" ? password : null,
-        userType: this.localStorageService.amISpectator ? UserType.Spectator : UserType.Player,
-        maxPlayers: parseInt(this.localStorageService.maxPlayers || "4") || 4,
-        reactionsEnabled: this.localStorageService.reactionsEnabled && this.localStorageService.reactionsEnabled == 'false' ? false : true,
-        isPublic: this.localStorageService.publicGame,
-        joinerJwtToken: this.userService.isLoggedIn ? this.userService.jwtToken : null,
-        allowSpectators: this.localStorageService.allowSpectators,
-        isSharingImages: this.localStorageService.isSharingImages && this.localStorageService.isSharingImages == 'false' ? false : true
-      } as JoinRoomPayload
-  }
-
-private handleJoinRoomError(error: IGameError): void {
-  switch (error.type) {
-    case GameErrorType.InvalidPassword:
-      this._roomPasswordValid.next(false);
-      break;
-
-    case GameErrorType.RoomFull:
-      this.alertService.addAlert('error', error.message, 5);
-      break;
-
-    case GameErrorType.EnteringBannedRoom:
-      this.router.navigate(['/join']);
-      this.alertService.addAlert('error', error.message, 5);
-      break;
-
-    case GameErrorType.InvalidAction:
-      this.router.navigate(['/join']);
-      this.alertService.addAlert('error', error.message);
-      break;
-
-    default:
-      console.warn('Unhandled join room error:', error);
-      this.alertService.addAlert('error', 'An unknown error occurred.', 5);
-      break;
-  }
-}
-
-public onServerResponseFromPhone = (socket: string, room: IRoom) => {
-  this.iceServerList = room.iceServerList;
-  //update stream to be new socket
-  //do all the peer to peer connection
-  //need videoId, audioId
-    // const constraints = this.getMediaConstraints();
-    // this.localStream = await this.devicesService.getLocalMediaStream(constraints);
-
-}
-
-public joinAsPhone = async (token: IPhoneToken) => {
-  this.socket = io(environment.socketUrl);
-  this.socket.on('signal', this.handleSignal);
-  this.socket.on('newPeer', this.handleNewPeer);
-  this.socket.on('peerDisconnected', this.handlePeerDisconnected);
-  this.remoteStreams = {};
-  this.peerConnections = {};
-
-  this.socket.emit('joinRoomAsPhone', token, (player: IUser, room: IRoom) => {//todo confirm payload
-    this.iceServerList = room.iceServerList;
-    });
-
-
-  }
-
-  public joinRoom = async(roomId: string, password: string | null, callback: (user: IUser, room: IRoom) => void) => {
+  public joinRoom = async (
+    roomId: string,
+    password: string | null,
+    callback: (user: IUser, room: IRoom) => void
+  ) => {
     const joinRoomPayload = this.getJoinRoomPayload(roomId, password);
     this.socket = io(environment.socketUrl);
-    if(!this.socket)
-      return;
+    if (!this.socket) return;
 
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -349,73 +93,211 @@ public joinAsPhone = async (token: IPhoneToken) => {
     this.socket.on('message', this.handleMessage);
     this.socket.on('gameEvent', this.handleGameEvent);
     this.socket.on('errorResponse', this.handleErrorResponse);
-    this.socket.on('historyEvent', (historyEvent:IRoomHistoryEvent)=> {
-    console.log("HISTORY: ", historyEvent)
-      //handle history adding, probably should live somewhere else
-    if(this.gameService.room && this.gameService.room.history && historyEvent){
-      this.gameService.room.history.push(historyEvent);
-    }}
-    );
+    this.socket.on('historyEvent', this.handleHistory);
     this.remoteStreams = {};
     this.peerConnections = {};
 
     this.amISpectator = joinRoomPayload.userType == UserType.Spectator;
-  
+
     if (this.socket) {
-      this.socket.emit('joinRoom', joinRoomPayload,
+      this.socket.emit(
+        'joinRoom',
+        joinRoomPayload,
         (me: IUser, room: IRoom, error: IGameError) => {
           if (error) {
             this.handleJoinRoomError(error);
             return;
           }
           this.iceServerList = room.iceServerList;
+          room.messages?.forEach((m) => this.handleMessage(m));
+          room.game?.sharedCards?.forEach((card) =>
+            this.handleGameEvent({ event: GameEvent.ShareCard, response: card })
+          );
 
-          // Set all our game state
-          if (room.messages) {
-            room.messages.forEach(m => this.handleMessage(m))
-          }
-          if (room.game && room.game.sharedCards) {
-            room.game.sharedCards.forEach(card => {
-              this.handleGameEvent({
-                event: GameEvent.ShareCard,
-                response: card
-              })
-            })
-          }
+          this.registerSocketDisconnect(joinRoomPayload, room, password);
+          callback(me, room);
+        }
+      );
+    }
+  };
 
-          this.registerSocketDisconnect(joinRoomPayload, room, password)
-          callback(me, room)
-        });
+  private async renegotiateConnection(
+    peerConnection: RTCPeerConnection,
+    socketId: string
+  ) {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    this.socket?.emit('signal', {
+      to: socketId,
+      signal: peerConnection.localDescription,
+    });
+  }
+
+  private async updatePeerConnections(mediaStream: MediaStream): Promise<void> {
+    for (const socketId in this.peerConnections) {
+      const peerConnection = this.peerConnections[socketId];
+      this.replaceOrAddTracks(peerConnection, mediaStream);
+      await this.renegotiateConnection(peerConnection, socketId);
     }
   }
 
-  private registerSocketDisconnect(joinRoomPayload: JoinRoomPayload, room: IRoom, password: string | null){
-    this.socket?.on('disconnect', (reason:string) => {
-      console.log("Reason, ", reason)
+  private replaceOrAddTracks(
+    peerConnection: RTCPeerConnection,
+    mediaStream: MediaStream
+  ) {
+    const senders = peerConnection.getSenders();
+    mediaStream.getTracks().forEach((track) => {
+      const sender = senders.find((s) => s.track?.kind === track.kind);
+      if (sender) {
+        sender.replaceTrack(track);
+      } else {
+        peerConnection.addTrack(track, mediaStream);
+      }
+    });
+  }
+  
+  public subscribeToStreamAdd(
+    callback: (id: string, stream: MediaStream, user: IUser) => void
+  ) {
+    this.onStreamAdded.push(callback);
+  }
+
+  public subscribeToStreamRemove(callback: (id: string) => void) {
+    this.onStreamRemoved.push(callback);
+  }
+
+  private getJoinRoomPayload(
+    roomId: string,
+    password: string | null
+  ): JoinRoomPayload {
+    return {
+      playerId: this.localStorageService.playerId,
+      roomId: roomId,
+      gameType: this.localStorageService.gameType,
+      roomName: this.localStorageService.roomName,
+      playerName: this.localStorageService.playerName,
+      password: password && password != 'null' ? password : null,
+      userType: this.localStorageService.amISpectator
+        ? UserType.Spectator
+        : UserType.Player,
+      maxPlayers: parseInt(this.localStorageService.maxPlayers || '4') || 4,
+      reactionsEnabled:
+        this.localStorageService.reactionsEnabled &&
+        this.localStorageService.reactionsEnabled == 'false'
+          ? false
+          : true,
+      isPublic: this.localStorageService.publicGame,
+      joinerJwtToken: this.userService.isLoggedIn
+        ? this.userService.jwtToken
+        : null,
+      allowSpectators: this.localStorageService.allowSpectators,
+      isSharingImages:
+        this.localStorageService.isSharingImages &&
+        this.localStorageService.isSharingImages == 'false'
+          ? false
+          : true,
+    } as JoinRoomPayload;
+  }
+
+  private handleJoinRoomError(error: IGameError): void {
+    switch (error.type) {
+      case GameErrorType.InvalidPassword:
+        this._roomPasswordValid.next(false);
+        break;
+
+      case GameErrorType.RoomFull:
+        this.alertService.addAlert('error', error.message, 5);
+        break;
+
+      case GameErrorType.EnteringBannedRoom:
+        this.router.navigate(['/join']);
+        this.alertService.addAlert('error', error.message, 5);
+        break;
+
+      case GameErrorType.InvalidAction:
+        this.router.navigate(['/join']);
+        this.alertService.addAlert('error', error.message);
+        break;
+
+      default:
+        console.warn('Unhandled join room error:', error);
+        this.alertService.addAlert('error', 'An unknown error occurred.', 5);
+        break;
+    }
+  }
+
+  public onServerResponseFromPhone = (socket: string, room: IRoom) => {
+    this.iceServerList = room.iceServerList;
+    //update stream to be new socket
+    //do all the peer to peer connection
+    //need videoId, audioId
+    // const constraints = this.getMediaConstraints();
+    // this.localStream = await this.devicesService.getLocalMediaStream(constraints);
+  };
+
+  public joinAsPhone = async (token: IPhoneToken) => {
+    this.socket = io(environment.socketUrl);
+    this.socket.on('signal', this.handleSignal);
+    this.socket.on('newPeer', this.handleNewPeer);
+    this.socket.on('peerDisconnected', this.handlePeerDisconnected);
+    this.remoteStreams = {};
+    this.peerConnections = {};
+
+    this.socket.emit('joinRoomAsPhone', token, (player: IUser, room: IRoom) => {
+      //todo confirm payload
+      this.iceServerList = room.iceServerList;
+    });
+  };
+
+  private registerSocketDisconnect(
+    joinRoomPayload: JoinRoomPayload,
+    room: IRoom,
+    password: string | null
+  ) {
+    this.socket?.on('disconnect', (reason: string) => {
+      console.log('Reason, ', reason);
       // this is when the user disconnects on purpose
-      if(reason && reason == 'io client disconnect'){return;}
-      
-      this.alertService.addAlert("error", "Lost connection to server. Retrying connection...", 5);
+      if (reason && reason == 'io client disconnect') {
+        return;
+      }
+
+      this.alertService.addAlert(
+        'error',
+        'Lost connection to server. Retrying connection...',
+        5
+      );
       console.warn('Socket disconnected. Attempting to reconnect...');
 
       this.socket?.once('connect', () => {
         console.log('Reconnected to server. Rejoining room...');
-        this.alertService.addAlert("warning", "Reconnected to server. Rejoining room...", 5);
-        this.socket?.emit('joinRoom', {
-          playerId: joinRoomPayload.playerId,
-          roomId: room.id,
-          gameType: joinRoomPayload.gameType,
-          roomName: joinRoomPayload.roomName,
-          playerName: joinRoomPayload.playerName,
-          password: password && password != "null" ? password : null,
-          userType: joinRoomPayload.userType,
-          maxPlayers: joinRoomPayload.maxPlayers || 4,//TODO
-          reactionsEnabled: joinRoomPayload.reactionsEnabled,
-          joinerJwtToken: joinRoomPayload.joinerJwtToken,
-        },
-        (newPlayer: IUser, room: IRoom, error: IGameError) => {//TODO
-          this.alertService.addAlert("success", "Successfully rejoined room", 5);
-        });
+        this.alertService.addAlert(
+          'warning',
+          'Reconnected to server. Rejoining room...',
+          5
+        );
+        this.socket?.emit(
+          'joinRoom',
+          {
+            playerId: joinRoomPayload.playerId,
+            roomId: room.id,
+            gameType: joinRoomPayload.gameType,
+            roomName: joinRoomPayload.roomName,
+            playerName: joinRoomPayload.playerName,
+            password: password && password != 'null' ? password : null,
+            userType: joinRoomPayload.userType,
+            maxPlayers: joinRoomPayload.maxPlayers || 4, //TODO
+            reactionsEnabled: joinRoomPayload.reactionsEnabled,
+            joinerJwtToken: joinRoomPayload.joinerJwtToken,
+          },
+          (newPlayer: IUser, room: IRoom, error: IGameError) => {
+            //TODO
+            this.alertService.addAlert(
+              'success',
+              'Successfully rejoined room',
+              5
+            );
+          }
+        );
       });
     });
   }
@@ -426,29 +308,22 @@ public joinAsPhone = async (token: IPhoneToken) => {
       this.socket = null;
     }
 
-    // Stop and remove all local media tracks
-    if (this.localStream) {
-      this.localStream.getTracks().forEach(track => {
-        track.stop();  // Stop the track
-        track.enabled = false;  // Disable it
-      });
-      this.localStream = null;
-    }
+    this.devicesService.stopAndRemoveAllLocalMediaTracks();
 
     // Close and remove all peer connections
     for (const pc of Object.values(this.peerConnections)) {
-      pc.getSenders().forEach(sender => {
+      pc.getSenders().forEach((sender) => {
         if (sender.track) {
-          sender.track.stop();  // Stop all sending tracks
+          sender.track.stop(); // Stop all sending tracks
         }
       });
-      pc.close();  // Close the peer connection
+      pc.close(); // Close the peer connection
     }
     this.peerConnections = {};
 
     // Clear remote streams and stop all tracks in the remote streams
     for (const stream of Object.values(this.remoteStreams)) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
     }
     this.remoteStreams = {};
 
@@ -460,32 +335,46 @@ public joinAsPhone = async (token: IPhoneToken) => {
     return this.remoteStreams[socketId] || null;
   }
 
-  private handleSignal = async (data: { from: string; signal: any, user: IUser }) => {
-    this.logger.log("Handle signal: ", data.from, data.signal);
+  private handleSignal = async (data: {
+    from: string;
+    signal: any;
+    user: IUser;
+  }) => {
+    this.logger.log('Handle signal: ', data.from, data.signal);
     const { from, signal } = data;
     if (!this.peerConnections[from]) {
       this.createPeerConnection(from, data.user);
     }
     const peerConnection = this.peerConnections[from];
     if (signal.type === 'offer') {
-
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
-      this.logger.log('Signaling state before answer:', peerConnection.signalingState);
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription(signal)
+      );
+      this.logger.log(
+        'Signaling state before answer:',
+        peerConnection.signalingState
+      );
       const answer = await peerConnection.createAnswer();
-      this.logger.log('Signaling state after answer:', peerConnection.signalingState);
-      
-      await peerConnection.setLocalDescription(answer);
-      this.socket?.emit('signal', { to: from, signal: peerConnection.localDescription });
-    } else if (signal.type === 'answer') {
+      this.logger.log(
+        'Signaling state after answer:',
+        peerConnection.signalingState
+      );
 
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
+      await peerConnection.setLocalDescription(answer);
+      this.socket?.emit('signal', {
+        to: from,
+        signal: peerConnection.localDescription,
+      });
+    } else if (signal.type === 'answer') {
+      await peerConnection.setRemoteDescription(
+        new RTCSessionDescription(signal)
+      );
     } else if (signal.candidate) {
       await peerConnection.addIceCandidate(new RTCIceCandidate(signal));
     }
   };
 
-
-  private handleNewPeer = (data: { socketId: string, user: IUser }) => {
+  private handleNewPeer = (data: { socketId: string; user: IUser }) => {
     debugger;
     const { socketId } = data;
     //not sure the correct order of this, trying in front of createPeerConnection
@@ -504,141 +393,154 @@ public joinAsPhone = async (token: IPhoneToken) => {
     }
 
     this.onStreamRemoved.forEach((callback) => {
-      callback(socketId)
-    });//might not need this on peerDisconnectedFromPhone
+      callback(socketId);
+    }); //might not need this on peerDisconnectedFromPhone
   };
 
   //TODO the phone is failing here
-  private async createPeerConnection(socketId: string, newUser: IUser, newPeer: boolean = false) {
-    this.logger.log("Creating peer connection: ", socketId, newUser);
+  private async createPeerConnection(
+    socketId: string,
+    newUser: IUser,
+    newPeer: boolean = false
+  ) {
+    this.logger.log('Creating peer connection: ', socketId, newUser);
     try {
       if (this.amISpectator && newUser.type == UserType.Spectator) {
-        this.logger.log("Not adding connection as it's spectator")
+        this.logger.log("Not adding connection as it's spectator");
         return;
       }
 
       const peerConnection = this.initializePeerConnection(socketId, newUser);
 
       if (!this.amISpectator) {
-        try{
+        try {
           await this.addLocalTracksToPeerConnection(peerConnection, socketId);
-        }catch(error){
+        } catch (error) {
           if (this.isSafeToOffer(peerConnection))
-            await this.createReceiveOnlyOffer(peerConnection, socketId)
+            await this.createReceiveOnlyOffer(peerConnection, socketId);
         }
       } else if (newPeer) {
-        this.logger.log("signal state: ", peerConnection.signalingState);
-        await this.createReceiveOnlyOffer(peerConnection, socketId)
+        this.logger.log('signal state: ', peerConnection.signalingState);
+        await this.createReceiveOnlyOffer(peerConnection, socketId);
       }
-    }catch(error){
+    } catch (error) {
       debugger;
-      this.logger.error("createPeerConnection error", {error: error, socketId, user: newUser }, "WEB RTC createPeerConnection");
-      this.alertService.addAlert("error", "There may be an error connecting to a player. Refreshing can help fix this issue");
+      this.logger.error(
+        'createPeerConnection error',
+        { error: error, socketId, user: newUser },
+        'WEB RTC createPeerConnection'
+      );
+      this.alertService.addAlert(
+        'error',
+        'There may be an error connecting to a player. Refreshing can help fix this issue'
+      );
     }
   }
 
-
-  private initializePeerConnection(socketId: string, user: IUser): RTCPeerConnection {
+  private initializePeerConnection(
+    socketId: string,
+    user: IUser
+  ): RTCPeerConnection {
     const configuration = { iceServers: this.iceServerList };
     const peerConnection = new RTCPeerConnection(configuration);
 
     this.peerConnections[socketId] = peerConnection;
 
-    peerConnection.onicecandidate = (event) => this.handleIceCandidateEvent(socketId, event);
-    peerConnection.ontrack = this.handleOnTrack(socketId, user, false);
-    peerConnection.onnegotiationneeded = async () => this.handleNegotiationNeeded(peerConnection, socketId);
+    peerConnection.onicecandidate = (event) =>
+      this.handleIceCandidateEvent(socketId, event);
+    peerConnection.ontrack = this.handleOnTrack(socketId, user);
+    peerConnection.onnegotiationneeded = async () =>
+      this.handleNegotiationNeeded(peerConnection, socketId);
 
     return peerConnection;
   }
 
-
-  private isSafeToOffer(peerConnection: RTCPeerConnection){
-    return peerConnection.signalingState === 'stable' || peerConnection.signalingState === 'have-local-offer'
+  private isSafeToOffer(peerConnection: RTCPeerConnection) {
+    return (
+      peerConnection.signalingState === 'stable' ||
+      peerConnection.signalingState === 'have-local-offer'
+    );
   }
 
-  private async createReceiveOnlyOffer(peerConnection: RTCPeerConnection, socketId: string) {
-    const offerOptions = { offerToReceiveAudio: true, offerToReceiveVideo: true };
+  private async createReceiveOnlyOffer(
+    peerConnection: RTCPeerConnection,
+    socketId: string
+  ) {
+    const offerOptions = {
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    };
     const offer = await peerConnection.createOffer(offerOptions);
     await peerConnection.setLocalDescription(offer);
-    this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
+    this.socket?.emit('signal', {
+      to: socketId,
+      signal: peerConnection.localDescription,
+    });
   }
 
-  private async handleNegotiationNeeded (peerConnection: RTCPeerConnection, socketId: string) {
-    this.logger.log("on negotiation: ", socketId, peerConnection.signalingState);
+  private async handleNegotiationNeeded(
+    peerConnection: RTCPeerConnection,
+    socketId: string
+  ) {
+    this.logger.log(
+      'on negotiation: ',
+      socketId,
+      peerConnection.signalingState
+    );
 
     try {
       if (peerConnection.signalingState === 'stable') {
         debugger;
         const offer = await peerConnection.createOffer({
           offerToReceiveVideo: true,
-          offerToReceiveAudio: true
+          offerToReceiveAudio: true,
         });
 
         await peerConnection.setLocalDescription(offer);
 
-        this.socket?.emit('signal', { to: socketId, signal: peerConnection.localDescription });
+        this.socket?.emit('signal', {
+          to: socketId,
+          signal: peerConnection.localDescription,
+        });
       }
     } catch (error) {
-      this.logger.error(`Error during negotiation: `, { error, socketId, peerConnection }, "WEB RTC onnegotiationneeded");
+      this.logger.error(
+        `Error during negotiation: `,
+        { error, socketId, peerConnection },
+        'WEB RTC onnegotiationneeded'
+      );
     }
   }
 
-
   //sets remoteStreams
-  private handleOnTrack(socketId: string, user: IUser, isPhoneUser: boolean) {
+  private handleOnTrack(socketId: string, user: IUser) {
     return (event: RTCTrackEvent) => {
-      const incomingStream = event.streams[0];
-      this.logger.log("on track: ", event);
+      this.logger.log('on track: ', event);
       this.remoteStreams[socketId] = event.streams[0];
-      if (isPhoneUser) {
-        this.logger.log("Overriding localStream with phone stream");
-        this.localStream = incomingStream;
-        // this.replaceAllTracksFromPhone(incomingStream);//commenting out by dom
-      }
-      this.onStreamAdded.forEach(callback => {
+      this.onStreamAdded.forEach((callback) => {
         callback(socketId, this.remoteStreams[socketId], user);
       });
     };
   }
 
-  private async replaceAllTracksFromPhone(newStream: MediaStream) {
-  for (const socketId in this.peerConnections) {
-    const pc = this.peerConnections[socketId];
-
-    // Remove existing senders and add new tracks
-    const senders = pc.getSenders();
-
-    for (const track of newStream.getTracks()) {
-      const sender = senders.find(s => s.track?.kind === track.kind);
-      if (sender) {
-        await sender.replaceTrack(track);
-      } else {
-        pc.addTrack(track, newStream);
-      }
-    }
-
-    // Renegotiate if needed
-    if (pc.signalingState === 'stable') {
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      this.socket?.emit('signal', { to: socketId, signal: pc.localDescription });
-    }
-  }
-}
-
-
-  private handleIceCandidateEvent(socketId: string, event: RTCPeerConnectionIceEvent) {
-    this.logger.log("on ice candidate", event);
+  private handleIceCandidateEvent(
+    socketId: string,
+    event: RTCPeerConnectionIceEvent
+  ) {
+    this.logger.log('on ice candidate', event);
     if (event.candidate) {
       this.socket?.emit('signal', { to: socketId, signal: event.candidate });
     }
   }
 
-  private async addLocalTracksToPeerConnection(peerConnection: RTCPeerConnection, socketId: string) {
-    let localStream = await this.buildLocalStream();
-    localStream!.getTracks().forEach(track => {
-      this.logger.log("adding tracks for: ", socketId);
-      if(track.kind === 'audio') {
+  private async addLocalTracksToPeerConnection(
+    peerConnection: RTCPeerConnection,
+    socketId: string
+  ) {
+    let localStream = await this.devicesService.buildLocalStream();
+    localStream!.getTracks().forEach((track) => {
+      this.logger.log('adding tracks for: ', socketId);
+      if (track.kind === 'audio') {
         const micMuted = this.localStorageService.isMicMuted === 'true';
         track.enabled = !micMuted;
       }
@@ -649,82 +551,191 @@ public joinAsPhone = async (token: IPhoneToken) => {
   public sendMessage(message: string) {
     if (this.socket) {
       this.socket.emit('message', {
-        text: message
+        text: message,
       });
     }
   }
 
   handleMessage = (message: IMessage) => {
-    this.onMessage.forEach(callback => {
+    this.onMessage.forEach((callback) => {
       if (callback != null) {
         callback(message);
       }
-    })
-  }
+    });
+  };
 
   sendGameEvent = (event: IGameEvent) => {
     if (this.socket) {
       this.socket.emit('gameEvent', event);
     }
-  }
+  };
 
   //we dont listen for these events as they are private, we wait for the callback and resolve
   sendPrivateGameEvent = (event: IGameEvent): Promise<any> => {
     return new Promise((resolve, reject) => {
-        if (this.socket) {
-            this.socket.emit('privateGameEvent', event, (response: any) => {
-              //safe to now call our normal handleGameEvent as we are the only person receiving the updates
-              this.handleGameEvent(response);
-              resolve(true); 
-            });
-        } else {
-            reject(new Error("Socket is not connected"));
-        }
+      if (this.socket) {
+        this.socket.emit('privateGameEvent', event, (response: any) => {
+          //safe to now call our normal handleGameEvent as we are the only person receiving the updates
+          this.handleGameEvent(response);
+          resolve(true);
+        });
+      } else {
+        reject(new Error('Socket is not connected'));
+      }
     });
   };
 
   handleGameEvent = (event: IGameEvent) => {
     this.gameEventSubject.next(event);
-  }
+  };
 
   sendLocalGameEvent = (event: IGameEvent) => {
     this.localGameEventSubject.next(event);
-  }
+  };
+
+  handleHistory = (historyEvent: IRoomHistoryEvent) => {
+    console.log('HISTORY: ', historyEvent);
+    if (
+      this.gameService.room &&
+      this.gameService.room.history &&
+      historyEvent
+    ) {
+      this.gameService.room.history.push(historyEvent);
+    }
+  };
 
   handleErrorResponse = (error: IGameError) => {
-    this.alertService.addAlert(error.severity == GameErrorSeverity.Error ? 'error' : 'warning', error.message);
-  }
-
-  public muteSelf(): void {
-    if (this.localStream) {
-      this.localStream.getAudioTracks().forEach(track => track.enabled = false);
-    }
-  }
-
-  public unmuteSelf(): void {
-    if (this.localStream) {
-      this.localStream.getAudioTracks().forEach(track => track.enabled = true);
-    }
-  }
-
-  public turnOffVideo(): void {
-    if (this.localStream) {
-      this.localStream.getVideoTracks().forEach(track => track.enabled = false);
-    }
-  }
-
-  public turnOnVideo(): void {
-    if (this.localStream) {
-      this.localStream.getVideoTracks().forEach(track => track.enabled = true);
-    }
-  }
+    this.alertService.addAlert(
+      error.severity == GameErrorSeverity.Error ? 'error' : 'warning',
+      error.message
+    );
+  };
 
   public getRemoteStream(socketId: string): MediaStream | null {
     return this.remoteStreams[socketId] || null;
   }
 
-  public resetRoomPasswordInvalid(){
+  public resetRoomPasswordInvalid() {
     this._roomPasswordValid.next(null);
   }
 
+  //TODO fix the constraints in this
+  public async changeDevice(
+    videoDeviceId?: string,
+    audioDeviceId?: string
+  ): Promise<void> {
+    if (!this.devicesService.localStream) {
+      const localStream = await this.devicesService.initializeLocalStream(
+        videoDeviceId!,
+        audioDeviceId!
+      );
+      await this.updatePeerConnections(localStream!);
+      return;
+    }
+
+    // Get current tracks and device IDs
+    const currentVideoTrack = this.devicesService.getFirstVideoTrack();
+    const currentAudioTrack = this.devicesService.getFirstAudioTrack();
+
+    const currentVideoDeviceId = currentVideoTrack?.getSettings().deviceId;
+    const currentAudioDeviceId = currentAudioTrack?.getSettings().deviceId;
+
+    const videoDeviceChanged: boolean =
+      videoDeviceId !== undefined && videoDeviceId !== currentVideoDeviceId;
+    const audioDeviceChanged: boolean =
+      audioDeviceId !== undefined && audioDeviceId !== currentAudioDeviceId;
+
+    const targetVideoQuality: IVideoQualify =
+      this.devicesService.getCameraVideoQuality();
+
+    // Apply new constraints to existing video track if device hasn't changed
+    if (!videoDeviceChanged && currentVideoTrack) {
+      try {
+        await currentVideoTrack.applyConstraints({
+          width: { ideal: targetVideoQuality.idealWidth },
+          height: { ideal: targetVideoQuality.idealHeight },
+          aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
+        });
+      } catch (err) {
+        console.error('Error applying constraints to video track:', err);
+      }
+    }
+
+    // If we need new tracks, get them before stopping existing tracks
+    let newVideoTrack: MediaStreamTrack | null = null;
+    let newAudioTrack: MediaStreamTrack | null = null;
+
+    if (videoDeviceChanged || audioDeviceChanged) {
+      const constraints: MediaStreamConstraints = {
+        video: videoDeviceChanged
+          ? {
+              deviceId: { exact: videoDeviceId },
+              width: { ideal: targetVideoQuality.idealWidth },
+              height: { ideal: targetVideoQuality.idealHeight },
+              aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
+            }
+          : false,
+        audio: audioDeviceChanged
+          ? {
+              deviceId: { exact: audioDeviceId },
+            }
+          : false,
+      };
+
+      try {
+        //TODO these constraints are different. should be moved out of here into devicesService
+        const newStream =
+          await this.devicesService.getLocalMediaStreamWithConstraints(
+            constraints
+          );
+        if (newStream) {
+          if (videoDeviceChanged) {
+            newVideoTrack = newStream.getVideoTracks()[0];
+          }
+          if (audioDeviceChanged) {
+            newAudioTrack = newStream.getAudioTracks()[0];
+          }
+        }
+      } catch (err) {
+        console.error('Error getting new media stream:', err);
+        // Handle error appropriately
+        return;
+      }
+    }
+
+    // Now we can stop existing tracks and replace them
+    if (videoDeviceChanged && newVideoTrack) {
+      currentVideoTrack?.stop();
+      this.devicesService.removeTrack(currentVideoTrack!);
+      this.devicesService.addTrack(newVideoTrack);
+      await this.replaceTrackInPeerConnections('video', newVideoTrack);
+    }
+
+    if (audioDeviceChanged && newAudioTrack) {
+      currentAudioTrack?.stop();
+      this.devicesService.removeTrack(currentAudioTrack!);
+      this.devicesService.addTrack(newAudioTrack);
+      await this.replaceTrackInPeerConnections('audio', newAudioTrack);
+    }
+
+    this.devicesService.logAspectRatio(this.devicesService.localStream!);
+  }
+
+   //called in changeDevice flow
+  private async replaceTrackInPeerConnections(
+    kind: 'video' | 'audio',
+    newTrack: MediaStreamTrack
+  ) {
+    for (const socketId in this.peerConnections) {
+      const peerConnection = this.peerConnections[socketId];
+      const sender = peerConnection
+        .getSenders()
+        .find((s) => s.track?.kind === kind);
+      if (sender) {
+        await sender.replaceTrack(newTrack);
+      } else {
+        peerConnection.addTrack(newTrack, this.devicesService.localStream!);
+      }
+    }
+  }
 }
