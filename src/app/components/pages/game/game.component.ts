@@ -1,7 +1,7 @@
 import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, shareReplay, Subscription, tap } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
@@ -13,7 +13,6 @@ import { InputService } from '../../../services/input/input.service';
 import { LoggerService } from '../../../services/logger/logger.service';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { CardListComponent } from '../../card-list/card-list.component';
-import { MessengerComponent } from '../../messaging/messenger/messenger.component';
 import { PasswordModalComponent } from '../../modals/password-modal/password-modal.component';
 import { PlayerTurnOrderModalComponent } from '../../modals/player-turn-order-modal/player-turn-order-modal.component';
 import { ReportModalComponent } from '../../modals/report-modal/report-modal.component';
@@ -25,7 +24,6 @@ import { UserStreamComponent } from '../../users/user-stream/user-stream.compone
 import { Token } from '../../../interfaces/IPlayingCard';
 import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
-import { SettingsService } from '../../../services/settings/settings.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { bootstrapCheck, bootstrapChevronDoubleLeft } from '@ng-icons/bootstrap-icons';
 import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
@@ -39,7 +37,6 @@ import { QrCodeComponent } from "../../qr-code/qr-code.component";
   imports: [
     NgFor,
     UserStreamComponent,
-    MessengerComponent,
     NgIf,
     NgClass,
     CardListComponent,
@@ -85,6 +82,15 @@ export class GameComponent {
   unreadMessages: number = 0;
   localPlayer$: Observable<IPlayer|null|undefined> = of(null);
   showSideBar: boolean = true;
+  showQrCode: boolean = false;
+
+  get focusedIndex(): number {
+    return this.gameService.getPlayerTakingTurnIndex();
+  }
+
+  get focusedPlayer() {
+    return this.gameService.room.players[this.focusedIndex];
+  }
 
   constructor(
     private webRTC: WebRTCService,
@@ -94,7 +100,6 @@ export class GameComponent {
     private route: ActivatedRoute,
     private alertService: AlertsService,
     private logger: LoggerService,
-    private settingsService:SettingsService,
     public localStorageService: LocalStorageService) {
     this.gameService.room = {
       name: 'temp',
@@ -332,15 +337,6 @@ export class GameComponent {
     return this.gameService.room.players.find((p) => p.id === id);
   };
 
-
-  get focusedIndex(): number {
-    return this.gameService.getPlayerTakingTurnIndex();
-  }
-
-  get focusedPlayer() {
-    return this.gameService.room.players[this.focusedIndex];
-  }
-
   startGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.StartGame });
   };
@@ -392,34 +388,6 @@ export class GameComponent {
 
   openReportUserModal = (offenderPlayerId:string)=>{
     this.reportUserModal.open(offenderPlayerId, this.gameService.room.id + "")
-  }
-
-  computeSizeClasses(i: number): string {
-    const len = this.gameService.room.players.length;
-    if (!this.focusedLayout) {
-      switch (len) {
-        case 1: return 'basis-full h-full';
-        case 2: return 'basis-1/2 h-1/2';
-        case 3:
-          return i < 2
-            ? 'basis-1/2 h-1/2'
-            : 'basis-full h-1/2';
-        case 4: return 'basis-1/2 h-1/2';
-        case 5:
-          return i < 3
-            ? 'basis-1/3 h-1/2'
-            : 'basis-1/2 h-1/2';
-        case 6: return 'basis-1/3 h-1/2';
-      }
-    } else {
-      // focused layout
-      if (i === this.focusedIndex) {
-        return 'basis-2/3 h-2/3';
-      } else {
-        return 'basis-1/3 h-1/3';
-      }
-    }
-    return '';
   }
 
    /**
@@ -510,24 +478,6 @@ export class GameComponent {
         };
       }
     }
-  }
-
-  setLayout(layout:string){
-    switch(layout){
-      case "DEFAULT":
-        this.focusedLayout = false;
-        this.settingsService.tokensEnabled = true;
-        break;
-      case "FOCUSED":
-        this.focusedLayout = true;
-        this.settingsService.tokensEnabled = false;
-        this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
-        break;
-    }
-  }
-
-  handleUnreadCount(count: number): void {
-    this.unreadMessages = count;
   }
 
 }

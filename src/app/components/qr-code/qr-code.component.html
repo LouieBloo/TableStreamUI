@@ -1,1 +1,2 @@
+<div> {{url$ | async}}</div>
 <qrcode [qrdata]="(url$ | async)!" [width]="256" [allowEmptyString]="true" [errorCorrectionLevel]="'M'"></qrcode>

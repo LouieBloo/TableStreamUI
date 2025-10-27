@@ -20,12 +20,13 @@ import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { combineLatest, from, Subscription, switchMap, tap } from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
 import { CommanderSideBarComponent } from "../../commander/commander-side-bar/commander-side-bar.component";
 import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
 import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand, gameTorch, gameModernCity, gameSunCloud, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
 import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-classified-popup.component';
+import { LocalDevicesService } from '../../../services/devices/devices.service';
 
 @Component({
   selector: 'app-user-stream',
@@ -67,8 +68,8 @@ import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-c
 })
 export class UserStreamComponent {
   @Input() player!: IPlayer;
-  @Input() localStream: boolean = false;
-  @Input() focusedLayout: boolean = false;
+  @Input() isLocalStream: boolean = false;
+  @Input() isFocusedLayout: boolean = false;
   @Output() reportPlayerEvent: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
@@ -93,7 +94,16 @@ export class UserStreamComponent {
   classifiedCard: IPlayingCard | null = null;
   popupPosition = { x: 0, y: 0 };
   showCardPopup = false;
-  
+
+    // only used to change the direction the settings menu renders
+  get isBottomRow():boolean{
+    if(!this.isFocusedLayout){ return false;}
+    if(!this.gameService.room?.game?.active){
+      return this.player.turnOrder != 0;
+    }
+
+    return !this.player.isTakingTurn;
+  }
 
   constructor(
     private webRTC: WebRTCService,
@@ -103,10 +113,34 @@ export class UserStreamComponent {
     private alertService: AlertsService,
     private ngZone: NgZone,
     private localStorageService: LocalStorageService,
-    private router: Router
+    private router: Router,
+    private devicesService: LocalDevicesService
   ) {
     this.videoQuality = localStorageService.videoQuality || '16/9-1080'
     this.subscribeToEvents();
+  }
+
+  async ngAfterViewInit() {
+
+    await this.devicesService.setDevices();
+    if (!this.isLocalStream) {
+      this.webRTC.subscribeToStreamAdd(this.streamAdded);
+      this.setStream(this.webRTC.getStream(this.player.socketId));
+    } else {
+      this.setupLocalStreamReactive();
+    }
+
+    this.setFlip();
+
+    //so we dont get a ngAfter change error
+    setTimeout(() => {
+      this.lifeTotalComponents.forEach(child => {
+      if(child.id == 'magicLifeTotal'){
+        this.magicLifeTotalComponent = child;
+      }
+    });
+    }, 100);
+    
   }
 
   ngOnDestroy(){
@@ -125,7 +159,7 @@ export class UserStreamComponent {
     //local events
     this.subscriptions.add(
       this.webRTC.localGameEvent.subscribe((localGameEvent:IGameEvent)=>{
-        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.localStream) {
+        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.isLocalStream) {
           this.video.nativeElement.play().catch((err) => {
             console.error('Error auto-playing:', err)
           });
@@ -134,75 +168,50 @@ export class UserStreamComponent {
     );
   }
 
-  imKicked(kickedEvent: IKickPlayerResponse){
-    return this.player.id == kickedEvent.kickedPlayer?.id && this.localStream
-  }
 
-  ngAfterViewInit() {
-    if (!this.localStream) {
-      this.webRTC.subscribeToStreamAdd(this.streamAdded);
-      // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
-      this.setStream(this.webRTC.getStream(this.player.socketId));
-    } else {
-      // Local stream
-      // Initialize device lists
-      navigator.mediaDevices.enumerateDevices().then((devices) => {
-        this.audioInputDevices = devices.filter(
-          (device) => device.kind === 'audioinput'
-        );
-        this.videoInputDevices = devices.filter(
-          (device) => device.kind === 'videoinput'
-        );
+  setupLocalStreamReactive() {//TODO handle subscription
+    combineLatest([
+      this.devicesService.audioDevices$,
+      this.devicesService.videoDevices$
+    ]).pipe(
+      tap(([audioInputDevices, videoInputDevices]) => {
+        this.audioInputDevices = audioInputDevices;
+        this.videoInputDevices = videoInputDevices;
 
-        // Set default selected devices
         if (this.videoInputDevices.length > 0) {
           this.selectedVideoDeviceId = this.videoInputDevices[0].deviceId;
         }
         if (this.audioInputDevices.length > 0) {
           this.selectedAudioDeviceId = this.audioInputDevices[0].deviceId;
         }
-
-        // Initialize local stream with selected devices
-        this.initLocalStream();
-      });
-    }
-
-    this.setFlip();
-
-    //so we dont get a ngAfter change error
-    setTimeout(() => {
-      this.lifeTotalComponents.forEach(child => {
-      if(child.id == 'magicLifeTotal'){
-        this.magicLifeTotalComponent = child;
+      }),
+      switchMap(() => 
+        from(this.webRTC.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
+      )
+    ).subscribe({
+      next: (stream: MediaStream | null) => {//TODO - what is the id on a MediaStream. Probabaly just a random id
+        if(!stream) return;
+        //TODO i need to do a refresh of the devices after permissions granted
+        this.displayLocalStream(stream);
+      },
+      error: (err) => {
+        console.error('Error initializing local stream:', err);
       }
     });
-    }, 100);
-    
   }
 
-  initLocalStream() {
-    this.webRTC
-      .initLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
-      .then((stream) => {
-        if (this.video.nativeElement) {
-          this.video.nativeElement.srcObject = stream;
-          this.video.nativeElement.muted = true; // Mute local video to prevent echo
-        }
+  private displayLocalStream(stream: MediaStream): void {
+    if (this.video.nativeElement) {
+      this.video.nativeElement.srcObject = stream;
+      this.video.nativeElement.muted = true;
+    }
 
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-          this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
-          this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
-        });
-
-      //check if we have saved a mic muted preference
-      const isMicMuted = this.localStorageService.isMicMuted
-      this.isMutedSelf = isMicMuted && isMicMuted == 'true' ? true: false;
-    })
-  }
+    const isMicMuted = this.localStorageService.isMicMuted;
+    this.isMutedSelf = isMicMuted === 'true';
+}
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
     if (user.id === this.player.id) {
-      //this.setStream(stream);
       this.setStream(this.webRTC.getStream(this.player.socketId));
     }
   };
@@ -221,32 +230,42 @@ export class UserStreamComponent {
     }
   };
 
-  // Methods for device selection
   onAudioDeviceChange(event: any) {
     this.selectedAudioDeviceId = event.target.value;
-    this.changeDevice();
+    this.changeDeviceReactive();
   }
 
   onVideoDeviceChange(event: any) {
     this.selectedVideoDeviceId = event.target.value;
-    this.changeDevice();
+    this.changeDeviceReactive();
   }
 
-  changeDevice() {
-    this.webRTC
-      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
-      .then(() => {
-        this.initLocalStream();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+
+changeDeviceReactive() {
+  from(this.webRTC.changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
+    .pipe(
+      switchMap(() => from(this.webRTC.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId)))
+    )
+    .subscribe({
+      next: (stream: MediaStream | null) => {
+        if (!stream) return;
+
+        if (this.video.nativeElement) {
+          this.video.nativeElement.srcObject = stream;
+          this.video.nativeElement.muted = true;
+        }
+
+        const isMicMuted = this.localStorageService.isMicMuted;
+        this.isMutedSelf = isMicMuted === 'true';
+      },
+      error: (err) => console.error('Error changing device:', err),
+    });
+}
 
   onVideoQualityChange(event: any) {
     this.videoQuality = event.target.value;
     this.localStorageService.setVideoQuality(this.videoQuality);
-    this.changeDevice();
+    this.changeDeviceReactive();
   }
 
   toggleMuteSelf() {
@@ -372,7 +391,7 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
-  kickPlayer(playerId: string) {
+  kickPlayer(playerId: string) {//TODO this doesnt look right
     // this.webRTC.sendGameEvent({
     //   event: GameEvent.KickPlayer,
     //   payload: {
@@ -412,23 +431,8 @@ export class UserStreamComponent {
     };
   };
   
-
-  getKeys(object: any): string[] {
-    return Object.keys(object);
-  }
-
   isFirefox(): boolean {
     return /firefox/i.test(navigator.userAgent);
-  }
-
-  // only used to change the direction the settings menu renders
-  get isBottomRow():boolean{
-    if(!this.focusedLayout){ return false;}
-    if(!this.gameService.room?.game?.active){
-      return this.player.turnOrder != 0;
-    }
-
-    return !this.player.isTakingTurn;
   }
 
   onVideoClick(event: MouseEvent) {
@@ -528,4 +532,9 @@ export class UserStreamComponent {
     this.showCardPopup = false;
     this.classifiedCard = null;
   }
+
+  private imKicked(kickedEvent: IKickPlayerResponse){
+    return this.player.id == kickedEvent.kickedPlayer?.id && this.isLocalStream
+  }
+
 }

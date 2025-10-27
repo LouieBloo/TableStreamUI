@@ -13,11 +13,12 @@ import { IPhoneToken } from '../../../interfaces/IPhoneToken';
 export class PhoneLandingComponent {
 
   webRtcService = inject(WebRTCService);
- route = inject(ActivatedRoute);
+  activatedRoute = inject(ActivatedRoute);
+  
   ngOnInit(){
     const phoneToken: IPhoneToken = {
-      playerToken: this.route.snapshot.paramMap.get('playerToken'),
-      roomId: this.route.snapshot.queryParamMap.get('roomId')
+      playerToken: this.activatedRoute.snapshot.paramMap.get('playerToken'),
+      roomId: this.activatedRoute.snapshot.queryParamMap.get('roomId')
     }
     this.webRtcService.joinAsPhone(phoneToken);
   }

@@ -14,7 +14,6 @@ import { VerifyEmailComponent } from './components/pages/verify-email/verify-ema
 import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
 import { UserEditComponent } from './components/pages/user-edit/user-edit.component';
 import { DevDragComponent } from './components/pages/dev-drag/dev-drag.component';
-import { QrCodeComponent } from './components/qr-code/qr-code.component';
 import { PhoneLandingComponent } from './components/pages/phone-landing/phone-landing.component';
 
 export const routes: Routes = [
