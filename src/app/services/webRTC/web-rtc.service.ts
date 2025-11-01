@@ -226,7 +226,8 @@ export class WebRTCService {
     }
   }
 
-  public onServerResponseFromPhone = (socket: string, room: IRoom) => {
+  public onServerResponseFromPhone = (room: IRoom) => {
+    debugger;
     this.iceServerList = room.iceServerList;
     //update stream to be new socket
     //do all the peer to peer connection
@@ -242,11 +243,7 @@ export class WebRTCService {
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.remoteStreams = {};
     this.peerConnections = {};
-
-    this.socket.emit('joinRoomAsPhone', token, (player: IUser, room: IRoom) => {
-      //todo confirm payload
-      this.iceServerList = room.iceServerList;
-    });
+    this.socket.emit('joinRoomAsPhone', token, this.onServerResponseFromPhone);
   };
 
   private registerSocketDisconnect(

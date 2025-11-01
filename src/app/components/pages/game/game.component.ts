@@ -182,7 +182,7 @@ export class GameComponent {
         },
         error: (error: any) => {
           this.logger.error('Error joining game: ', error);
-          alert('Error joining game: ' + error);
+          alert('Error joining game: ' + error.message);
         },
       })
     );
@@ -211,6 +211,13 @@ export class GameComponent {
         });
 
         this.initialLoad = false;
+      }
+
+
+      test(){
+        const peerConnections = this.webRTC.peerConnections;
+        const remoteStreams = this.webRTC.remoteStreams;
+        debugger;
       }
 
   loadIntoGame(password: string|null) {

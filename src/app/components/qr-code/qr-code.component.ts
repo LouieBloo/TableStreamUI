@@ -25,7 +25,7 @@ export class QrCodeComponent {
       .getQrCode(this.player?.roomId, this.player?.id ?? null)
       .pipe(
         map((code: string) => {
-          const url = `http://192.168.1.77:4200/remote-camera/${code}?roomId=${this.player?.roomId}`
+          const url = `https://192.168.1.77:4200/remote-camera/${code}?roomId=${this.player?.roomId}`
           return url;
         })
       );
