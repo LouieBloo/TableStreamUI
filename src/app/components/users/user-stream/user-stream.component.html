@@ -41,6 +41,12 @@
           [editable]="localStream"
         >
         </app-life-total>
+        <app-life-total *ngIf="gameService.isOnePieceGame()"
+          [player]="player"
+          [modifyCallback]="modifyLifeTotal"
+          [editable]="localStream"
+        >
+        </app-life-total>
     </div>
     <div class="absolute left-2 text-white flex flex-col leftPanel">
         <div class="text-xs max-w-24">
