@@ -1,20 +1,20 @@
-import { Injectable } from '@angular/core';
-import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../interfaces/IRoom';
-import { IPlayer } from '../../interfaces/IPlayer';
-import { GameType, IGameEvent } from '../../interfaces/IGame';
-import { MTGCommander } from '../../classes/game/MTGCommander';
-import { MTGStandard } from '../../classes/game/MTGStandard';
-import { MTGModern } from '../../classes/game/MTGModern';
-import { Game } from '../../classes/game/game';
-import { MTGLegacy } from '../../classes/game/MTGLegacy';
-import { MTGVintage } from '../../classes/game/MTGVintage';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { PokemonStandard } from '../../classes/game/PokemonStandard';
+import { Game } from '../../classes/game/game';
+import { MTGCommander } from '../../classes/game/MTGCommander';
+import { MTGLegacy } from '../../classes/game/MTGLegacy';
+import { MTGModern } from '../../classes/game/MTGModern';
 import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
+import { MTGStandard } from '../../classes/game/MTGStandard';
+import { MTGVintage } from '../../classes/game/MTGVintage';
+import { PokemonStandard } from '../../classes/game/PokemonStandard';
 import { YugiohStandard } from '../../classes/game/YugiohStandard';
 import { YugiohDomain } from '../../classes/game/YugiohStandardDomain';
+import { GameType } from '../../interfaces/IGame';
+import { IPlayer } from '../../interfaces/IPlayer';
+import { IRoom, PasswordCheckResponse } from '../../interfaces/IRoom';
 import { OncePiece } from '../../classes/game/OnePiece';
 
 @Injectable({
@@ -44,6 +44,10 @@ export class GameService {
   public setLocalPlayer(localPlayerId: string) {
     const localPlayer = this.getPlayerById(localPlayerId);
     this._localPlayer$.next(localPlayer);
+  }
+
+  public isLocalPlayer(playerId: string){
+    return this._localPlayer$.value?.id == playerId;
   }
 
   public getPlayerById = (playerId:string | null):IPlayer | undefined=>{

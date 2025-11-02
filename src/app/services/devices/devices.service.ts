@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable } from 'rxjs';
 import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { LoggerService } from '../logger/logger.service';
@@ -13,35 +13,17 @@ export class LocalDevicesService {
 
   private _audioDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
   private _videoDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
+  public _localStream = new BehaviorSubject<MediaStream | null>(null);
 
   audioDevices$ = this._audioDevices.asObservable();
   videoDevices$ = this._videoDevices.asObservable();
-  localStream: MediaStream | null = null;
+  localStream$ = this._localStream.asObservable();
 
-  constructor() {}
+  selectedVideoDeviceId = new BehaviorSubject<string>('');
+  selectedAudioDeviceId = new BehaviorSubject<string>('');
 
-  public logAspectRatio(stream: MediaStream): void {
-    if (!stream) {
-      return;
-    }
-    const videoTrack = stream.getVideoTracks()[0];
-    if (videoTrack) {
-      const settings = videoTrack.getSettings();
-      if (settings.width && settings.height) {
-        const aspectRatio = settings.width / settings.height;
-        this.logger.log(
-          `Camera aspect ratio: ${aspectRatio.toFixed(2)} (width: ${
-            settings.width
-          }, height: ${settings.height})`
-        );
-      } else {
-        this.logger.log(
-          'Could not determine camera aspect ratio (width/height not available in settings).'
-        );
-      }
-    } else {
-      this.logger.log('No video track available to determine aspect ratio.');
-    }
+  setLocalStream(stream: MediaStream) {
+    this._localStream.next(stream);
   }
 
   public async buildLocalStream(
@@ -49,18 +31,19 @@ export class LocalDevicesService {
     audioDeviceId?: string,
     aspectRatio: string = '16/9'
   ): Promise<MediaStream | null> {
-    if (this.localStream) {
-      this.logAspectRatio(this.localStream);
-      return this.localStream;
+    if (this._localStream.value) {
+      this.logAspectRatio(this._localStream.value);
+      return this._localStream.value;
     }
 
     try {
-      this.localStream = await this.getLocalMediaStream(
+      const stream = await this.getLocalMediaStream(
         videoDeviceId,
         audioDeviceId,
         aspectRatio
       );
-      this.logAspectRatio(this.localStream!);
+      this.setLocalStream(stream!);
+      this.logAspectRatio(stream!);
     } catch (err: any) {
       if (
         err.name === 'NotAllowedError' ||
@@ -68,33 +51,34 @@ export class LocalDevicesService {
       ) {
         this.logger.log('Permission error: Trying again without audio');
 
-        await this.getUserMediaWithoutAudio(
+        await this.setUserMediaWithoutAudio(
           videoDeviceId,
           audioDeviceId,
           aspectRatio
         );
-        this.logAspectRatio(this.localStream!);
+        this.logAspectRatio(this._localStream.value!);
       } else {
         // this.logger.error("Error getting media stream:", {error: err, constraints }, "WEB RTC initLocalStream")TODO
         throw err;
       }
     }
 
-    return this.localStream;
+    return this._localStream.value;
   }
 
-  private async getUserMediaWithoutAudio(
+  private async setUserMediaWithoutAudio(
     videoDeviceId?: string,
     audioDeviceId?: string,
     aspectRatio: string = '16/9'
   ) {
     try {
-      this.localStream = await this.getLocalMediaStream(
+      const stream = await this.getLocalMediaStream(
         videoDeviceId,
         audioDeviceId,
         aspectRatio,
         false
       );
+      this._localStream.next(stream);
     } catch (err) {
       this.logger.error('Error getting media stream without audio:', err);
     }
@@ -102,14 +86,19 @@ export class LocalDevicesService {
 
   async setDevices(): Promise<void> {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    const audioDevices = devices.filter(
-      (device) => device.kind === 'audioinput'
-    );
+
     const videoDevices = devices.filter(
       (device) => device.kind === 'videoinput'
     );
-    this._audioDevices.next(audioDevices);
+    const audioDevices = devices.filter(
+      (device) => device.kind === 'audioinput'
+    );
+
     this._videoDevices.next(videoDevices);
+    this._audioDevices.next(audioDevices);
+    const selectedVideoDeviceId = videoDevices[0].deviceId;
+    const selectedAudioDeviceId = audioDevices[0].deviceId;
+    this.buildLocalStream(selectedVideoDeviceId, selectedAudioDeviceId);
   }
 
   async getLocalMediaStreamWithConstraints(
@@ -205,71 +194,114 @@ export class LocalDevicesService {
     };
   }
 
+  public async attachTrackToPeerConnection(
+    peerConnection: RTCPeerConnection,
+    socketId: string
+  ) {
+    const localStream = await this.buildLocalStream();
+    localStream!.getTracks().forEach((track) => {
+      this.logger.log('adding tracks for: ', socketId);
+      if (track.kind === 'audio') {
+        const micMuted = this.localStorageService.isMicMuted === 'true';
+        track.enabled = !micMuted;
+      }
+      peerConnection.addTrack(track, localStream!);
+    });
+  }
+
   public stopAndRemoveAllLocalMediaTracks() {
-    if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => {
+    if (this._localStream.value) {
+      this._localStream.value.getTracks().forEach((track) => {
         track.stop();
         track.enabled = false;
       });
-      this.localStream = null;
+      this._localStream.next(null);
     }
   }
 
   public muteSelf(): void {
-    if (this.localStream) {
-      this.localStream
+    if (this._localStream.value) {
+      this._localStream.value
         .getAudioTracks()
         .forEach((track) => (track.enabled = false));
     }
   }
 
   public unmuteSelf(): void {
-    if (this.localStream) {
-      this.localStream
+    if (this._localStream.value) {
+      this._localStream.value
         .getAudioTracks()
         .forEach((track) => (track.enabled = true));
     }
   }
 
   public turnOffVideo(): void {
-    if (this.localStream) {
-      this.localStream
+    if (this._localStream.value) {
+      this._localStream.value
         .getVideoTracks()
         .forEach((track) => (track.enabled = false));
     }
   }
 
   public turnOnVideo(): void {
-    if (this.localStream) {
-      this.localStream
+    if (this._localStream.value) {
+      this._localStream.value
         .getVideoTracks()
         .forEach((track) => (track.enabled = true));
     }
   }
 
   public removeTrack(mediaStreamTrack: MediaStreamTrack) {
-    this.localStream?.removeTrack(mediaStreamTrack);
+    this._localStream.value?.removeTrack(mediaStreamTrack);
   }
 
   public addTrack(mediaStreamTrack: MediaStreamTrack) {
-    this.localStream?.addTrack(mediaStreamTrack);
+    this._localStream.value?.addTrack(mediaStreamTrack);
   }
 
-  public getFirstVideoTrack(){
-    return this.localStream?.getVideoTracks()[0]
+  public getFirstVideoTrack() {
+    return this._localStream.value?.getVideoTracks()[0];
   }
 
-  public getFirstAudioTrack(){
-    return this.localStream?.getAudioTracks()[0]
+  public getFirstAudioTrack() {
+    return this._localStream.value?.getAudioTracks()[0];
   }
 
-
-  public async initializeLocalStream(videoDeviceId: string, audioDeviceId: string){
-    if(!this.localStream){
-      this.localStream = await this.getLocalMediaStream(videoDeviceId, audioDeviceId)
+  public async initializeLocalStream(
+    videoDeviceId: string,
+    audioDeviceId: string
+  ) {
+    if (!this._localStream.value) {
+      const stream = await this.getLocalMediaStream(
+        videoDeviceId,
+        audioDeviceId
+      );
+      this._localStream.next(stream);
     }
-    return this.localStream;
+    return this._localStream.value;
   }
 
-
+  public logAspectRatio(stream: MediaStream): void {
+    if (!stream) {
+      return;
+    }
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack) {
+      const settings = videoTrack.getSettings();
+      if (settings.width && settings.height) {
+        const aspectRatio = settings.width / settings.height;
+        this.logger.log(
+          `Camera aspect ratio: ${aspectRatio.toFixed(2)} (width: ${
+            settings.width
+          }, height: ${settings.height})`
+        );
+      } else {
+        this.logger.log(
+          'Could not determine camera aspect ratio (width/height not available in settings).'
+        );
+      }
+    } else {
+      this.logger.log('No video track available to determine aspect ratio.');
+    }
+  }
 }

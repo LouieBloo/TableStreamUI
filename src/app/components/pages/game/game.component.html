@@ -1,7 +1,7 @@
                       <button (click)="test()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Test</button>
 <div class="drawer drawer-end" >
 
-  
+
   <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="w-screen h-screen flex flex-col drawer-content ">
       <div class="flex flex-row flex-grow" *ngIf="localPlayer$ | async as localPlayer">
@@ -11,6 +11,11 @@
             [class.bgDayLight]="gameService.isDay"
             [style.order]="getOrder(i)"
             [ngStyle]="computeFlexStyles(i)">
+            <div style="color: white">
+            playerSocketId: {{player.socketId}}
+            playerId: {{player.id}}
+            <button (click)="webRTC.writeRemoteStreams()">TEST</button>
+            </div>
               <app-user-stream
                 [player]="player"
                 [isLocalStream]="player.id === localPlayer.id"

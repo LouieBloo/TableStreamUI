@@ -165,7 +165,7 @@
                             <label class="block text-sm font-medium mb-1">Video Device:</label>
                             <select (change)="onVideoDeviceChange($event)"
                                 class="select select-bordered w-full max-w-xs bg-white">
-                                <option *ngFor="let device of videoInputDevices" [value]="device.deviceId"
+                                <option *ngFor="let device of videoInputDevices$ | async" [value]="device.deviceId"
                                     [selected]="device.deviceId === selectedVideoDeviceId">
                                     {{ device.label || 'Camera ' + device.deviceId }}
                                 </option>
@@ -194,7 +194,7 @@
                             <label class="block text-sm font-medium mb-1">Audio Device:</label>
                             <select (change)="onAudioDeviceChange($event)"
                                 class="select select-bordered w-full max-w-xs bg-white">
-                                <option *ngFor="let device of audioInputDevices" [value]="device.deviceId"
+                                <option *ngFor="let device of audioInputDevices$ | async" [value]="device.deviceId"
                                     [selected]="device.deviceId === selectedAudioDeviceId">
                                     {{ device.label || 'Microphone ' + device.deviceId }}
                                 </option>

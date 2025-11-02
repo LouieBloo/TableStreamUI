@@ -21,29 +21,15 @@ import { UserService } from '../user/user.service';
 import { GameService } from '../game/game.service';
 import { IPhoneToken } from '../../interfaces/IPhoneToken';
 import { LocalDevicesService } from '../devices/devices.service';
+import { JoinRoomPayload } from './joinRoomPayload';
 
-export interface JoinRoomPayload {
-  playerId: string;
-  roomId: string;
-  gameType: string;
-  roomName: string;
-  playerName: string;
-  password: string | null;
-  userType: UserType;
-  maxPlayers: number;
-  reactionsEnabled: boolean;
-  isPublic: boolean;
-  joinerJwtToken: string | null;
-  allowSpectators: boolean;
-  isSharingImages: boolean;
-}
 @Injectable({
   providedIn: 'root',
 })
 export class WebRTCService {
   socket: Socket | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
-  remoteStreams: { [key: string]: MediaStream } = {};
+  remoteStreams: { [key: string]: MediaStream } = {};//will contain a users phone stream
   private iceServerList: any = null;
   private userJoinedSubject = new Subject<{ id: string; user: IUser }>();
   private gameEventSubject = new Subject<IGameEvent>();
@@ -78,6 +64,13 @@ export class WebRTCService {
     private devicesService: LocalDevicesService
   ) {}
 
+
+  writeRemoteStreams(){
+    console.log(this.remoteStreams);
+    console.log(this.peerConnections);
+
+  }
+
   public joinRoom = async (
     roomId: string,
     password: string | null,
@@ -88,7 +81,7 @@ export class WebRTCService {
     if (!this.socket) return;
 
     this.socket.on('signal', this.handleSignal);
-    this.socket.on('newPeer', this.handleNewPeer);
+    this.socket.on('newPeer', this.handleNewPeer);//how do i know that myself is coming in as a new peer
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.socket.on('message', this.handleMessage);
     this.socket.on('gameEvent', this.handleGameEvent);
@@ -227,13 +220,7 @@ export class WebRTCService {
   }
 
   public onServerResponseFromPhone = (room: IRoom) => {
-    debugger;
     this.iceServerList = room.iceServerList;
-    //update stream to be new socket
-    //do all the peer to peer connection
-    //need videoId, audioId
-    // const constraints = this.getMediaConstraints();
-    // this.localStream = await this.devicesService.getLocalMediaStream(constraints);
   };
 
   public joinAsPhone = async (token: IPhoneToken) => {
@@ -311,10 +298,10 @@ export class WebRTCService {
     for (const pc of Object.values(this.peerConnections)) {
       pc.getSenders().forEach((sender) => {
         if (sender.track) {
-          sender.track.stop(); // Stop all sending tracks
+          sender.track.stop();
         }
       });
-      pc.close(); // Close the peer connection
+      pc.close();
     }
     this.peerConnections = {};
 
@@ -347,16 +334,7 @@ export class WebRTCService {
       await peerConnection.setRemoteDescription(
         new RTCSessionDescription(signal)
       );
-      this.logger.log(
-        'Signaling state before answer:',
-        peerConnection.signalingState
-      );
       const answer = await peerConnection.createAnswer();
-      this.logger.log(
-        'Signaling state after answer:',
-        peerConnection.signalingState
-      );
-
       await peerConnection.setLocalDescription(answer);
       this.socket?.emit('signal', {
         to: from,
@@ -372,7 +350,6 @@ export class WebRTCService {
   };
 
   private handleNewPeer = (data: { socketId: string; user: IUser }) => {
-    debugger;
     const { socketId } = data;
     //not sure the correct order of this, trying in front of createPeerConnection
     this.userJoinedSubject.next({ id: socketId, user: data.user });
@@ -394,11 +371,10 @@ export class WebRTCService {
     }); //might not need this on peerDisconnectedFromPhone
   };
 
-  //TODO the phone is failing here
   private async createPeerConnection(
     socketId: string,
     newUser: IUser,
-    newPeer: boolean = false
+    isNewPeer: boolean = false
   ) {
     this.logger.log('Creating peer connection: ', socketId, newUser);
     try {
@@ -406,22 +382,20 @@ export class WebRTCService {
         this.logger.log("Not adding connection as it's spectator");
         return;
       }
-
       const peerConnection = this.initializePeerConnection(socketId, newUser);
 
       if (!this.amISpectator) {
         try {
-          await this.addLocalTracksToPeerConnection(peerConnection, socketId);
+          await this.devicesService.attachTrackToPeerConnection(peerConnection, socketId);
         } catch (error) {
           if (this.isSafeToOffer(peerConnection))
             await this.createReceiveOnlyOffer(peerConnection, socketId);
         }
-      } else if (newPeer) {
+      } else if (isNewPeer) {
         this.logger.log('signal state: ', peerConnection.signalingState);
         await this.createReceiveOnlyOffer(peerConnection, socketId);
       }
     } catch (error) {
-      debugger;
       this.logger.error(
         'createPeerConnection error',
         { error: error, socketId, user: newUser },
@@ -445,7 +419,7 @@ export class WebRTCService {
 
     peerConnection.onicecandidate = (event) =>
       this.handleIceCandidateEvent(socketId, event);
-    peerConnection.ontrack = this.handleOnTrack(socketId, user);
+    peerConnection.ontrack = this.addRemoteStream(socketId, user);
     peerConnection.onnegotiationneeded = async () =>
       this.handleNegotiationNeeded(peerConnection, socketId);
 
@@ -487,7 +461,6 @@ export class WebRTCService {
 
     try {
       if (peerConnection.signalingState === 'stable') {
-        debugger;
         const offer = await peerConnection.createOffer({
           offerToReceiveVideo: true,
           offerToReceiveAudio: true,
@@ -509,11 +482,13 @@ export class WebRTCService {
     }
   }
 
-  //sets remoteStreams
-  private handleOnTrack(socketId: string, user: IUser) {
+  private addRemoteStream(socketId: string, user: IUser) {
     return (event: RTCTrackEvent) => {
       this.logger.log('on track: ', event);
       this.remoteStreams[socketId] = event.streams[0];
+      if(this.gameService.isLocalPlayer(user.id)){
+        this.devicesService.setLocalStream(event.streams[0])
+      }
       this.onStreamAdded.forEach((callback) => {
         callback(socketId, this.remoteStreams[socketId], user);
       });
@@ -528,21 +503,6 @@ export class WebRTCService {
     if (event.candidate) {
       this.socket?.emit('signal', { to: socketId, signal: event.candidate });
     }
-  }
-
-  private async addLocalTracksToPeerConnection(
-    peerConnection: RTCPeerConnection,
-    socketId: string
-  ) {
-    let localStream = await this.devicesService.buildLocalStream();
-    localStream!.getTracks().forEach((track) => {
-      this.logger.log('adding tracks for: ', socketId);
-      if (track.kind === 'audio') {
-        const micMuted = this.localStorageService.isMicMuted === 'true';
-        track.enabled = !micMuted;
-      }
-      peerConnection.addTrack(track, localStream!);
-    });
   }
 
   public sendMessage(message: string) {
@@ -616,12 +576,12 @@ export class WebRTCService {
     this._roomPasswordValid.next(null);
   }
 
-  //TODO fix the constraints in this
+  //TODO fix the constraints in this and move everything to devices
   public async changeDevice(
     videoDeviceId?: string,
     audioDeviceId?: string
   ): Promise<void> {
-    if (!this.devicesService.localStream) {
+    if (!this.devicesService._localStream) {
       const localStream = await this.devicesService.initializeLocalStream(
         videoDeviceId!,
         audioDeviceId!
@@ -695,7 +655,6 @@ export class WebRTCService {
         }
       } catch (err) {
         console.error('Error getting new media stream:', err);
-        // Handle error appropriately
         return;
       }
     }
@@ -715,7 +674,7 @@ export class WebRTCService {
       await this.replaceTrackInPeerConnections('audio', newAudioTrack);
     }
 
-    this.devicesService.logAspectRatio(this.devicesService.localStream!);
+    this.devicesService.logAspectRatio(this.devicesService._localStream.value!);
   }
 
    //called in changeDevice flow
@@ -731,7 +690,7 @@ export class WebRTCService {
       if (sender) {
         await sender.replaceTrack(newTrack);
       } else {
-        peerConnection.addTrack(newTrack, this.devicesService.localStream!);
+        peerConnection.addTrack(newTrack, this.devicesService._localStream.value!);
       }
     }
   }

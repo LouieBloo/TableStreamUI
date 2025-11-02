@@ -43,3 +43,5 @@ Thumbs.db
 /.vs
 
 *Zone.Identifier
+/ssl/cert.pem
+/ssl/key.pem

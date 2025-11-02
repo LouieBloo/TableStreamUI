@@ -1,9 +1,24 @@
-import { Component, ElementRef, EventEmitter, Input, NgZone, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  NgZone,
+  Output,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/IPlayer';
-import { GameEvent, IGameEvent, IModifyPlayerProperty, LocalGameEvent } from '../../../interfaces/IGame';
+import {
+  GameEvent,
+  IGameEvent,
+  IModifyPlayerProperty,
+  LocalGameEvent,
+} from '../../../interfaces/IGame';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { GameService } from '../../../services/game/game.service';
@@ -20,11 +35,34 @@ import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
-import { combineLatest, from, Subscription, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  from,
+  Observable,
+  of,
+  Subscription,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
-import { CommanderSideBarComponent } from "../../commander/commander-side-bar/commander-side-bar.component";
+import { CommanderSideBarComponent } from '../../commander/commander-side-bar/commander-side-bar.component';
 import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
-import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand, gameTorch, gameModernCity, gameSunCloud, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
+import {
+  gameCrown,
+  gameHealthNormal,
+  gamePoisonBottle,
+  gamePowerLightning,
+  gameBrokenHeart,
+  gameDiceSixFacesFive,
+  gameFairyWand,
+  gameTorch,
+  gameModernCity,
+  gameSunCloud,
+  gameDeathSkull,
+  gameRadioactive,
+  gameHearts,
+} from '@ng-icons/game-icons';
 import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-classified-popup.component';
 import { LocalDevicesService } from '../../../services/devices/devices.service';
 
@@ -45,44 +83,48 @@ import { LocalDevicesService } from '../../../services/devices/devices.service';
     BoundingBoxComponent,
     CommanderSideBarComponent,
     LifeTotalDropzoneComponent,
-    CardClassifiedPopupComponent
-],
+    CardClassifiedPopupComponent,
+  ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
-  viewProviders: [provideIcons({ 
-    bootstrapGearFill,
-    gameCrown,
-    gameHealthNormal,
-    gamePoisonBottle,
-    gamePowerLightning,
-    gameBrokenHeart,
-    gameDiceSixFacesFive,
-    gameFairyWand,
-    gameTorch,
-    gameModernCity,
-    gameSunCloud,
-    gameDeathSkull,
-    gameRadioactive,
-    gameHearts
-  })],
+  viewProviders: [
+    provideIcons({
+      bootstrapGearFill,
+      gameCrown,
+      gameHealthNormal,
+      gamePoisonBottle,
+      gamePowerLightning,
+      gameBrokenHeart,
+      gameDiceSixFacesFive,
+      gameFairyWand,
+      gameTorch,
+      gameModernCity,
+      gameSunCloud,
+      gameDeathSkull,
+      gameRadioactive,
+      gameHearts,
+    }),
+  ],
 })
 export class UserStreamComponent {
   @Input() player!: IPlayer;
   @Input() isLocalStream: boolean = false;
   @Input() isFocusedLayout: boolean = false;
-  @Output() reportPlayerEvent: EventEmitter<string> = new EventEmitter<string>();
+  @Output() reportPlayerEvent: EventEmitter<string> =
+    new EventEmitter<string>();
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
-  @ViewChildren(LifeTotalComponent) lifeTotalComponents!: QueryList<LifeTotalComponent>;
+  @ViewChildren(LifeTotalComponent)
+  lifeTotalComponents!: QueryList<LifeTotalComponent>;
 
-  magicLifeTotalComponent!:LifeTotalComponent; 
+  magicLifeTotalComponent!: LifeTotalComponent;
 
   private subscriptions: Subscription = new Subscription();
   showCommanderDamage: boolean = true;
   muted: boolean = false;
   volume: number = 1;
-  audioInputDevices: MediaDeviceInfo[] = [];
-  videoInputDevices: MediaDeviceInfo[] = [];
+  audioInputDevices$: Observable<MediaDeviceInfo[]> = of([]);
+  videoInputDevices$: Observable<MediaDeviceInfo[]> = of([]);
   selectedAudioDeviceId: string = '';
   selectedVideoDeviceId: string = '';
   videoQuality: string;
@@ -90,15 +132,16 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification: boolean = false;
   boundingBox: any;
-
   classifiedCard: IPlayingCard | null = null;
   popupPosition = { x: 0, y: 0 };
   showCardPopup = false;
 
-    // only used to change the direction the settings menu renders
-  get isBottomRow():boolean{
-    if(!this.isFocusedLayout){ return false;}
-    if(!this.gameService.room?.game?.active){
+  // only used to change the direction the settings menu renders
+  get isBottomRow(): boolean {
+    if (!this.isFocusedLayout) {
+      return false;
+    }
+    if (!this.gameService.room?.game?.active) {
       return this.player.turnOrder != 0;
     }
 
@@ -116,34 +159,49 @@ export class UserStreamComponent {
     private router: Router,
     public devicesService: LocalDevicesService
   ) {
-    this.videoQuality = localStorageService.videoQuality || '16/9-1080'
+    this.videoQuality = localStorageService.videoQuality || '16/9-1080';
+    this.audioInputDevices$ = devicesService.audioDevices$;
+    this.videoInputDevices$ = devicesService.videoDevices$;
+
+    this.subscribeToLocalStream();
     this.subscribeToEvents();
   }
 
-  async ngAfterViewInit() {
+  subscribeToLocalStream() {
+    this.devicesService.localStream$
+      .pipe(
+        tap((stream: MediaStream | null) => {
+          if (stream) this.displayLocalStream(stream);
+        }),
+        catchError((error: Error) => {
+          console.error('Error initializing local stream:', error);
+          return of(null);
+        })
+      )
+      .subscribe();
+  }
 
-    await this.devicesService.setDevices();
+  async ngAfterViewInit() {
+    if(this.isLocalStream){
+      await this.devicesService.setDevices();//TODO rename method
+    }
     if (!this.isLocalStream) {
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
-      this.setStream(this.webRTC.getStream(this.player.socketId));
-    } else {
-      this.setupLocalStreamReactive();
+      this.setStream(this.webRTC.getStream(this.player.socketId));//ended here thinking about replacing the remote stream with the local stream.
     }
-
     this.setFlip();
 
     //so we dont get a ngAfter change error
     setTimeout(() => {
-      this.lifeTotalComponents.forEach(child => {
-      if(child.id == 'magicLifeTotal'){
-        this.magicLifeTotalComponent = child;
-      }
-    });
+      this.lifeTotalComponents.forEach((child) => {
+        if (child.id == 'magicLifeTotal') {
+          this.magicLifeTotalComponent = child;
+        }
+      });
     }, 100);
-    
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
 
@@ -158,47 +216,26 @@ export class UserStreamComponent {
 
     //local events
     this.subscriptions.add(
-      this.webRTC.localGameEvent.subscribe((localGameEvent:IGameEvent)=>{
-        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.isLocalStream) {
+      this.webRTC.localGameEvent.subscribe((localGameEvent: IGameEvent) => {
+        if (
+          localGameEvent.event === LocalGameEvent.RejoinGame &&
+          !this.isLocalStream
+        ) {
           this.video.nativeElement.play().catch((err) => {
-            console.error('Error auto-playing:', err)
+            console.error('Error auto-playing:', err);
           });
         }
       })
     );
   }
 
-
-  setupLocalStreamReactive() {//TODO handle subscription
-    combineLatest([
-      this.devicesService.audioDevices$,
-      this.devicesService.videoDevices$
-    ]).pipe(
-      tap(([audioInputDevices, videoInputDevices]) => {
-        this.audioInputDevices = audioInputDevices;
-        this.videoInputDevices = videoInputDevices;
-
-        if (this.videoInputDevices.length > 0) {
-          this.selectedVideoDeviceId = this.videoInputDevices[0].deviceId;
-        }
-        if (this.audioInputDevices.length > 0) {
-          this.selectedAudioDeviceId = this.audioInputDevices[0].deviceId;
-        }
-      }),
-      switchMap(() => 
-        from(this.devicesService.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
-      )
-    ).subscribe({
-      next: (stream: MediaStream | null) => {//TODO - what is the id on a MediaStream. Probabaly just a random id
-        if(!stream) return;
-        //TODO i need to do a refresh of the devices after permissions granted
-        this.displayLocalStream(stream);
-      },
-      error: (err) => {
-        console.error('Error initializing local stream:', err);
-      }
-    });
-  }
+  setStream = (stream: MediaStream | null) => {
+    if (this.video.nativeElement && stream) {
+      this.video.nativeElement.srcObject = stream;
+      this.video.nativeElement.volume = this.volume;
+      this.video.nativeElement.muted = this.muted;
+    }
+  };
 
   private displayLocalStream(stream: MediaStream): void {
     if (this.video.nativeElement) {
@@ -208,7 +245,7 @@ export class UserStreamComponent {
 
     const isMicMuted = this.localStorageService.isMicMuted;
     this.isMutedSelf = isMicMuted === 'true';
-}
+  }
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
     if (user.id === this.player.id) {
@@ -222,14 +259,6 @@ export class UserStreamComponent {
     }
   };
 
-  setStream = (stream: MediaStream | null) => {
-    if (this.video.nativeElement && stream) {
-      this.video.nativeElement.srcObject = stream;
-      this.video.nativeElement.volume = this.volume;
-      this.video.nativeElement.muted = this.muted;
-    }
-  };
-
   onAudioDeviceChange(event: any) {
     this.selectedAudioDeviceId = event.target.value;
     this.changeDeviceReactive();
@@ -240,27 +269,38 @@ export class UserStreamComponent {
     this.changeDeviceReactive();
   }
 
-
-changeDeviceReactive() {
-  from(this.webRTC.changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
-    .pipe(
-      switchMap(() => from(this.devicesService.buildLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId)))
+  changeDeviceReactive() {
+    from(
+      this.webRTC.changeDevice(
+        this.selectedVideoDeviceId,
+        this.selectedAudioDeviceId
+      )
     )
-    .subscribe({
-      next: (stream: MediaStream | null) => {
-        if (!stream) return;
+      .pipe(
+        switchMap(() =>
+          from(
+            this.devicesService.buildLocalStream(
+              this.selectedVideoDeviceId,
+              this.selectedAudioDeviceId
+            )
+          )
+        )
+      )
+      .subscribe({
+        next: (stream: MediaStream | null) => {
+          if (!stream) return;
 
-        if (this.video.nativeElement) {
-          this.video.nativeElement.srcObject = stream;
-          this.video.nativeElement.muted = true;
-        }
+          if (this.video.nativeElement) {
+            this.video.nativeElement.srcObject = stream;
+            this.video.nativeElement.muted = true;
+          }
 
-        const isMicMuted = this.localStorageService.isMicMuted;
-        this.isMutedSelf = isMicMuted === 'true';
-      },
-      error: (err) => console.error('Error changing device:', err),
-    });
-}
+          const isMicMuted = this.localStorageService.isMicMuted;
+          this.isMutedSelf = isMicMuted === 'true';
+        },
+        error: (err) => console.error('Error changing device:', err),
+      });
+  }
 
   onVideoQualityChange(event: any) {
     this.videoQuality = event.target.value;
@@ -270,7 +310,7 @@ changeDeviceReactive() {
 
   toggleMuteSelf() {
     this.isMutedSelf = !this.isMutedSelf;
-    this.localStorageService.setMicMuted(this.isMutedSelf + "");
+    this.localStorageService.setMicMuted(this.isMutedSelf + '');
     if (this.isMutedSelf) {
       this.devicesService.muteSelf();
     } else {
@@ -314,14 +354,14 @@ changeDeviceReactive() {
   makeAdmin = (player: IPlayer) => {
     const payload: IModifyPlayerProperty = {
       property: PlayerProperties.isAdmin,
-      value: player.id
-    }
+      value: player.id,
+    };
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyPlayerProperty,
       payload: payload,
     });
-    this.alertService.addAlert("success","Admin given to " + player.name);
-  }
+    this.alertService.addAlert('success', 'Admin given to ' + player.name);
+  };
 
   modifyLifeTotal = (amount: number) => {
     let payload: IModifyPlayerProperty = {
@@ -383,7 +423,9 @@ changeDeviceReactive() {
   };
 
   setFlip() {
-    this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleX(-1) scaleY(-1)' : 'scaleX(1) scaleY(1)';
+    this.video.nativeElement.style.transform = this.player.cameraFlipped
+      ? 'scaleX(-1) scaleY(-1)'
+      : 'scaleX(1) scaleY(1)';
   }
 
   toggleFlip(): void {
@@ -391,7 +433,8 @@ changeDeviceReactive() {
     this.setFlip();
   }
 
-  kickPlayer(playerId: string) {//TODO this doesnt look right
+  kickPlayer(playerId: string) {
+    //TODO this doesnt look right
     // this.webRTC.sendGameEvent({
     //   event: GameEvent.KickPlayer,
     //   payload: {
@@ -401,14 +444,19 @@ changeDeviceReactive() {
     this.reportPlayerEvent.emit(this.player.id);
   }
 
-  toggleImageSharing = async()=>{
-    this.localStorageService.setIsSharingImages(!this.player.isSharingImages + "");
-    let payload:IModifyPlayerProperty = {value: !this.player.isSharingImages, property: PlayerProperties.sharingImages}
+  toggleImageSharing = async () => {
+    this.localStorageService.setIsSharingImages(
+      !this.player.isSharingImages + ''
+    );
+    let payload: IModifyPlayerProperty = {
+      value: !this.player.isSharingImages,
+      property: PlayerProperties.sharingImages,
+    };
     let response = await this.webRTC.sendPrivateGameEvent({
       event: GameEvent.ModifyPlayerProperty,
-      payload:payload
-    })
-  }
+      payload: payload,
+    });
+  };
 
   modifyCommanderDamage = (
     playerId: string,
@@ -425,23 +473,34 @@ changeDeviceReactive() {
     });
   };
 
-  getModifyCommanderDamageCallback = (playerId: string, card: IPlayingCard): ((amount: number) => void) => {
+  getModifyCommanderDamageCallback = (
+    playerId: string,
+    card: IPlayingCard
+  ): ((amount: number) => void) => {
     return (amount: number): void => {
       this.modifyCommanderDamage(playerId, amount, card);
     };
   };
-  
+
   isFirefox(): boolean {
     return /firefox/i.test(navigator.userAgent);
   }
 
   onVideoClick(event: MouseEvent) {
     if (this.loadingCardIdentification) {
-      this.alertService.addAlert("error", "Only 1 image can be classified at once");
+      this.alertService.addAlert(
+        'error',
+        'Only 1 image can be classified at once'
+      );
       return;
     }
 
-    if(!environment.cardIdentifierActive || !this.gameService.room.game?.classifierActive){return;}
+    if (
+      !environment.cardIdentifierActive ||
+      !this.gameService.room.game?.classifierActive
+    ) {
+      return;
+    }
 
     this.loadingCardIdentification = true;
 
@@ -484,26 +543,40 @@ changeDeviceReactive() {
               type: 'image/jpeg',
             });
 
-              // Send the file and normalized click position to the classification service
-              this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY, this.player.id).subscribe(
-                  (response:any) => {
-                    this.ngZone.run(() => {
-                      if(response && response.scryfall_data){
-                        this.classifiedCard = { ...response.scryfall_data, classificationConfidence: response.classification_confidence };
-                        this.popupPosition = { x: event.clientX, y: event.clientY}; 
-                        this.showCardPopup = true; // This will make the popup appear
-                        this.boundingBox = response.bounding_box;
-                      }
-                      this.loadingCardIdentification = false;
-                    });
-                  },
-                  (error:any) => {
-                      this.logger.error('Error classifying image:', error);
-                      
-                      this.ngZone.run(() => {
-                        this.loadingCardIdentification = false;
-                      });
-                  }
+            // Send the file and normalized click position to the classification service
+            this.cardIdentifierService
+              .classifyImage(
+                photoFile,
+                normalizedX,
+                normalizedY,
+                this.player.id
+              )
+              .subscribe(
+                (response: any) => {
+                  this.ngZone.run(() => {
+                    if (response && response.scryfall_data) {
+                      this.classifiedCard = {
+                        ...response.scryfall_data,
+                        classificationConfidence:
+                          response.classification_confidence,
+                      };
+                      this.popupPosition = {
+                        x: event.clientX,
+                        y: event.clientY,
+                      };
+                      this.showCardPopup = true; // This will make the popup appear
+                      this.boundingBox = response.bounding_box;
+                    }
+                    this.loadingCardIdentification = false;
+                  });
+                },
+                (error: any) => {
+                  this.logger.error('Error classifying image:', error);
+
+                  this.ngZone.run(() => {
+                    this.loadingCardIdentification = false;
+                  });
+                }
               );
           }
 
@@ -519,10 +592,19 @@ changeDeviceReactive() {
    * Handles the (share) event emitted from the card popup.
    * @param card The card data to be shared.
    */
-  shareCard = ({ card, sharePublic }: { card: IPlayingCard, sharePublic: boolean }) => {
-    this.webRTC.sendLocalGameEvent({event:LocalGameEvent.ShareCard, payload: {card, sharePublic }});
+  shareCard = ({
+    card,
+    sharePublic,
+  }: {
+    card: IPlayingCard;
+    sharePublic: boolean;
+  }) => {
+    this.webRTC.sendLocalGameEvent({
+      event: LocalGameEvent.ShareCard,
+      payload: { card, sharePublic },
+    });
     this.dismissCardPopup();
-  }
+  };
 
   /**
    * Hides the popup and clears its data.
@@ -533,8 +615,7 @@ changeDeviceReactive() {
     this.classifiedCard = null;
   }
 
-  private imKicked(kickedEvent: IKickPlayerResponse){
-    return this.player.id == kickedEvent.kickedPlayer?.id && this.isLocalStream
+  private imKicked(kickedEvent: IKickPlayerResponse) {
+    return this.player.id == kickedEvent.kickedPlayer?.id && this.isLocalStream;
   }
-
 }

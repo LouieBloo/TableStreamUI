@@ -94,7 +94,7 @@ export class GameComponent {
   }
 
   constructor(
-    private webRTC: WebRTCService,
+    public webRTC: WebRTCService,
     private inputService: InputService,
     public gameService: GameService,
     private router: Router,
@@ -196,8 +196,8 @@ export class GameComponent {
         this.localStorageService.setPlayerId(me.id);
         this.router.navigate([], {
           queryParams: { id: room.id },
-          queryParamsHandling: 'merge', // This merges with any existing query params
-          replaceUrl: true // Replace the current URL in history
+          queryParamsHandling: 'merge',
+          replaceUrl: true
         });
 
         if (me.type == UserType.Player) {
