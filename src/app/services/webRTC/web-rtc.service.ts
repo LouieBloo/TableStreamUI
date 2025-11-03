@@ -14,7 +14,6 @@ import { IUser, UserType } from '../../interfaces/IPlayer';
 import { IRoom, IRoomHistoryEvent } from '../../interfaces/IRoom';
 import { AlertsService } from '../alerts/alerts.service';
 import { LoggerService } from '../logger/logger.service';
-import { IVideoQualify } from '../../interfaces/IVideoQualify';
 import { LocalStorageService } from '../local-storage/local-storage.service';
 import { Router } from '@angular/router';
 import { UserService } from '../user/user.service';
@@ -63,13 +62,6 @@ export class WebRTCService {
     private gameService: GameService,
     private devicesService: LocalDevicesService
   ) {}
-
-
-  writeRemoteStreams(){
-    console.log(this.remoteStreams);
-    console.log(this.peerConnections);
-
-  }
 
   public joinRoom = async (
     roomId: string,
@@ -576,7 +568,6 @@ export class WebRTCService {
     this._roomPasswordValid.next(null);
   }
 
-  //TODO fix the constraints in this and move everything to devices
   public async changeDevice(
     videoDeviceId?: string,
     audioDeviceId?: string
@@ -590,108 +581,9 @@ export class WebRTCService {
       return;
     }
 
-    // Get current tracks and device IDs
-    const currentVideoTrack = this.devicesService.getFirstVideoTrack();
-    const currentAudioTrack = this.devicesService.getFirstAudioTrack();
-
-    const currentVideoDeviceId = currentVideoTrack?.getSettings().deviceId;
-    const currentAudioDeviceId = currentAudioTrack?.getSettings().deviceId;
-
-    const videoDeviceChanged: boolean =
-      videoDeviceId !== undefined && videoDeviceId !== currentVideoDeviceId;
-    const audioDeviceChanged: boolean =
-      audioDeviceId !== undefined && audioDeviceId !== currentAudioDeviceId;
-
-    const targetVideoQuality: IVideoQualify =
-      this.devicesService.getCameraVideoQuality();
-
-    // Apply new constraints to existing video track if device hasn't changed
-    if (!videoDeviceChanged && currentVideoTrack) {
-      try {
-        await currentVideoTrack.applyConstraints({
-          width: { ideal: targetVideoQuality.idealWidth },
-          height: { ideal: targetVideoQuality.idealHeight },
-          aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
-        });
-      } catch (err) {
-        console.error('Error applying constraints to video track:', err);
-      }
-    }
-
-    // If we need new tracks, get them before stopping existing tracks
-    let newVideoTrack: MediaStreamTrack | null = null;
-    let newAudioTrack: MediaStreamTrack | null = null;
-
-    if (videoDeviceChanged || audioDeviceChanged) {
-      const constraints: MediaStreamConstraints = {
-        video: videoDeviceChanged
-          ? {
-              deviceId: { exact: videoDeviceId },
-              width: { ideal: targetVideoQuality.idealWidth },
-              height: { ideal: targetVideoQuality.idealHeight },
-              aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
-            }
-          : false,
-        audio: audioDeviceChanged
-          ? {
-              deviceId: { exact: audioDeviceId },
-            }
-          : false,
-      };
-
-      try {
-        //TODO these constraints are different. should be moved out of here into devicesService
-        const newStream =
-          await this.devicesService.getLocalMediaStreamWithConstraints(
-            constraints
-          );
-        if (newStream) {
-          if (videoDeviceChanged) {
-            newVideoTrack = newStream.getVideoTracks()[0];
-          }
-          if (audioDeviceChanged) {
-            newAudioTrack = newStream.getAudioTracks()[0];
-          }
-        }
-      } catch (err) {
-        console.error('Error getting new media stream:', err);
-        return;
-      }
-    }
-
-    // Now we can stop existing tracks and replace them
-    if (videoDeviceChanged && newVideoTrack) {
-      currentVideoTrack?.stop();
-      this.devicesService.removeTrack(currentVideoTrack!);
-      this.devicesService.addTrack(newVideoTrack);
-      await this.replaceTrackInPeerConnections('video', newVideoTrack);
-    }
-
-    if (audioDeviceChanged && newAudioTrack) {
-      currentAudioTrack?.stop();
-      this.devicesService.removeTrack(currentAudioTrack!);
-      this.devicesService.addTrack(newAudioTrack);
-      await this.replaceTrackInPeerConnections('audio', newAudioTrack);
-    }
-
-    this.devicesService.logAspectRatio(this.devicesService._localStream.value!);
+    this.devicesService.changeDevice(videoDeviceId!, audioDeviceId!, this.peerConnections);
+    
   }
 
-   //called in changeDevice flow
-  private async replaceTrackInPeerConnections(
-    kind: 'video' | 'audio',
-    newTrack: MediaStreamTrack
-  ) {
-    for (const socketId in this.peerConnections) {
-      const peerConnection = this.peerConnections[socketId];
-      const sender = peerConnection
-        .getSenders()
-        .find((s) => s.track?.kind === kind);
-      if (sender) {
-        await sender.replaceTrack(newTrack);
-      } else {
-        peerConnection.addTrack(newTrack, this.devicesService._localStream.value!);
-      }
-    }
-  }
+
 }

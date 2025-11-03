@@ -272,16 +272,16 @@ export class UserStreamComponent {
   changeDeviceReactive() {
     from(
       this.webRTC.changeDevice(
-        this.selectedVideoDeviceId,
-        this.selectedAudioDeviceId
+        this.devicesService.selectedVideoDeviceId.value,
+        this.devicesService.selectedAudioDeviceId.value
       )
     )
       .pipe(
         switchMap(() =>
           from(
             this.devicesService.buildLocalStream(
-              this.selectedVideoDeviceId,
-              this.selectedAudioDeviceId
+              this.devicesService.selectedVideoDeviceId.value,
+              this.devicesService.selectedAudioDeviceId.value
             )
           )
         )
@@ -289,7 +289,6 @@ export class UserStreamComponent {
       .subscribe({
         next: (stream: MediaStream | null) => {
           if (!stream) return;
-
           if (this.video.nativeElement) {
             this.video.nativeElement.srcObject = stream;
             this.video.nativeElement.muted = true;

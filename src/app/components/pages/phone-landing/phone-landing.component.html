@@ -1,3 +1,29 @@
 <div style="background-color: white; font-size: 30">
   We are trying to setup your phone as a camera. Please hold!
 </div>
+<div>
+  <label class="block text-sm font-medium mb-1">Video Quality:</label>
+  <select
+    (change)="onVideoQualityChange($event)"
+    class="select select-bordered w-full max-w-xs bg-white"
+  >
+    <option value="16/9-720" [selected]="videoQuality === '16/9-720'">
+      16:9 - 720p
+    </option>
+    <option value="16/9-1080" [selected]="videoQuality === '16/9-1080'">
+      16:9 - 1080p
+    </option>
+    <option value="16/9-2k" [selected]="videoQuality === '16/9-2k'">
+      16:9 - 2K
+    </option>
+    <option value="4/3-720" [selected]="videoQuality === '4/3-720'">
+      4:3 - 720p
+    </option>
+    <option value="4/3-960" [selected]="videoQuality === '4/3-960'">
+      4:3 - Standard
+    </option>
+    <option value="4/3-2k" [selected]="videoQuality === '4/3-2k'">
+      4:3 - 2K
+    </option>
+  </select>
+</div>
