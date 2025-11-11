@@ -9,6 +9,7 @@ export class Game {
     searchTag:string = "game";
     coinImagePathPrefix:string = "magic"
     name:string = "game";
+    commanderTitle:string = "";
     dayNightCycle:string = "";
     classifierActive:boolean = false;
     transcribeActive:boolean = true;

@@ -16,11 +16,11 @@ export class ModalServiceService {
 
   constructor(private inputService: InputService) { }
 
-  public openModal(modalToOpen:ModalType, callback:any){
+  public openModal(modalToOpen:ModalType, callback:any, payload:any=null){
     this.callbacks[modalToOpen] = callback;
     switch(modalToOpen){
       case ModalType.SearchCards:
-        this.inputService.triggerEvent(UserInputAction.JumpToSearch);
+        this.inputService.triggerEvent(UserInputAction.JumpToSearch, payload);
         break;
     }
   }

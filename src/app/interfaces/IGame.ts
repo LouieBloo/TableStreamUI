@@ -40,7 +40,7 @@ export enum LocalGameEvent{
     ShareCard
 }
 
-
+// Preserve order of enums!
 export enum GameType{
     Game,
     MTGCommander,
@@ -51,7 +51,8 @@ export enum GameType{
     PokemonStandard,
     MTGPauperCommander,
     YugiohStandard,
-    YugiohDomain
+    YugiohDomain,
+    OnePiece
 }
 
 export enum GameProperties{

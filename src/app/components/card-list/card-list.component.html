@@ -39,6 +39,16 @@
                             name="searchOption"
                         >
                     </label>
+
+                    <label *ngIf="gameService.isOnePieceGame()" class="flex flex-row items-center cursor-pointer">
+                        <span class="mr-1">Leaders only</span>
+                        <input 
+                            type="radio" 
+                            [(ngModel)]="includeOption" 
+                            [value]="'Leader'" 
+                            name="searchOption"
+                        >
+                    </label>
                 </div>
                 
             </form>
@@ -69,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="max-w-64  ml-3">
+                    <div class="max-w-64 min-w-64 ml-3">
                         <app-card [card]="cardBeingHovered" [showPopup]="false" (click)="shareCard(true)"></app-card>
                     </div>
                 </div>
