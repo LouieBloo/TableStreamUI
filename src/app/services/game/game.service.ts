@@ -15,6 +15,7 @@ import { PokemonStandard } from '../../classes/game/PokemonStandard';
 import { MTGPauperCommander } from '../../classes/game/MTGPauperCommander';
 import { YugiohStandard } from '../../classes/game/YugiohStandard';
 import { YugiohDomain } from '../../classes/game/YugiohStandardDomain';
+import { OncePiece } from '../../classes/game/OnePiece';
 
 @Injectable({
   providedIn: 'root'
@@ -96,6 +97,10 @@ export class GameService {
     return this.room.game as PokemonStandard;
   }
 
+  public isOnePieceGame = ():boolean =>{
+    return this.room.game?.gameType == GameType.OnePiece;
+  }
+
   // most games will not have day/night so we "assume" its night which is default css coloring (Dark)
   get isDay() : boolean{
     return this.room.game?.dayNightCycle && this.room.game?.dayNightCycle == 'DAY' ? true : false;
@@ -113,6 +118,8 @@ export class GameService {
         return new MTGLegacy();
       case GameType.MTGVintage:
         return new MTGVintage();
+      case GameType.OnePiece:
+        return new OncePiece();
       case GameType.PokemonStandard:
         return new PokemonStandard();
       case GameType.MTGPauperCommander:

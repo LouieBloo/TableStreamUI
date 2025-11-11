@@ -35,7 +35,8 @@ export class SetCommanderComponent {
 
   openSearch = ()=>{
     if(!this.editable){return;}
-    this.modalService.openModal(ModalType.SearchCards,this.cardSelected);
+    const payload = {source: 'SetCommander'};
+    this.modalService.openModal(ModalType.SearchCards,this.cardSelected, payload);
   }
 
   cardSelected = (card:IPlayingCard)=>{

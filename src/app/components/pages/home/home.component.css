@@ -63,6 +63,10 @@
     background-image: url("/assets/images/mana-vault-background.jpg");
 }
 
+.one-pieceBackground{
+    background-image: url("/assets/images/one-piece-background.jpg");
+}
+
 .pauperBackground{
     background-image: url("/assets/images/pauper-background.jpg");
 }

@@ -41,6 +41,12 @@
           [editable]="localStream"
         >
         </app-life-total>
+        <app-life-total *ngIf="gameService.isOnePieceGame()"
+          [player]="player"
+          [modifyCallback]="modifyLifeTotal"
+          [editable]="localStream"
+        >
+        </app-life-total>
     </div>
     <div class="absolute left-2 text-white flex flex-col leftPanel">
         <div class="text-xs max-w-24">
@@ -48,8 +54,8 @@
             <p>Avg: <app-timer [date]="(player.totalTurnTime/ ( (player.totalTurns) || 1 ) )"></app-timer></p>
         </div>
 
-        <div *ngIf="player && (gameService.isCommanderGame() || gameService.isDomainGame())" class="mt-2">
-            <app-set-commander [player]="player" [editable]="localStream" [commander]="player.commanders[0]" [index]="0" [label]="gameService.isDomainGame() ? 'Deck Master' : 'Commander'"></app-set-commander>
+        <div *ngIf="player && (gameService.isCommanderGame() || gameService.isDomainGame() || gameService.isOnePieceGame())" class="mt-2">
+            <app-set-commander [player]="player" [editable]="localStream" [commander]="player.commanders[0]" [index]="0" [label]="gameService.room.game?.commanderTitle || ''"></app-set-commander>
             <app-set-commander *ngIf="gameService.isCommanderGame()" [player]="player" [editable]="localStream" [commander]="player.commanders[1]" [index]="1"></app-set-commander>
         </div>
 
