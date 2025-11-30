@@ -45,7 +45,7 @@
         <app-life-total *ngIf="gameService.isOnePieceGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"
-          [editable]="localStream"
+          [editable]="isLocalStream"
         >
         </app-life-total>
     </div>
