@@ -1,4 +1,5 @@
 <div class="relative h-full glow" [ngClass]="{'glow':  player.isTakingTurn}">
+    {{isLocalStream}}
     <div class="flex justify-center h-full">
         <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 
             [muted]="isLocalStream || muted"></video>
@@ -144,8 +145,8 @@
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
-                <li *ngIf="!isLocalStream && gameService.room.allowPlayerKicking" (click)="kickPlayer(player.id)" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
-                <li *ngIf="!isLocalStream && !player.admin" (click)="makeAdmin(player)" class="text-slate-800">
+                <li *ngIf="!isLocalStream && gameService.room.allowPlayerKicking" (click)="kickPlayer()" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
+                <li *ngIf="!isLocalStream && !player.isAdmin" (click)="makeAdmin(player)" class="text-slate-800">
                     <a>Make admin</a>
                 </li>
                 <!-- Local Stream Controls -->

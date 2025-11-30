@@ -12,7 +12,7 @@ export interface IUser{
 export interface IPlayer extends IUser{
     turnOrder:number;
     lifeTotal:number;
-    admin?:boolean;
+    isAdmin?:boolean;
     cameraFlipped:boolean;
     isTakingTurn?: boolean;
     totalTurns: number;

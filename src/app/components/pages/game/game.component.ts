@@ -1,12 +1,20 @@
 import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of, Subscription, tap } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
-import { GameEvent, IGameEvent, LocalGameEvent} from '../../../interfaces/IGame';
+import {
+  GameEvent,
+  IGameEvent,
+  LocalGameEvent,
+} from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/IPlayer';
-import { IKickPlayerResponse, IRoom, PasswordCheckResponse } from '../../../interfaces/IRoom';
+import {
+  IKickPlayerResponse,
+  IRoom,
+  PasswordCheckResponse,
+} from '../../../interfaces/IRoom';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
@@ -25,12 +33,15 @@ import { Token } from '../../../interfaces/IPlayingCard';
 import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { bootstrapCheck, bootstrapChevronDoubleLeft } from '@ng-icons/bootstrap-icons';
-import { SidebarGameInfoComponent } from "../../sidebar/sidebar-game-info/sidebar-game-info.component";
+import {
+  bootstrapCheck,
+  bootstrapChevronDoubleLeft,
+} from '@ng-icons/bootstrap-icons';
+import { SidebarGameInfoComponent } from '../../sidebar/sidebar-game-info/sidebar-game-info.component';
 import { ReportUserModalComponent } from '../../modals/report-user-modal/report-user-modal.component';
 import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-modal.component';
-import { QrCodeComponent } from "../../qr-code/qr-code.component";
 import { LocalDevicesService } from '../../../services/devices/devices.service';
+import { QrCodeModalComponent } from '../../modals/qr-code-modal/qr-code-modal.component';
 
 @Component({
   selector: 'app-game',
@@ -56,11 +67,11 @@ import { LocalDevicesService } from '../../../services/devices/devices.service';
     ReportUserModalComponent,
     GameLogModalComponent,
     AsyncPipe,
-    QrCodeComponent
+    QrCodeModalComponent
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
-  viewProviders: [provideIcons({ bootstrapCheck, bootstrapChevronDoubleLeft })]
+  viewProviders: [provideIcons({ bootstrapCheck, bootstrapChevronDoubleLeft })],
 })
 export class GameComponent {
   @ViewChild(ReportModalComponent) reportComponent!: ReportModalComponent;
@@ -71,8 +82,11 @@ export class GameComponent {
   playerTurnOrderModal!: PlayerTurnOrderModalComponent;
   @ViewChild(TokenModalComponent) tokenModal!: TokenModalComponent;
   @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
-  @ViewChild(ReportUserModalComponent) reportUserModal!: ReportUserModalComponent;
+  @ViewChild(ReportUserModalComponent)
+  reportUserModal!: ReportUserModalComponent;
   @ViewChild(GameLogModalComponent) gameLogModal!: GameLogModalComponent;
+  @ViewChild(QrCodeModalComponent) qrCodeModal!: QrCodeModalComponent;
+
 
   private subscriptions: Subscription = new Subscription();
   roomId!: string;
@@ -81,10 +95,11 @@ export class GameComponent {
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
-  localPlayer$: Observable<IPlayer|null|undefined> = of(null);
+  localPlayer$: Observable<IPlayer | null | undefined> = of(null);
   showSideBar: boolean = true;
   showQrCode: boolean = false;
-  devicesService = inject(LocalDevicesService)
+  devicesService = inject(LocalDevicesService);
+  
   get focusedIndex(): number {
     return this.gameService.getPlayerTakingTurnIndex();
   }
@@ -101,14 +116,19 @@ export class GameComponent {
     private route: ActivatedRoute,
     private alertService: AlertsService,
     private logger: LoggerService,
-    public localStorageService: LocalStorageService) {
+    public localStorageService: LocalStorageService
+  ) {
     this.gameService.room = {
       name: 'temp',
       players: [],
       messages: [],
     };
 
-    this.localPlayer$ = this.gameService.localPlayer$;
+    this.localPlayer$ = this.gameService.localPlayer$.pipe(
+      tap((player)=>{
+        console.log(player);
+      })
+    );
   }
 
   ngOnInit() {
@@ -118,11 +138,17 @@ export class GameComponent {
 
     if (!this.localStorageService.hasPlayedBefore) {
       this.showingHotkeys = true;
-      this.localStorageService.setHasPlayedBefore("true");
-      setTimeout(() => { this.showingHotkeys = false }, 1000 * 60 * 5)
+      this.localStorageService.setHasPlayedBefore('true');
+      setTimeout(() => {
+        this.showingHotkeys = false;
+      }, 1000 * 60 * 5);
     }
-    
-    if (!this.localStorageService.playerName || !hasSetSpectator || (previousRoomId && this.roomId != previousRoomId)) {
+
+    if (
+      !this.localStorageService.playerName ||
+      !hasSetSpectator ||
+      (previousRoomId && this.roomId != previousRoomId)
+    ) {
       if (this.roomId) {
         this.router.navigate(['/join'], {
           queryParams: { id: this.roomId },
@@ -141,25 +167,27 @@ export class GameComponent {
     this.checkPasswordProtection(this.roomId);
   }
 
-  subscribeToGameEvent(){
+  subscribeToGameEvent() {
     this.subscriptions.add(
       this.webRTC.gameEvent.subscribe((event) => this.handleGameEvent(event))
     );
   }
 
-  subscribeToUserJoined(){
+  subscribeToUserJoined() {
     this.subscriptions.add(
       this.webRTC.userJoined.subscribe((user) => this.userJoined(user))
     );
   }
-  
-  subscribeToPassTurn(){
+
+  subscribeToPassTurn() {
     this.subscriptions.add(
-      this.inputService.subscribe(({ action, payload }: { action: UserInputAction; payload?: any }) => {
-        if (action == UserInputAction.PassTurn) {
-          this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn });
+      this.inputService.subscribe(
+        ({ action, payload }: { action: UserInputAction; payload?: any }) => {
+          if (action == UserInputAction.PassTurn) {
+            this.webRTC.sendGameEvent({ event: GameEvent.EndCurrentTurn });
+          }
         }
-      })
+      )
     );
   }
 
@@ -188,46 +216,43 @@ export class GameComponent {
     );
   };
 
- onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
-        this.gameService.setRoom(room, me.id);
-        this.passwordModal.close();
+  test(localPlayer: IPlayer){
+    console.log(localPlayer);
+  }
 
-        this.localStorageService.setRoomId(room.id + "");
-        this.localStorageService.setPlayerId(me.id);
-        this.router.navigate([], {
-          queryParams: { id: room.id },
-          queryParamsHandling: 'merge',
-          replaceUrl: true
-        });
+  testTest(){
+    console.log(this.gameService.room.players);
+    console.log(this.webRTC.remoteStreams);
+  }
 
-        if (me.type == UserType.Player) {
-          this.addPlayer(me as IPlayer);
-        }
+  onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
+    this.gameService.setRoom(room, me.id);
+    this.passwordModal.close();
 
-        room.players.forEach((p: IPlayer) => {
-          if (p.id != me.id) {
-            this.addPlayer(p);
-          }
-        });
+    this.localStorageService.setRoomId(room.id + '');
+    this.localStorageService.setPlayerId(me.id);
+    this.router.navigate([], {
+      queryParams: { id: room.id },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
 
-        this.initialLoad = false;
+    if (me.type == UserType.Player) {
+      this.addPlayer(me as IPlayer);
+    }
+
+    room.players.forEach((p: IPlayer) => {
+      if (p.id != me.id) {
+        this.addPlayer(p);
       }
+    });
 
+    this.initialLoad = false;
+  };
 
-      test(){
-        const peerConnections = this.webRTC.peerConnections;
-        const remoteStreams = this.webRTC.remoteStreams;
-        debugger;
-      }
-
-  loadIntoGame(password: string|null) {
-    this.localStorageService.setPassword(password + "");
-
-    this.webRTC.joinRoom(
-      this.roomId,
-      password,
-      this.onSuccessfulLoadIntoGame
-    );
+  loadIntoGame(password: string | null) {
+    this.localStorageService.setPassword(password + '');
+    this.webRTC.joinRoom(this.roomId, password, this.onSuccessfulLoadIntoGame);
   }
 
   ngOnDestroy(): void {
@@ -265,7 +290,8 @@ export class GameComponent {
         if (this.gameService.room.game) {
           this.gameService.room.game.startedAt = event.response.game.startedAt;
           this.gameService.room.game.active = event.response.game.active;
-          this.gameService.room.game.dayNightCycle = event.response.game.dayNightCycle;
+          this.gameService.room.game.dayNightCycle =
+            event.response.game.dayNightCycle;
         }
         break;
       case GameEvent.EndCurrentTurn:
@@ -298,11 +324,11 @@ export class GameComponent {
         }
         break;
       case GameEvent.KickPlayer:
-        const kickedResponse:IKickPlayerResponse = event.response
+        const kickedResponse: IKickPlayerResponse = event.response;
         //remove all tokens
-        kickedResponse.removedTokens.forEach((token:Token)=>{
+        kickedResponse.removedTokens.forEach((token: Token) => {
           this.gameService.room.game?.removeToken(token);
-        })
+        });
 
         //remove player
         this.gameService.removePlayer(kickedResponse.kickedPlayer?.id);
@@ -329,7 +355,9 @@ export class GameComponent {
   };
 
   updatePlayers(newPlayers: IPlayer[]): void {
-    if (!newPlayers) { return; }
+    if (!newPlayers) {
+      return;
+    }
 
     newPlayers.forEach((newPlayer) => {
       const existingPlayer = this.gameService.room.players.find(
@@ -354,21 +382,24 @@ export class GameComponent {
   };
 
   // This is purely for the chrome autoplay policy, user needs to interact with the page before we can auto play the video streams
-  rejoinGame = ()=>{
+  rejoinGame = () => {
     this.webRTC.sendLocalGameEvent({
-      event: LocalGameEvent.RejoinGame
+      event: LocalGameEvent.RejoinGame,
     });
 
     this.localStorageService.setUserInteractedWithSite(true);
-  }
+  };
 
   copyUrl() {
     const currentUrl = window.location.href;
-    navigator.clipboard.writeText(currentUrl).then(() => {
-      this.alertService.addAlert('success', 'URL copied to clipboard!');
-    }).catch(err => {
-      this.logger.error("Failed to copy", err)
-    });
+    navigator.clipboard
+      .writeText(currentUrl)
+      .then(() => {
+        this.alertService.addAlert('success', 'URL copied to clipboard!');
+      })
+      .catch((err) => {
+        this.logger.error('Failed to copy', err);
+      });
   }
 
   goBack() {
@@ -390,25 +421,27 @@ export class GameComponent {
     });
   };
 
-  openDonationModel = ()=>{
+  openDonationModel = () => {
     this.donationModal.open();
-  }
+  };
 
-  openReportUserModal = (offenderPlayerId:string)=>{
-    this.reportUserModal.open(offenderPlayerId, this.gameService.room.id + "")
-  }
+  openReportUserModal = (offenderPlayerId: string) => {
+    this.reportUserModal.open(offenderPlayerId, this.gameService.room.id + '');
+  };
 
-   /**
+  /**
    * Returns the CSS flex‐order for the i'th player in the raw array,
    * so they appear in the correct slot in non‐focused or focused layouts.
    */
-   getOrder(i: number): number {
+  getOrder(i: number): number {
     const n = this.gameService.room.players.length;
     const turnOrder = this.gameService.room.players[i].turnOrder;
     if (this.focusedLayout) {
       // Focused: player whose turn it is always order=0,
       // then the rest follow in turnOrder wraparound
-      return (turnOrder - (this.focusedIndex >= 0 ? this.focusedIndex : 0) + n) % n;
+      return (
+        (turnOrder - (this.focusedIndex >= 0 ? this.focusedIndex : 0) + n) % n
+      );
     } else {
       // Non-focused: clockwise slots:
       // n=1: [0]
@@ -442,13 +475,33 @@ export class GameComponent {
       // original two-row logic:
       let topCount: number, bottomCount: number;
       switch (n) {
-        case 1: topCount = 1; bottomCount = 0; break;
-        case 2: topCount = 2; bottomCount = 0; break;
-        case 3: topCount = 2; bottomCount = 1; break;
-        case 4: topCount = 2; bottomCount = 2; break;
-        case 5: topCount = 3; bottomCount = 2; break;
-        case 6: topCount = 3; bottomCount = 3; break;
-        default: topCount = n; bottomCount = 0;
+        case 1:
+          topCount = 1;
+          bottomCount = 0;
+          break;
+        case 2:
+          topCount = 2;
+          bottomCount = 0;
+          break;
+        case 3:
+          topCount = 2;
+          bottomCount = 1;
+          break;
+        case 4:
+          topCount = 2;
+          bottomCount = 2;
+          break;
+        case 5:
+          topCount = 3;
+          bottomCount = 2;
+          break;
+        case 6:
+          topCount = 3;
+          bottomCount = 3;
+          break;
+        default:
+          topCount = n;
+          bottomCount = 0;
       }
 
       if (i < topCount) {
@@ -471,7 +524,7 @@ export class GameComponent {
       // focused layout
       const othersCount = n - 1;
       // the -1 check is when the game hasnt started so its technically nobodies turn
-      if (i === this.focusedIndex || (i === 0 && this.focusedIndex === -1 )) {
+      if (i === this.focusedIndex || (i === 0 && this.focusedIndex === -1)) {
         // highlighted player
         return {
           flexBasis: `100%`,
@@ -487,5 +540,4 @@ export class GameComponent {
       }
     }
   }
-
 }

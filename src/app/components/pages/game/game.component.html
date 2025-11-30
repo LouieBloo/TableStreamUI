@@ -1,7 +1,4 @@
-                      <button (click)="test()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Test</button>
 <div class="drawer drawer-end" >
-
-
   <input id="my-drawer" type="checkbox" class="drawer-toggle" />
     <div class="w-screen h-screen flex flex-col drawer-content ">
       <div class="flex flex-row flex-grow" *ngIf="localPlayer$ | async as localPlayer">
@@ -14,6 +11,8 @@
             <div style="color: white">
             playerSocketId: {{player.socketId}}
             playerId: {{player.id}}
+            localPlayerId: {{localPlayer.id}}
+            
             </div>
               <app-user-stream
                 [player]="player"
@@ -37,13 +36,13 @@
                <div>
                   <app-sidebar-game-info></app-sidebar-game-info>
                   <div class="justify-center mb-2 grid grid-cols-2">
-                    <div *ngIf="localPlayer?.admin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action" >Game</label></div>
+                    <div *ngIf="localPlayer?.isAdmin" appTooltip="Start game when ready" [tooltipDirection]="'left'" [tooltipStartOpen]="true"><label for="my-drawer" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action" >Game</label></div>
                       <button (click)="copyUrl()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Share Link</button>
                       <button (click)="gameLogModal.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Game Log</button>
                       <button (click)="reportComponent.open()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none btn-action">Report Issue</button>
 
                       <div class="relative inline-block dropdown">
-                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none btn-action">Layout {{(devicesService.videoDevices$ | async)?.length}} </button>
+                        <button tabindex="0" class="btn btn-sm btn-outline text-white w-full rounded-none btn-action">Layout</button>
                            <ul tabindex="0" class="menu dropdown-content bg-base-100 rounded-box shadow mt-1 -left-16 absolute z-10">
                             </ul>
                       </div>
@@ -53,8 +52,7 @@
                         {{ showChatbox ? 'Hide Chat' : 'Show Chat' }}
                           <span *ngIf="!showChatbox && unreadMessages > 0" class="text-xs ml-2 badge badge-error absolute right-0 top-0 p-2">{{ unreadMessages }}</span>
                         </button>
-                      <button (click)="showQrCode = !showQrCode" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative btn-action">Join with phone</button>
-                        <app-qr-code *ngIf="showQrCode" [player]="localPlayer"></app-qr-code>
+                      <button (click)="qrCodeModal.open(); testTest()" class="btn btn-sm btn-outline text-white drawer-button w-full rounded-none relative btn-action">Join with phone</button>
                     </div>
                     <div *ngIf="showingHotkeys" class="mb-4">
                       <ul class="text-white">
@@ -117,7 +115,7 @@
     <app-token-modal></app-token-modal>
     <app-report-user-modal></app-report-user-modal>
     <app-game-log-modal></app-game-log-modal>
-
+    <app-qr-code-modal [player]="localPlayer$ | async"></app-qr-code-modal>
     <app-donation-modal></app-donation-modal>
     <div class="absolute bottom-3 left-3">
         <app-donation-button [clickCallback]="openDonationModel"></app-donation-button>

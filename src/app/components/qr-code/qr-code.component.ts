@@ -14,7 +14,7 @@ import { GameService } from '../../services/game/game.service';
   styleUrl: './qr-code.component.css',
 })
 export class QrCodeComponent {
-  @Input() player?: IPlayer | null;
+  @Input() player!: IPlayer;
   readonly phoneCameraService = inject(PhoneCameraService);
   readonly gameService = inject(GameService);
 

@@ -11,63 +11,61 @@ import { LocalDevicesService } from '../../../services/devices/devices.service';
   standalone: true,
   imports: [],
   templateUrl: './phone-landing.component.html',
-  styleUrl: './phone-landing.component.css'
+  styleUrl: './phone-landing.component.css',
 })
 export class PhoneLandingComponent {
-
   webRtcService = inject(WebRTCService);
   devicesService = inject(LocalDevicesService);
   activatedRoute = inject(ActivatedRoute);
   localStorageService = inject(LocalStorageService);
   videoQuality: string;
 
-  constructor(){
-   this.videoQuality =  this.localStorageService.videoQuality || '16/9-1080';
+  constructor() {
+    this.videoQuality = this.localStorageService.videoQuality || '16/9-1080';
   }
-  
-  ngOnInit(){
+
+  ngOnInit() {
     const phoneToken: IPhoneToken = {
       playerToken: this.activatedRoute.snapshot.paramMap.get('playerToken'),
-      roomId: this.activatedRoute.snapshot.queryParamMap.get('roomId')
-    }
+      roomId: this.activatedRoute.snapshot.queryParamMap.get('roomId'),
+    };
     this.webRtcService.joinAsPhone(phoneToken);
   }
 
-    onVideoQualityChange(event: any) {
+  onVideoQualityChange(event: any) {
     this.videoQuality = event.target.value;
     this.localStorageService.setVideoQuality(this.videoQuality);
     this.changeDeviceReactive();
   }
 
-    changeDeviceReactive() {
-      from(
-        this.webRtcService.changeDevice(
-          this.devicesService.selectedVideoDeviceId.value,
-          this.devicesService.selectedAudioDeviceId.value
-        )
+  changeDeviceReactive() {
+    from(
+      this.webRtcService.changeDevice(
+        this.devicesService.selectedVideoDeviceId.value,
+        this.devicesService.selectedAudioDeviceId.value
       )
-        .pipe(
-          switchMap(() =>
-            from(
-              this.devicesService.buildLocalStream(
-                this.devicesService.selectedVideoDeviceId.value,
-                this.devicesService.selectedAudioDeviceId.value
-              )
+    )
+      .pipe(
+        switchMap(() =>
+          from(
+            this.devicesService.buildLocalStream(
+              this.devicesService.selectedVideoDeviceId.value,
+              this.devicesService.selectedAudioDeviceId.value
             )
           )
         )
-        .subscribe({
-          next: (stream: MediaStream | null) => {
-            // if (!stream) return;
-            // if (this.video.nativeElement) {
-            //   this.video.nativeElement.srcObject = stream;
-            //   this.video.nativeElement.muted = true;
-            // }
-  
-            // const isMicMuted = this.localStorageService.isMicMuted;
-            // this.isMutedSelf = isMicMuted === 'true';
-          },
-          error: (err) => console.error('Error changing device:', err),
-        });
-    }
+      )
+      .subscribe({
+        next: (stream: MediaStream | null) => {
+          // if (!stream) return;
+          // if (this.video.nativeElement) {
+          //   this.video.nativeElement.srcObject = stream;
+          //   this.video.nativeElement.muted = true;
+          // }
+          // const isMicMuted = this.localStorageService.isMicMuted;
+          // this.isMutedSelf = isMicMuted === 'true';
+        },
+        error: (err) => console.error('Error changing device:', err),
+      });
+  }
 }

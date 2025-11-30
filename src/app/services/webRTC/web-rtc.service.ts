@@ -216,6 +216,7 @@ export class WebRTCService {
   };
 
   public joinAsPhone = async (token: IPhoneToken) => {
+
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
@@ -342,7 +343,11 @@ export class WebRTCService {
   };
 
   private handleNewPeer = (data: { socketId: string; user: IUser }) => {
-    const { socketId } = data;
+    const { socketId } = data;//GETTING SOCKET ID
+    if(socketId == this.socket?.id){//NEW
+      return;
+    }
+
     //not sure the correct order of this, trying in front of createPeerConnection
     this.userJoinedSubject.next({ id: socketId, user: data.user });
     this.createPeerConnection(socketId, data.user, true);

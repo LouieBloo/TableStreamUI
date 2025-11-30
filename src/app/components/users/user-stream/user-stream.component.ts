@@ -37,7 +37,6 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 import { Router } from '@angular/router';
 import {
   catchError,
-  combineLatest,
   from,
   Observable,
   of,
@@ -162,8 +161,6 @@ export class UserStreamComponent {
     this.videoQuality = localStorageService.videoQuality || '16/9-1080';
     this.audioInputDevices$ = devicesService.audioDevices$;
     this.videoInputDevices$ = devicesService.videoDevices$;
-
-    this.subscribeToLocalStream();
     this.subscribeToEvents();
   }
 
@@ -183,11 +180,12 @@ export class UserStreamComponent {
 
   async ngAfterViewInit() {
     if(this.isLocalStream){
+      this.subscribeToLocalStream();
       await this.devicesService.setDevices();//TODO rename method
     }
     if (!this.isLocalStream) {
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
-      this.setStream(this.webRTC.getStream(this.player.socketId));//ended here thinking about replacing the remote stream with the local stream.
+      this.setStream(this.webRTC.getRemoteStream(this.player.socketId));
     }
     this.setFlip();
 
@@ -432,14 +430,7 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
-  kickPlayer(playerId: string) {
-    //TODO this doesnt look right
-    // this.webRTC.sendGameEvent({
-    //   event: GameEvent.KickPlayer,
-    //   payload: {
-    //     playerId: playerId,
-    //   },
-    // });
+  kickPlayer() {
     this.reportPlayerEvent.emit(this.player.id);
   }
 

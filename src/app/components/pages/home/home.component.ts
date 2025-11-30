@@ -80,7 +80,6 @@ export class HomeComponent {
 
   ngOnInit() {
     const joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
-
     if (joinRoomId) {
       this.setJoinRoomId(joinRoomId);
     }
