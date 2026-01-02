@@ -1,6 +1,15 @@
-# TableStreamUI
+# Table Stream UI
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.4.
+This is the front end for **Table Stream**
+
+## 🛠 Prerequisites
+- **Node.js:** `v18.19.1`
+
+## 1. Installation
+Clone the repository and install the dependencies:
+```bash
+npm install
+```
 
 ## Development server
 
