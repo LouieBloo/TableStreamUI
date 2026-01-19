@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import {
@@ -31,18 +31,13 @@ export class WebRTCService {
   remoteStreams: { [key: string]: MediaStream } = {};//will contain a users phone stream
   private iceServerList: any = null;
   private userJoinedSubject = new Subject<{ id: string; user: IUser }>();
-  private gameEventSubject = new Subject<IGameEvent>();
   public userJoined = this.userJoinedSubject.asObservable();
   private localGameEventSubject = new Subject<IGameEvent>();
   public localGameEvent = this.localGameEventSubject.asObservable();
   onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] =
     [];
   onStreamRemoved: ((id: string) => void)[] = [];
-  public gameEvent = this.gameEventSubject.asObservable();
 
-  public kickedPlayerEvent$ = this.gameEventSubject.pipe(
-    filter((event) => event.event === GameEvent.KickPlayer)
-  );
 
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
@@ -482,9 +477,11 @@ export class WebRTCService {
   private addRemoteStream(socketId: string, user: IUser) {
     return (event: RTCTrackEvent) => {
       this.logger.log('on track: ', event);
-      this.remoteStreams[socketId] = event.streams[0];
+      const remoteStream = event.streams[0];
+
+      this.remoteStreams[socketId] = remoteStream;
       if(this.gameService.isLocalPlayer(user.id)){
-        this.devicesService.setLocalStream(event.streams[0])
+        this.devicesService.setLocalStream(remoteStream)
       }
       this.onStreamAdded.forEach((callback) => {
         callback(socketId, this.remoteStreams[socketId], user);
@@ -540,7 +537,7 @@ export class WebRTCService {
   };
 
   handleGameEvent = (event: IGameEvent) => {
-    this.gameEventSubject.next(event);
+    this.gameService.handleGameEvent(event);
   };
 
   sendLocalGameEvent = (event: IGameEvent) => {
@@ -548,14 +545,7 @@ export class WebRTCService {
   };
 
   handleHistory = (historyEvent: IRoomHistoryEvent) => {
-    console.log('HISTORY: ', historyEvent);
-    if (
-      this.gameService.room &&
-      this.gameService.room.history &&
-      historyEvent
-    ) {
-      this.gameService.room.history.push(historyEvent);
-    }
+    this.gameService.handleHistory(historyEvent);
   };
 
   handleErrorResponse = (error: IGameError) => {

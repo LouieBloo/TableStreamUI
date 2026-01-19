@@ -13,10 +13,6 @@ import { NgIf } from '@angular/common';
 export class QrCodeModalComponent {
   @Input() player: IPlayer | null | undefined = null;
 
-  ngOnChanges(){
-    console.log(this.player);
-  }
-
   open() {
     const dialogCheckbox = document.getElementById('toggleqrCodeModalOpen');
     if (dialogCheckbox) {

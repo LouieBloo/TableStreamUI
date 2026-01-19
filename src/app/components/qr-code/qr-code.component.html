@@ -1,1 +1,3 @@
 <qrcode [qrdata]="(url$ | async)!" [width]="256" [allowEmptyString]="true" [errorCorrectionLevel]="'M'"></qrcode>
+
+code {{url$ | async}}

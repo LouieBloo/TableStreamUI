@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Observable, of, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { UserService } from '../user/user.service';
 
 @Injectable({
@@ -10,13 +10,11 @@ import { UserService } from '../user/user.service';
 export class PhoneCameraService {
   readonly http = inject(HttpClient);
   readonly userService = inject(UserService);
-  private _qrcode: BehaviorSubject<string> = new BehaviorSubject('');
+  private _url: BehaviorSubject<string> = new BehaviorSubject('');
 
-  get qrCode$() {
-    return this._qrcode.asObservable();
+  get urlForJoinByPhone$() {
+    return this._url.asObservable();
   }
-
-  constructor() {}
 
   public getQrCode(
     roomId: string | null | undefined,
@@ -31,7 +29,8 @@ export class PhoneCameraService {
       .post<string>(environment.socketUrl + '/qrcodetoken', body)
       .pipe(
         tap((code: string) => {
-          this._qrcode.next(code);
+          const url = `https://192.168.1.77:4200/remote-camera/${code}?roomId=${roomId}`;
+          this._url.next(url);
         })
       );
   }
@@ -42,4 +41,5 @@ export class PhoneCameraService {
       {}
     );
   }
+
 }

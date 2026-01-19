@@ -56,7 +56,7 @@
         </div>
 
         <div *ngIf="player && (gameService.isCommanderGame() || gameService.isDomainGame() || gameService.isOnePieceGame())" class="mt-2">
-            <app-set-commander [player]="player" [editable]="isLocalStream" [commander]="player.commanders[0]" [index]="0" [label]="gameService.room.game?.commanderTitle || ''"></app-set-commander>
+            <app-set-commander [player]="player" [editable]="isLocalStream" [commander]="player.commanders[0]" [index]="0" [label]="gameService.commanderTitle || ''"></app-set-commander>
             <app-set-commander *ngIf="gameService.isCommanderGame()" [player]="player" [editable]="isLocalStream" [commander]="player.commanders[1]" [index]="1"></app-set-commander>
         </div>
 
@@ -114,7 +114,7 @@
                         <img src="assets/images/icons/death-icon.png" alt="Death" class="w-12">
                     </p>
                 </div>
-                <div *ngIf="gameService.room.game?.dayNightCycle != ''">
+                <div *ngIf="gameService.dayNightCycle != ''">
                     <p *ngIf="gameService.isDay" class="text-center text-4xl"  appTooltip="Daytime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
                         <img src="assets/images/icons/sun-icon.png" alt="Daytime" class="w-12">
                     </p>
@@ -145,7 +145,7 @@
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
-                <li *ngIf="!isLocalStream && gameService.room.allowPlayerKicking" (click)="kickPlayer()" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
+                <li *ngIf="!isLocalStream && gameService.isAllowPlayerKicked" (click)="kickPlayer()" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
                 <li *ngIf="!isLocalStream && !player.isAdmin" (click)="makeAdmin(player)" class="text-slate-800">
                     <a>Make admin</a>
                 </li>

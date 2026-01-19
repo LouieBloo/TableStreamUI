@@ -1,10 +1,10 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, inject, Input } from '@angular/core';
 import { QRCodeModule } from 'angularx-qrcode';
-import { PhoneCameraService } from '../../services/phone-camera/phone-camera.service';
-import { AsyncPipe } from '@angular/common';
-import { map, Observable, of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { IPlayer } from '../../interfaces/IPlayer';
 import { GameService } from '../../services/game/game.service';
+import { PhoneCameraService } from '../../services/phone-camera/phone-camera.service';
 
 @Component({
   selector: 'app-qr-code',
@@ -17,17 +17,19 @@ export class QrCodeComponent {
   @Input() player!: IPlayer;
   readonly phoneCameraService = inject(PhoneCameraService);
   readonly gameService = inject(GameService);
-
-  url$: Observable<string> = of("");
+  subscriptions = new Subscription();
+  url$ = of('');
 
   ngOnInit() {
-    this.url$ = this.phoneCameraService
-      .getQrCode(this.player?.roomId, this.player?.id ?? null)
-      .pipe(
-        map((code: string) => {
-          const url = `https://192.168.1.77:4200/remote-camera/${code}?roomId=${this.player?.roomId}`
-          return url;
-        })
-      );
+    this.subscriptions.add(
+      this.phoneCameraService
+        .getQrCode(this.player?.roomId, this.player?.id ?? null)
+        .subscribe()
+    );
+    this.url$ = this.phoneCameraService.urlForJoinByPhone$;
+  }
+
+  ngOnDestroy(){
+    this.subscriptions.unsubscribe();
   }
 }

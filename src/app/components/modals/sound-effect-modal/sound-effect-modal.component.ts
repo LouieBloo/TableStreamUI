@@ -84,7 +84,7 @@ export class SoundEffectModalComponent {
 
   constructor(private webRTC:WebRTCService, private gameService:GameService, public soundService:SoundService, public settingService:SettingsService){
     this.subscriptions.add(
-      this.webRTC.gameEvent.subscribe(event => this.handleGameEvent(event))
+      this.gameService.gameEvent.subscribe(event => this.handleGameEvent(event))
     );
 
     this.soundListKeys = Object.keys(this.soundList);
@@ -127,8 +127,8 @@ export class SoundEffectModalComponent {
 
   // plays the sound, will also tell the effect component to render the animoji
   playSound(sound: ISound, incomingPlayer: IPlayer) {
-    const localIncomingPlayer:IPlayer | undefined = this.gameService.room.players.find(player=>{return player.id == incomingPlayer.id})
 
+    const localIncomingPlayer = this.gameService.getPlayerById(incomingPlayer.id);
     if(!localIncomingPlayer){return;}
 
     if(!localIncomingPlayer.reactionsMuted){

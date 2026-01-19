@@ -67,7 +67,7 @@ export class CardListComponent {
 
   ngAfterViewInit(): void {
     this.subscriptions.add(
-      this.webRtc.gameEvent.subscribe((event: IGameEvent) => {
+      this.gameService.gameEvent.subscribe((event: IGameEvent) => {
         if (event.event == GameEvent.ShareCard && event.response) {
           this.sharedCards.unshift(event.response);
         }
@@ -90,6 +90,7 @@ export class CardListComponent {
       })
     );
 
+    //subscribes to share card
     this.subscriptions.add(
       this.webRtc.localGameEvent.subscribe((localGameEvent: IGameEvent) => {
         if (localGameEvent.event === LocalGameEvent.ShareCard) {
@@ -117,7 +118,7 @@ export class CardListComponent {
           return this.cardSearchService.searchCards(
             this.searchString,
             true,
-            this.gameService.room.game!,
+            this.gameService.game!,
             this.searchOptions
           ).pipe(
             catchError((error: any) => {

@@ -140,7 +140,7 @@ export class UserStreamComponent {
     if (!this.isFocusedLayout) {
       return false;
     }
-    if (!this.gameService.room?.game?.active) {
+    if (!this.gameService.isActiveGame) {
       return this.player.turnOrder != 0;
     }
 
@@ -179,9 +179,9 @@ export class UserStreamComponent {
   }
 
   async ngAfterViewInit() {
-    if(this.isLocalStream){
+    if (this.isLocalStream) {
       this.subscribeToLocalStream();
-      await this.devicesService.setDevices();//TODO rename method
+      await this.devicesService.setDevices(); //TODO rename method
     }
     if (!this.isLocalStream) {
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
@@ -205,8 +205,8 @@ export class UserStreamComponent {
 
   subscribeToEvents() {
     this.subscriptions.add(
-      this.webRTC.kickedPlayerEvent$.subscribe((event) => {
-        if (this.imKicked(event.response)) {
+      this.gameService.kickedPlayerEvent$.subscribe((event) => {
+        if (this.imKicked(event?.response)) {
           this.router.navigate(['/join']);
         }
       })
@@ -287,13 +287,7 @@ export class UserStreamComponent {
       .subscribe({
         next: (stream: MediaStream | null) => {
           if (!stream) return;
-          if (this.video.nativeElement) {
-            this.video.nativeElement.srcObject = stream;
-            this.video.nativeElement.muted = true;
-          }
-
-          const isMicMuted = this.localStorageService.isMicMuted;
-          this.isMutedSelf = isMicMuted === 'true';
+          this.displayLocalStream(stream);
         },
         error: (err) => console.error('Error changing device:', err),
       });
@@ -487,7 +481,7 @@ export class UserStreamComponent {
 
     if (
       !environment.cardIdentifierActive ||
-      !this.gameService.room.game?.classifierActive
+      !this.gameService.isClassifierActive
     ) {
       return;
     }

@@ -2,8 +2,8 @@
     <div class="flex flex-row">
         <div class="grow">
             <h3 class="text-white flex items-center" appTooltip="Room Name" [tooltipDirection]="'left'"><ng-icon name="gameHouse" class="text-white text-lg"></ng-icon> <span class="text-pop ml-2">{{adjustedRoomName}}</span></h3>
-            <h3 class="text-white flex items-center" appTooltip="Game Type" [tooltipDirection]="'left'"><ng-icon name="gameGamepadCross" class="text-white text-lg"></ng-icon> <span class="text-pop ml-2 capitalize">{{gameService.room.game?.name}}</span></h3>
-            <h3 class="text-white mb-2 flex items-center" appTooltip="Game Time" [tooltipDirection]="'left'"><ng-icon name="gameSandsOfTime" class="text-white text-lg mr-2"></ng-icon><app-timer [date]="gameService.room.game?.startedAt"></app-timer></h3>
+            <h3 class="text-white flex items-center" appTooltip="Game Type" [tooltipDirection]="'left'"><ng-icon name="gameGamepadCross" class="text-white text-lg"></ng-icon> <span class="text-pop ml-2 capitalize">{{gameService.gameName}}</span></h3>
+            <h3 class="text-white mb-2 flex items-center" appTooltip="Game Time" [tooltipDirection]="'left'"><ng-icon name="gameSandsOfTime" class="text-white text-lg mr-2"></ng-icon><app-timer [date]="gameService.startedAt"></app-timer></h3>
         </div>
     
         <div class="flex flex-col ">

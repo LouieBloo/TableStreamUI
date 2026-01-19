@@ -1,17 +1,15 @@
 import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, Subscription, tap } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import {
   GameEvent,
-  IGameEvent,
   LocalGameEvent,
 } from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/IPlayer';
 import {
-  IKickPlayerResponse,
   IRoom,
   PasswordCheckResponse,
 } from '../../../interfaces/IRoom';
@@ -29,7 +27,6 @@ import { TokenModalComponent } from '../../modals/token-modal/token-modal.compon
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { CardTokenComponent } from '../../tokens/card-token/card-token.component';
 import { UserStreamComponent } from '../../users/user-stream/user-stream.component';
-import { Token } from '../../../interfaces/IPlayingCard';
 import { DonationButtonComponent } from '../../donations/donation-button/donation-button.component';
 import { DonationModalComponent } from '../../modals/donation-modal/donation-modal.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -42,6 +39,8 @@ import { ReportUserModalComponent } from '../../modals/report-user-modal/report-
 import { GameLogModalComponent } from '../../modals/game-log-modal/game-log-modal.component';
 import { LocalDevicesService } from '../../../services/devices/devices.service';
 import { QrCodeModalComponent } from '../../modals/qr-code-modal/qr-code-modal.component';
+import { MessengerComponent } from '../../messaging/messenger/messenger.component';
+import { SettingsService } from '../../../services/settings/settings.service';
 
 @Component({
   selector: 'app-game',
@@ -67,7 +66,8 @@ import { QrCodeModalComponent } from '../../modals/qr-code-modal/qr-code-modal.c
     ReportUserModalComponent,
     GameLogModalComponent,
     AsyncPipe,
-    QrCodeModalComponent
+    QrCodeModalComponent,
+    MessengerComponent
 ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
@@ -104,10 +104,6 @@ export class GameComponent {
     return this.gameService.getPlayerTakingTurnIndex();
   }
 
-  get focusedPlayer() {
-    return this.gameService.room.players[this.focusedIndex];
-  }
-
   constructor(
     public webRTC: WebRTCService,
     private inputService: InputService,
@@ -116,26 +112,29 @@ export class GameComponent {
     private route: ActivatedRoute,
     private alertService: AlertsService,
     private logger: LoggerService,
+    private settingsService:SettingsService,
     public localStorageService: LocalStorageService
   ) {
-    this.gameService.room = {
-      name: 'temp',
-      players: [],
-      messages: [],
-    };
-
-    this.localPlayer$ = this.gameService.localPlayer$.pipe(
-      tap((player)=>{
-        console.log(player);
-      })
-    );
+    this.gameService.setTempRoom();
+    this.localPlayer$ = this.gameService.localPlayer$;
   }
+
 
   ngOnInit() {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
-    let previousRoomId = this.localStorageService.roomId;
-    let hasSetSpectator = this.localStorageService.hasSetSpectator;
+    this.handleFirstTimePlayer();
 
+    if (this.shouldRedirectToJoin()){
+      this.redirect();
+      return;
+    }
+
+    this.subscribeToPassTurn();
+    this.subscribeToUserJoined();
+    this.checkPasswordProtection(this.roomId);
+  }
+
+  private handleFirstTimePlayer(){
     if (!this.localStorageService.hasPlayedBefore) {
       this.showingHotkeys = true;
       this.localStorageService.setHasPlayedBefore('true');
@@ -143,34 +142,28 @@ export class GameComponent {
         this.showingHotkeys = false;
       }, 1000 * 60 * 5);
     }
+  }
 
-    if (
+  private shouldRedirectToJoin(){
+    const previousRoomId = this.localStorageService.roomId;
+    const hasSetSpectator = this.localStorageService.hasSetSpectator;
+
+    return (
       !this.localStorageService.playerName ||
       !hasSetSpectator ||
       (previousRoomId && this.roomId != previousRoomId)
-    ) {
-      if (this.roomId) {
-        this.router.navigate(['/join'], {
-          queryParams: { id: this.roomId },
-          queryParamsHandling: 'merge',
-        });
-      } else {
-        this.router.navigate(['/join']);
-      }
-
-      return;
-    }
-
-    this.subscribeToPassTurn();
-    this.subscribeToUserJoined();
-    this.subscribeToGameEvent();
-    this.checkPasswordProtection(this.roomId);
+    )
   }
 
-  subscribeToGameEvent() {
-    this.subscriptions.add(
-      this.webRTC.gameEvent.subscribe((event) => this.handleGameEvent(event))
-    );
+  private redirect(){
+    if (this.roomId) {
+      this.router.navigate(['/join'], {
+        queryParams: { id: this.roomId },
+        queryParamsHandling: 'merge',
+      });
+    } else {
+      this.router.navigate(['/join']);
+    }
   }
 
   subscribeToUserJoined() {
@@ -216,15 +209,6 @@ export class GameComponent {
     );
   };
 
-  test(localPlayer: IPlayer){
-    console.log(localPlayer);
-  }
-
-  testTest(){
-    console.log(this.gameService.room.players);
-    console.log(this.webRTC.remoteStreams);
-  }
-
   onSuccessfulLoadIntoGame = (me: IUser, room: IRoom) => {
     this.gameService.setRoom(room, me.id);
     this.passwordModal.close();
@@ -255,123 +239,23 @@ export class GameComponent {
     this.webRTC.joinRoom(this.roomId, password, this.onSuccessfulLoadIntoGame);
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
   userJoined = ({ id, user }: { id: string; user: IUser }) => {
     if (user.type === UserType.Player) {
       this.addPlayer(user as IPlayer);
     }
   };
 
-  handleGameEvent = (event: IGameEvent) => {
-    this.logger.log('handling event: ', event);
-    switch (event.event) {
-      case GameEvent.RandomizePlayerOrder:
-        this.updatePlayers(event.response);
-        this.gameService.sortPlayers();
-        break;
-      case GameEvent.ModifyPlayerProperty:
-        this.updatePlayers(event.response);
-        break;
-      case GameEvent.ModifyGameProperty:
-        this.gameService.room.game?.modifyProperty(event.response);
-        break;
-      case GameEvent.StartGame:
-        this.updatePlayers(event.response.players);
-        if (this.gameService.room.game) {
-          this.gameService.room.game.startedAt = event.response.game.startedAt;
-          this.gameService.room.game.active = event.response.game.active;
-        }
-        break;
-      case GameEvent.ResetGame:
-        this.updatePlayers(event.response.players);
-        if (this.gameService.room.game) {
-          this.gameService.room.game.startedAt = event.response.game.startedAt;
-          this.gameService.room.game.active = event.response.game.active;
-          this.gameService.room.game.dayNightCycle =
-            event.response.game.dayNightCycle;
-        }
-        break;
-      case GameEvent.EndCurrentTurn:
-        this.updatePlayers(event.response);
-        break;
-      case GameEvent.ToggleMonarch:
-        this.updatePlayers(event.response);
-        break;
-      case GameEvent.ToggleInitiative:
-        this.updatePlayers(event.response);
-        break;
-      case GameEvent.ModifyPlayerCommanderDamage:
-        this.updatePlayers([event.response]);
-        break;
-      case GameEvent.SetCommander:
-        this.updatePlayers(event.response);
-        break;
-      case GameEvent.SetPlayerTurnOrders:
-        this.updatePlayers(event.response);
-        this.gameService.sortPlayers();
-        break;
-      case GameEvent.CreateToken:
-        if (this.gameService.room.game) {
-          this.gameService.room.game.createToken(event.response);
-        }
-        break;
-      case GameEvent.DeleteToken:
-        if (this.gameService.room.game) {
-          this.gameService.room.game.removeToken(event.response);
-        }
-        break;
-      case GameEvent.KickPlayer:
-        const kickedResponse: IKickPlayerResponse = event.response;
-        //remove all tokens
-        kickedResponse.removedTokens.forEach((token: Token) => {
-          this.gameService.room.game?.removeToken(token);
-        });
-
-        //remove player
-        this.gameService.removePlayer(kickedResponse.kickedPlayer?.id);
-
-        //update players (turn order, commander damages)
-        this.updatePlayers(kickedResponse.players);
-        break;
-    }
-  };
-
   addPlayer = (newPlayer: IPlayer) => {
-    let foundPlayer = this.getPlayer(newPlayer.id);
-
-    if (!foundPlayer) {
-      this.gameService.room.players.push(newPlayer);
-    } else {
-      //update the socketId
-      foundPlayer.socketId = newPlayer.socketId;
-    }
-
-    this.gameService.sortPlayers();
-
-    return foundPlayer;
+    this.gameService.addPlayer(newPlayer);
   };
 
-  updatePlayers(newPlayers: IPlayer[]): void {
-    if (!newPlayers) {
-      return;
-    }
-
-    newPlayers.forEach((newPlayer) => {
-      const existingPlayer = this.gameService.room.players.find(
-        (p) => p.id === newPlayer.id
-      );
-      if (existingPlayer) {
-        Object.assign(existingPlayer, newPlayer); // This updates only the fields that have changed
-      }
-    });
+  sortPlayers(){
+    this.gameService.sortPlayers();
   }
 
-  getPlayer = (id: string) => {
-    return this.gameService.room.players.find((p) => p.id === id);
-  };
+  updatePlayers(newPlayers: IPlayer[]): void {
+    this.gameService.updatePlayers(newPlayers);
+  }
 
   startGame = () => {
     this.webRTC.sendGameEvent({ event: GameEvent.StartGame });
@@ -425,8 +309,9 @@ export class GameComponent {
     this.donationModal.open();
   };
 
+  //TEST
   openReportUserModal = (offenderPlayerId: string) => {
-    this.reportUserModal.open(offenderPlayerId, this.gameService.room.id + '');
+    this.reportUserModal.open(offenderPlayerId, this.gameService.roomId + '');
   };
 
   /**
@@ -434,8 +319,8 @@ export class GameComponent {
    * so they appear in the correct slot in non‐focused or focused layouts.
    */
   getOrder(i: number): number {
-    const n = this.gameService.room.players.length;
-    const turnOrder = this.gameService.room.players[i].turnOrder;
+    const n = this.gameService.numberOfPlayersInRoom;
+    const turnOrder = this.gameService.getPlayerTurnOrder(i);
     if (this.focusedLayout) {
       // Focused: player whose turn it is always order=0,
       // then the rest follow in turnOrder wraparound
@@ -469,7 +354,7 @@ export class GameComponent {
    * for both normal and focused layouts.
    */
   computeFlexStyles(i: number): { [key: string]: string } {
-    const n = this.gameService.room.players.length;
+    const n = this.gameService.numberOfPlayersInRoom;
 
     if (!this.focusedLayout) {
       // original two-row logic:
@@ -539,5 +424,27 @@ export class GameComponent {
         };
       }
     }
+  }
+
+    setLayout(layout:string){
+      switch(layout){
+        case "DEFAULT":
+          this.focusedLayout = false;
+          this.settingsService.tokensEnabled = true;
+          break;
+        case "FOCUSED":
+          this.focusedLayout = true;
+          this.settingsService.tokensEnabled = false;
+          this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
+          break;
+      }
+  }
+
+    handleUnreadCount(count: number): void {
+      this.unreadMessages = count;
+    }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }
