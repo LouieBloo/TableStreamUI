@@ -26,6 +26,13 @@ export class LocalDevicesService {
     this._localStream.next(stream);
   }
 
+  public buildLocalStreamFromSelectedDevices() {
+    return this.buildLocalStream(
+      this.selectedVideoDeviceId.value,
+      this.selectedAudioDeviceId.value
+    );
+  }
+
   public async buildLocalStream(
     videoDeviceId?: string,
     audioDeviceId?: string,
@@ -50,11 +57,7 @@ export class LocalDevicesService {
       if (this.isPermissionError(err)) {
         this.logger.log('Permission error: Trying again without audio');
 
-        await this.setUserMediaWithoutAudio(
-          videoDeviceId,
-          audioDeviceId,
-          aspectRatio
-        );
+        await this.setUserMediaWithoutAudio(videoDeviceId, audioDeviceId, aspectRatio);
       } else {
         throw err;
       }
@@ -64,20 +67,14 @@ export class LocalDevicesService {
   }
 
   private isPermissionError(err: any) {
-    return (
-      err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
-    );
+    return err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
   }
 
   async setDevices(): Promise<void> {
     const devices = await navigator.mediaDevices.enumerateDevices();
 
-    const videoDevices = devices.filter(
-      (device) => device.kind === 'videoinput'
-    );
-    const audioDevices = devices.filter(
-      (device) => device.kind === 'audioinput'
-    );
+    const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+    const audioDevices = devices.filter((device) => device.kind === 'audioinput');
 
     this._videoDevices.next(videoDevices);
     this._audioDevices.next(audioDevices);
@@ -86,7 +83,10 @@ export class LocalDevicesService {
     await this.buildLocalStream(selectedVideoDeviceId, selectedAudioDeviceId);
   }
 
-  async getLocalMediaStreamWithConstraints(videoDeviceChanged: boolean, audioDeviceChanged: boolean) {
+  async getLocalMediaStreamWithConstraints(
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean
+  ) {
     const constraints = this.getConstraints(videoDeviceChanged, audioDeviceChanged);
     return navigator.mediaDevices.getUserMedia(constraints);
   }
@@ -214,9 +214,7 @@ export class LocalDevicesService {
 
   public unmuteSelf(): void {
     if (this._localStream.value) {
-      this._localStream.value
-        .getAudioTracks()
-        .forEach((track) => (track.enabled = true));
+      this._localStream.value.getAudioTracks().forEach((track) => (track.enabled = true));
     }
   }
 
@@ -230,9 +228,7 @@ export class LocalDevicesService {
 
   public turnOnVideo(): void {
     if (this._localStream.value) {
-      this._localStream.value
-        .getVideoTracks()
-        .forEach((track) => (track.enabled = true));
+      this._localStream.value.getVideoTracks().forEach((track) => (track.enabled = true));
     }
   }
 
@@ -265,10 +261,7 @@ export class LocalDevicesService {
     return audioDeviceId !== undefined && audioDeviceId !== currentDeviceId;
   }
 
-  private getConstraints(
-    videoDeviceChanged: boolean,
-    audioDeviceChanged: boolean
-  ) {
+  private getConstraints(videoDeviceChanged: boolean, audioDeviceChanged: boolean) {
     const videoQuality = this.getCameraVideoQuality();
     const videoDeviceId = this.selectedVideoDeviceId.value;
     const audioDeviceId = this.selectedAudioDeviceId.value;
@@ -292,9 +285,7 @@ export class LocalDevicesService {
     return constraints;
   }
 
-  private async tryApplyingVideoConstraints(
-    currentVideoTrack: MediaStreamTrack
-  ) {
+  private async tryApplyingVideoConstraints(currentVideoTrack: MediaStreamTrack) {
     const videoQuality = this.getCameraVideoQuality();
     try {
       await currentVideoTrack.applyConstraints({
@@ -307,9 +298,7 @@ export class LocalDevicesService {
     }
   }
 
-  public async changeDevice(peerConnections: {
-    [key: string]: RTCPeerConnection;
-  }) {
+  public async changeDevice(peerConnections: { [key: string]: RTCPeerConnection }) {
     const currentVideoTrack = this.getFirstVideoTrack();
     const currentAudioTrack = this.getFirstAudioTrack();
 
@@ -389,10 +378,7 @@ export class LocalDevicesService {
     const audioDeviceId = this.selectedAudioDeviceId.value;
 
     if (!this._localStream.value) {
-      const stream = await this.getLocalMediaStream(
-        videoDeviceId,
-        audioDeviceId
-      );
+      const stream = await this.getLocalMediaStream(videoDeviceId, audioDeviceId);
       this._localStream.next(stream);
     }
     return this._localStream.value;
@@ -435,9 +421,7 @@ export class LocalDevicesService {
   ) {
     for (const socketId in peerConnections) {
       const peerConnection = peerConnections[socketId];
-      const sender = peerConnection
-        .getSenders()
-        .find((s) => s.track?.kind === kind);
+      const sender = peerConnection.getSenders().find((s) => s.track?.kind === kind);
       if (sender) {
         await sender.replaceTrack(newTrack);
       } else {

@@ -35,15 +35,7 @@ import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
-import {
-  catchError,
-  from,
-  Observable,
-  of,
-  Subscription,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { catchError, from, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
 import { CommanderSideBarComponent } from '../../commander/commander-side-bar/commander-side-bar.component';
 import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
@@ -109,8 +101,7 @@ export class UserStreamComponent {
   @Input() player!: IPlayer;
   @Input() isLocalStream: boolean = false;
   @Input() isFocusedLayout: boolean = false;
-  @Output() reportPlayerEvent: EventEmitter<string> =
-    new EventEmitter<string>();
+  @Output() reportPlayerEvent: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
   @ViewChildren(LifeTotalComponent)
@@ -214,10 +205,7 @@ export class UserStreamComponent {
 
     this.subscriptions.add(
       this.webRTC.localGameEvent.subscribe((localGameEvent: IGameEvent) => {
-        if (
-          localGameEvent.event === LocalGameEvent.RejoinGame &&
-          !this.isLocalStream
-        ) {
+        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.isLocalStream) {
           this.video.nativeElement.play().catch((err) => {
             console.error('Error auto-playing:', err);
           });
@@ -258,25 +246,18 @@ export class UserStreamComponent {
 
   onAudioDeviceChange(event: any) {
     this.selectedAudioDeviceId = event.target.value;
-    this.changeDeviceReactive();
+    this.changeDevice();
   }
 
   onVideoDeviceChange(event: any) {
     this.selectedVideoDeviceId = event.target.value;
-    this.changeDeviceReactive();
+    this.changeDevice();
   }
 
-  changeDeviceReactive() {
+  changeDevice() {
     from(this.webRTC.changeDevice())
       .pipe(
-        switchMap(() =>
-          from(
-            this.devicesService.buildLocalStream(
-              this.devicesService.selectedVideoDeviceId.value,
-              this.devicesService.selectedAudioDeviceId.value
-            )
-          )
-        )
+        switchMap(() => from(this.devicesService.buildLocalStreamFromSelectedDevices()))
       )
       .subscribe({
         next: (stream: MediaStream | null) => {
@@ -290,7 +271,7 @@ export class UserStreamComponent {
   onVideoQualityChange(event: any) {
     this.videoQuality = event.target.value;
     this.localStorageService.setVideoQuality(this.videoQuality);
-    this.changeDeviceReactive();
+    this.changeDevice();
   }
 
   toggleMuteSelf() {
@@ -423,9 +404,7 @@ export class UserStreamComponent {
   }
 
   toggleImageSharing = async () => {
-    this.localStorageService.setIsSharingImages(
-      !this.player.isSharingImages + ''
-    );
+    this.localStorageService.setIsSharingImages(!this.player.isSharingImages + '');
     let payload: IModifyPlayerProperty = {
       value: !this.player.isSharingImages,
       property: PlayerProperties.sharingImages,
@@ -436,11 +415,7 @@ export class UserStreamComponent {
     });
   };
 
-  modifyCommanderDamage = (
-    playerId: string,
-    amount: number,
-    card: IPlayingCard
-  ) => {
+  modifyCommanderDamage = (playerId: string, amount: number, card: IPlayingCard) => {
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyPlayerCommanderDamage,
       payload: {
@@ -466,17 +441,11 @@ export class UserStreamComponent {
 
   onVideoClick(event: MouseEvent) {
     if (this.loadingCardIdentification) {
-      this.alertService.addAlert(
-        'error',
-        'Only 1 image can be classified at once'
-      );
+      this.alertService.addAlert('error', 'Only 1 image can be classified at once');
       return;
     }
 
-    if (
-      !environment.cardIdentifierActive ||
-      !this.gameService.isClassifierActive
-    ) {
+    if (!environment.cardIdentifierActive || !this.gameService.isClassifierActive) {
       return;
     }
 
@@ -523,20 +492,14 @@ export class UserStreamComponent {
 
             // Send the file and normalized click position to the classification service
             this.cardIdentifierService
-              .classifyImage(
-                photoFile,
-                normalizedX,
-                normalizedY,
-                this.player.id
-              )
+              .classifyImage(photoFile, normalizedX, normalizedY, this.player.id)
               .subscribe(
                 (response: any) => {
                   this.ngZone.run(() => {
                     if (response && response.scryfall_data) {
                       this.classifiedCard = {
                         ...response.scryfall_data,
-                        classificationConfidence:
-                          response.classification_confidence,
+                        classificationConfidence: response.classification_confidence,
                       };
                       this.popupPosition = {
                         x: event.clientX,
@@ -570,13 +533,7 @@ export class UserStreamComponent {
    * Handles the (share) event emitted from the card popup.
    * @param card The card data to be shared.
    */
-  shareCard = ({
-    card,
-    sharePublic,
-  }: {
-    card: IPlayingCard;
-    sharePublic: boolean;
-  }) => {
+  shareCard = ({ card, sharePublic }: { card: IPlayingCard; sharePublic: boolean }) => {
     this.webRTC.sendLocalGameEvent({
       event: LocalGameEvent.ShareCard,
       payload: { card, sharePublic },

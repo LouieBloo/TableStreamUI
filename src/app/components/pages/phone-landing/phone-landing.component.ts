@@ -41,14 +41,7 @@ export class PhoneLandingComponent {
   changeDevice() {
     from(this.webRtcService.changeDevice())
       .pipe(
-        switchMap(() =>
-          from(
-            this.devicesService.buildLocalStream(
-              this.devicesService.selectedVideoDeviceId.value,
-              this.devicesService.selectedAudioDeviceId.value
-            )
-          )
-        )
+        switchMap(() => from(this.devicesService.buildLocalStreamFromSelectedDevices()))
       )
       .subscribe({
         next: (stream: MediaStream | null) => {},
