@@ -3,16 +3,10 @@ import { Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of, shareReplay, Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
-import {
-  GameEvent,
-  LocalGameEvent,
-} from '../../../interfaces/IGame';
+import { GameEvent, LocalGameEvent } from '../../../interfaces/IGame';
 import { UserInputAction } from '../../../interfaces/inputs';
 import { IPlayer, IUser, UserType } from '../../../interfaces/IPlayer';
-import {
-  IRoom,
-  PasswordCheckResponse,
-} from '../../../interfaces/IRoom';
+import { IRoom, PasswordCheckResponse } from '../../../interfaces/IRoom';
 import { AlertsService } from '../../../services/alerts/alerts.service';
 import { GameService } from '../../../services/game/game.service';
 import { InputService } from '../../../services/input/input.service';
@@ -67,8 +61,8 @@ import { SettingsService } from '../../../services/settings/settings.service';
     GameLogModalComponent,
     AsyncPipe,
     QrCodeModalComponent,
-    MessengerComponent
-],
+    MessengerComponent,
+  ],
   templateUrl: './game.component.html',
   styleUrl: './game.component.css',
   viewProviders: [provideIcons({ bootstrapCheck, bootstrapChevronDoubleLeft })],
@@ -87,6 +81,16 @@ export class GameComponent {
   @ViewChild(GameLogModalComponent) gameLogModal!: GameLogModalComponent;
   @ViewChild(QrCodeModalComponent) qrCodeModal!: QrCodeModalComponent;
 
+  public webRTC = inject(WebRTCService);
+  public gameService = inject(GameService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private alertService = inject(AlertsService);
+  private logger = inject(LoggerService);
+  private settingsService = inject(SettingsService);
+  public localStorageService = inject(LocalStorageService);
+  private inputService = inject(InputService);
+  devicesService = inject(LocalDevicesService);
 
   private subscriptions: Subscription = new Subscription();
   roomId!: string;
@@ -95,36 +99,26 @@ export class GameComponent {
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
-  localPlayer$: Observable<IPlayer | null | undefined> = of(null).pipe(shareReplay());
+  localPlayer$: Observable<IPlayer | null | undefined> = of(null).pipe(
+    shareReplay()
+  );
   showSideBar: boolean = true;
   showQrCode: boolean = false;
-  devicesService = inject(LocalDevicesService);
-  
+
   get focusedIndex(): number {
     return this.gameService.getPlayerTakingTurnIndex();
   }
 
-  constructor(
-    public webRTC: WebRTCService,
-    private inputService: InputService,
-    public gameService: GameService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private alertService: AlertsService,
-    private logger: LoggerService,
-    private settingsService:SettingsService,
-    public localStorageService: LocalStorageService
-  ) {
+  constructor() {
     this.gameService.setTempRoom();
     this.localPlayer$ = this.gameService.localPlayer$;
   }
-
 
   ngOnInit() {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
     this.handleFirstTimePlayer();
 
-    if (this.shouldRedirectToJoin()){
+    if (this.shouldRedirectToJoin()) {
       this.redirect();
       return;
     }
@@ -134,7 +128,7 @@ export class GameComponent {
     this.checkPasswordProtection(this.roomId);
   }
 
-  private handleFirstTimePlayer(){
+  private handleFirstTimePlayer() {
     if (!this.localStorageService.hasPlayedBefore) {
       this.showingHotkeys = true;
       this.localStorageService.setHasPlayedBefore('true');
@@ -144,7 +138,7 @@ export class GameComponent {
     }
   }
 
-  private shouldRedirectToJoin(){
+  private shouldRedirectToJoin() {
     const previousRoomId = this.localStorageService.roomId;
     const hasSetSpectator = this.localStorageService.hasSetSpectator;
 
@@ -152,10 +146,10 @@ export class GameComponent {
       !this.localStorageService.playerName ||
       !hasSetSpectator ||
       (previousRoomId && this.roomId != previousRoomId)
-    )
+    );
   }
 
-  private redirect(){
+  private redirect() {
     if (this.roomId) {
       this.router.navigate(['/join'], {
         queryParams: { id: this.roomId },
@@ -249,7 +243,7 @@ export class GameComponent {
     this.gameService.addPlayer(newPlayer);
   };
 
-  sortPlayers(){
+  sortPlayers() {
     this.gameService.sortPlayers();
   }
 
@@ -328,7 +322,6 @@ export class GameComponent {
         (turnOrder - (this.focusedIndex >= 0 ? this.focusedIndex : 0) + n) % n
       );
     } else {
-
       const map: Record<number, number[]> = {
         1: [0],
         2: [0, 1],
@@ -420,16 +413,20 @@ export class GameComponent {
     }
   }
 
-  setLayout(layout:string){
-    switch(layout){
-      case "DEFAULT":
+  setLayout(layout: string) {
+    switch (layout) {
+      case 'DEFAULT':
         this.focusedLayout = false;
         this.settingsService.tokensEnabled = true;
         break;
-      case "FOCUSED":
+      case 'FOCUSED':
         this.focusedLayout = true;
         this.settingsService.tokensEnabled = false;
-        this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
+        this.alertService.addAlert(
+          'warning',
+          "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.",
+          7.5
+        );
         break;
     }
   }

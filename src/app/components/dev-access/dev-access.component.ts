@@ -31,4 +31,7 @@ export class DevAccessComponent {
     }));
   }
 
+  ngOnDestroy(){
+    this.subscriptions.unsubscribe();
+  }
 }
