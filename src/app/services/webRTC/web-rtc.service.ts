@@ -84,24 +84,14 @@ export class WebRTCService {
       );
   };
 
-  public async changeDevice(
-    videoDeviceId?: string,
-    audioDeviceId?: string
-  ): Promise<void> {
+  public async changeDevice(): Promise<void> {
     if (!this.devicesService._localStream) {
-      const localStream = await this.devicesService.initializeLocalStream(
-        videoDeviceId!,
-        audioDeviceId!
-      );
+      const localStream = await this.devicesService.initializeLocalStream();
       await this.updatePeerConnections(localStream!);
       return;
     }
 
-    this.devicesService.changeDevice(
-      videoDeviceId!,
-      audioDeviceId!,
-      this.peerConnections
-    );
+    this.devicesService.changeDevice(this.peerConnections);
   }
 
   public disconnect() {
@@ -459,7 +449,6 @@ export class WebRTCService {
     newUser: IUser,
     isNewPeer: boolean = false
   ) {
-
     if (this.shouldSkipPeerConnection(newUser)) {
       return;
     }

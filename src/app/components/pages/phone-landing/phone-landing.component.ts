@@ -35,16 +35,11 @@ export class PhoneLandingComponent {
   onVideoQualityChange(event: any) {
     this.videoQuality = event.target.value;
     this.localStorageService.setVideoQuality(this.videoQuality);
-    this.changeDeviceReactive();
+    this.changeDevice();
   }
 
-  changeDeviceReactive() {
-    from(
-      this.webRtcService.changeDevice(
-        this.devicesService.selectedVideoDeviceId.value,
-        this.devicesService.selectedAudioDeviceId.value
-      )
-    )
+  changeDevice() {
+    from(this.webRtcService.changeDevice())
       .pipe(
         switchMap(() =>
           from(
@@ -56,15 +51,7 @@ export class PhoneLandingComponent {
         )
       )
       .subscribe({
-        next: (stream: MediaStream | null) => {
-          // if (!stream) return;
-          // if (this.video.nativeElement) {
-          //   this.video.nativeElement.srcObject = stream;
-          //   this.video.nativeElement.muted = true;
-          // }
-          // const isMicMuted = this.localStorageService.isMicMuted;
-          // this.isMutedSelf = isMicMuted === 'true';
-        },
+        next: (stream: MediaStream | null) => {},
         error: (err) => console.error('Error changing device:', err),
       });
   }

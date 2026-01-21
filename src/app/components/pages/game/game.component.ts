@@ -116,7 +116,7 @@ export class GameComponent {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.queryParamMap.get('id')!;
-    this.handleFirstTimePlayer();
+    this.checkForFirstTimePlayer();
 
     if (this.shouldRedirectToJoin()) {
       this.redirect();
@@ -128,7 +128,7 @@ export class GameComponent {
     this.checkPasswordProtection(this.roomId);
   }
 
-  private handleFirstTimePlayer() {
+  private checkForFirstTimePlayer() {
     if (!this.localStorageService.hasPlayedBefore) {
       this.showingHotkeys = true;
       this.localStorageService.setHasPlayedBefore('true');

@@ -267,12 +267,7 @@ export class UserStreamComponent {
   }
 
   changeDeviceReactive() {
-    from(
-      this.webRTC.changeDevice(
-        this.devicesService.selectedVideoDeviceId.value,
-        this.devicesService.selectedAudioDeviceId.value
-      )
-    )
+    from(this.webRTC.changeDevice())
       .pipe(
         switchMap(() =>
           from(

@@ -86,20 +86,11 @@ export class LocalDevicesService {
     await this.buildLocalStream(selectedVideoDeviceId, selectedAudioDeviceId);
   }
 
-  async getLocalMediaStreamWithConstraints(
-    videoDeviceId: string,
-    audioDeviceId: string,
-    videoDeviceChanged: boolean,
-    audioDeviceChanged: boolean
-  ) {
-    const constraints = this.getConstraints(
-      videoDeviceId,
-      audioDeviceId,
-      videoDeviceChanged,
-      audioDeviceChanged
-    );
+  async getLocalMediaStreamWithConstraints(videoDeviceChanged: boolean, audioDeviceChanged: boolean) {
+    const constraints = this.getConstraints(videoDeviceChanged, audioDeviceChanged);
     return navigator.mediaDevices.getUserMedia(constraints);
   }
+
   //confirm with luke that this name makes sense
   async getLocalMediaStream(
     videoDeviceId?: string,
@@ -262,29 +253,25 @@ export class LocalDevicesService {
     return this._localStream.value?.getAudioTracks()[0];
   }
 
-  private hasVideoDeviceChanged(
-    videoDeviceId: string,
-    currentVideoTrack?: MediaStreamTrack
-  ) {
+  private hasVideoDeviceChanged(currentVideoTrack?: MediaStreamTrack) {
+    const videoDeviceId = this.selectedVideoDeviceId.value;
     const currentDeviceId = currentVideoTrack?.getSettings().deviceId;
     return videoDeviceId !== undefined && videoDeviceId !== currentDeviceId;
   }
 
-  private hasAudioDeviceChanged(
-    audioDeviceId: string,
-    currentAudioTrack?: MediaStreamTrack
-  ) {
+  private hasAudioDeviceChanged(currentAudioTrack?: MediaStreamTrack) {
+    const audioDeviceId = this.selectedAudioDeviceId.value;
     const currentDeviceId = currentAudioTrack?.getSettings().deviceId;
     return audioDeviceId !== undefined && audioDeviceId !== currentDeviceId;
   }
 
   private getConstraints(
-    videoDeviceId: string,
-    audioDeviceId: string,
     videoDeviceChanged: boolean,
     audioDeviceChanged: boolean
   ) {
     const videoQuality = this.getCameraVideoQuality();
+    const videoDeviceId = this.selectedVideoDeviceId.value;
+    const audioDeviceId = this.selectedAudioDeviceId.value;
 
     const constraints: MediaStreamConstraints = {
       video: videoDeviceChanged
@@ -320,22 +307,14 @@ export class LocalDevicesService {
     }
   }
 
-  public async changeDevice(
-    videoDeviceId: string,
-    audioDeviceId: string,
-    peerConnections: { [key: string]: RTCPeerConnection }
-  ) {
+  public async changeDevice(peerConnections: {
+    [key: string]: RTCPeerConnection;
+  }) {
     const currentVideoTrack = this.getFirstVideoTrack();
     const currentAudioTrack = this.getFirstAudioTrack();
 
-    const videoDeviceChanged = this.hasVideoDeviceChanged(
-      videoDeviceId,
-      currentVideoTrack
-    );
-    const audioDeviceChanged = this.hasAudioDeviceChanged(
-      audioDeviceId,
-      currentAudioTrack
-    );
+    const videoDeviceChanged = this.hasVideoDeviceChanged(currentVideoTrack);
+    const audioDeviceChanged = this.hasAudioDeviceChanged(currentAudioTrack);
 
     if (!videoDeviceChanged && currentVideoTrack) {
       await this.tryApplyingVideoConstraints(currentVideoTrack);
@@ -346,8 +325,6 @@ export class LocalDevicesService {
 
     if (videoDeviceChanged || audioDeviceChanged) {
       const tracks = await this.acquireNewMediaTracks(
-        videoDeviceId,
-        audioDeviceId,
         videoDeviceChanged,
         audioDeviceChanged
       );
@@ -378,8 +355,6 @@ export class LocalDevicesService {
   }
 
   private async acquireNewMediaTracks(
-    videoDeviceId: string,
-    audioDeviceId: string,
     videoDeviceChanged: boolean,
     audioDeviceChanged: boolean
   ): Promise<{
@@ -391,8 +366,6 @@ export class LocalDevicesService {
 
     try {
       const newStream = await this.getLocalMediaStreamWithConstraints(
-        videoDeviceId,
-        audioDeviceId,
         videoDeviceChanged,
         audioDeviceChanged
       );
@@ -411,10 +384,10 @@ export class LocalDevicesService {
     return { videoTrack, audioTrack };
   }
 
-  public async initializeLocalStream(
-    videoDeviceId: string,
-    audioDeviceId: string
-  ) {
+  public async initializeLocalStream() {
+    const videoDeviceId = this.selectedVideoDeviceId.value;
+    const audioDeviceId = this.selectedAudioDeviceId.value;
+
     if (!this._localStream.value) {
       const stream = await this.getLocalMediaStream(
         videoDeviceId,
