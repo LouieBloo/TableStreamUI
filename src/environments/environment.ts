@@ -3,5 +3,6 @@ export const environment = {
     cardIdentifierActive: true,
     cardIdentifierUrl: "https://api.table-stream.com",
     socketUrl: 'https://api.table-stream.com',
-    tcgPlayerAffiliateLink: 'https://partner.tcgplayer.com/YRLYMK'
+    tcgPlayerAffiliateLink: 'https://partner.tcgplayer.com/YRLYMK',
+    clientUrl: 'www.tablestream.com'
 };

@@ -47,10 +47,7 @@ export class LocalDevicesService {
       this.setLocalStream(stream!);
       this.logAspectRatio(stream!);
     } catch (err: any) {
-      if (
-        err.name === 'NotAllowedError' ||
-        err.name === 'PermissionDeniedError'
-      ) {
+      if (this.isPermissionError(err)) {
         this.logger.log('Permission error: Trying again without audio');
 
         await this.setUserMediaWithoutAudio(
@@ -58,9 +55,7 @@ export class LocalDevicesService {
           audioDeviceId,
           aspectRatio
         );
-        this.logAspectRatio(this._localStream.value!);
       } else {
-        // this.logger.error("Error getting media stream:", {error: err, constraints }, "WEB RTC initLocalStream")TODO
         throw err;
       }
     }
@@ -68,22 +63,10 @@ export class LocalDevicesService {
     return this._localStream.value;
   }
 
-  private async setUserMediaWithoutAudio(
-    videoDeviceId?: string,
-    audioDeviceId?: string,
-    aspectRatio: string = '16/9'
-  ) {
-    try {
-      const stream = await this.getLocalMediaStream(
-        videoDeviceId,
-        audioDeviceId,
-        aspectRatio,
-        false
-      );
-      this._localStream.next(stream);
-    } catch (err) {
-      this.logger.error('Error getting media stream without audio:', err);
-    }
+  private isPermissionError(err: any) {
+    return (
+      err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+    );
   }
 
   async setDevices(): Promise<void> {
@@ -100,12 +83,21 @@ export class LocalDevicesService {
     this._audioDevices.next(audioDevices);
     const selectedVideoDeviceId = videoDevices[0].deviceId;
     const selectedAudioDeviceId = audioDevices[0].deviceId;
-    this.buildLocalStream(selectedVideoDeviceId, selectedAudioDeviceId);
+    await this.buildLocalStream(selectedVideoDeviceId, selectedAudioDeviceId);
   }
 
   async getLocalMediaStreamWithConstraints(
-    constraints: MediaStreamConstraints
+    videoDeviceId: string,
+    audioDeviceId: string,
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean
   ) {
+    const constraints = this.getConstraints(
+      videoDeviceId,
+      audioDeviceId,
+      videoDeviceChanged,
+      audioDeviceChanged
+    );
     return navigator.mediaDevices.getUserMedia(constraints);
   }
   //confirm with luke that this name makes sense
@@ -253,7 +245,8 @@ export class LocalDevicesService {
     }
   }
 
-  public removeTrack(mediaStreamTrack: MediaStreamTrack) {
+  public stopAndRemoveTrack(mediaStreamTrack: MediaStreamTrack) {
+    mediaStreamTrack?.stop();
     this._localStream.value?.removeTrack(mediaStreamTrack);
   }
 
@@ -269,6 +262,64 @@ export class LocalDevicesService {
     return this._localStream.value?.getAudioTracks()[0];
   }
 
+  private hasVideoDeviceChanged(
+    videoDeviceId: string,
+    currentVideoTrack?: MediaStreamTrack
+  ) {
+    const currentDeviceId = currentVideoTrack?.getSettings().deviceId;
+    return videoDeviceId !== undefined && videoDeviceId !== currentDeviceId;
+  }
+
+  private hasAudioDeviceChanged(
+    audioDeviceId: string,
+    currentAudioTrack?: MediaStreamTrack
+  ) {
+    const currentDeviceId = currentAudioTrack?.getSettings().deviceId;
+    return audioDeviceId !== undefined && audioDeviceId !== currentDeviceId;
+  }
+
+  private getConstraints(
+    videoDeviceId: string,
+    audioDeviceId: string,
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean
+  ) {
+    const videoQuality = this.getCameraVideoQuality();
+
+    const constraints: MediaStreamConstraints = {
+      video: videoDeviceChanged
+        ? {
+            deviceId: { exact: videoDeviceId },
+            width: { ideal: videoQuality.idealWidth },
+            height: { ideal: videoQuality.idealHeight },
+            aspectRatio: { ideal: videoQuality.idealAspectRatio },
+          }
+        : false,
+      audio: audioDeviceChanged
+        ? {
+            deviceId: { exact: audioDeviceId },
+          }
+        : false,
+    };
+
+    return constraints;
+  }
+
+  private async tryApplyingVideoConstraints(
+    currentVideoTrack: MediaStreamTrack
+  ) {
+    const videoQuality = this.getCameraVideoQuality();
+    try {
+      await currentVideoTrack.applyConstraints({
+        width: { ideal: videoQuality.idealWidth },
+        height: { ideal: videoQuality.idealHeight },
+        aspectRatio: { ideal: videoQuality.idealAspectRatio },
+      });
+    } catch (err) {
+      console.error('Error applying constraints to video track:', err);
+    }
+  }
+
   public async changeDevice(
     videoDeviceId: string,
     audioDeviceId: string,
@@ -276,63 +327,33 @@ export class LocalDevicesService {
   ) {
     const currentVideoTrack = this.getFirstVideoTrack();
     const currentAudioTrack = this.getFirstAudioTrack();
-    const currentVideoDeviceId = currentVideoTrack?.getSettings().deviceId;
-    const currentAudioDeviceId = currentAudioTrack?.getSettings().deviceId;
-    const videoDeviceChanged: boolean =
-      videoDeviceId !== undefined && videoDeviceId !== currentVideoDeviceId;
-    const audioDeviceChanged: boolean =
-      audioDeviceId !== undefined && audioDeviceId !== currentAudioDeviceId;
-    const targetVideoQuality: IVideoQualify = this.getCameraVideoQuality();
+
+    const videoDeviceChanged = this.hasVideoDeviceChanged(
+      videoDeviceId,
+      currentVideoTrack
+    );
+    const audioDeviceChanged = this.hasAudioDeviceChanged(
+      audioDeviceId,
+      currentAudioTrack
+    );
 
     if (!videoDeviceChanged && currentVideoTrack) {
-      try {
-        await currentVideoTrack.applyConstraints({
-          width: { ideal: targetVideoQuality.idealWidth },
-          height: { ideal: targetVideoQuality.idealHeight },
-          aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
-        });
-      } catch (err) {
-        console.error('Error applying constraints to video track:', err);
-      }
+      await this.tryApplyingVideoConstraints(currentVideoTrack);
     }
 
     let newVideoTrack: MediaStreamTrack | null = null;
     let newAudioTrack: MediaStreamTrack | null = null;
 
     if (videoDeviceChanged || audioDeviceChanged) {
-      const constraints: MediaStreamConstraints = {
-        video: videoDeviceChanged
-          ? {
-              deviceId: { exact: videoDeviceId },
-              width: { ideal: targetVideoQuality.idealWidth },
-              height: { ideal: targetVideoQuality.idealHeight },
-              aspectRatio: { ideal: targetVideoQuality.idealAspectRatio },
-            }
-          : false,
-        audio: audioDeviceChanged
-          ? {
-              deviceId: { exact: audioDeviceId },
-            }
-          : false,
-      };
+      const tracks = await this.acquireNewMediaTracks(
+        videoDeviceId,
+        audioDeviceId,
+        videoDeviceChanged,
+        audioDeviceChanged
+      );
 
-      try {
-        //TODO these constraints are different. should be moved out of here into devicesService
-        const newStream = await this.getLocalMediaStreamWithConstraints(
-          constraints
-        );
-        if (newStream) {
-          if (videoDeviceChanged) {
-            newVideoTrack = newStream.getVideoTracks()[0];
-          }
-          if (audioDeviceChanged) {
-            newAudioTrack = newStream.getAudioTracks()[0];
-          }
-        }
-      } catch (err) {
-        console.error('Error getting new media stream:', err);
-        return;
-      }
+      newVideoTrack = tracks.videoTrack;
+      newAudioTrack = tracks.audioTrack;
     }
 
     if (videoDeviceChanged && newVideoTrack) {
@@ -354,19 +375,40 @@ export class LocalDevicesService {
     }
 
     this.logAspectRatio(this._localStream.value!);
-
   }
 
-  private async replaceDeviceTrack(
-    kind: 'video' | 'audio',
-    currentTrack: MediaStreamTrack,
-    newTrack: MediaStreamTrack,
-    peerConnections: { [key: string]: RTCPeerConnection }
-  ) {
-    currentTrack?.stop();
-    this.removeTrack(currentTrack);
-    this.addTrack(newTrack);
-    await this.replaceTrackInPeerConnections(kind, newTrack, peerConnections);
+  private async acquireNewMediaTracks(
+    videoDeviceId: string,
+    audioDeviceId: string,
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean
+  ): Promise<{
+    videoTrack: MediaStreamTrack | null;
+    audioTrack: MediaStreamTrack | null;
+  }> {
+    let videoTrack: MediaStreamTrack | null = null;
+    let audioTrack: MediaStreamTrack | null = null;
+
+    try {
+      const newStream = await this.getLocalMediaStreamWithConstraints(
+        videoDeviceId,
+        audioDeviceId,
+        videoDeviceChanged,
+        audioDeviceChanged
+      );
+      if (newStream) {
+        if (videoDeviceChanged) {
+          videoTrack = newStream.getVideoTracks()[0] || null;
+        }
+        if (audioDeviceChanged) {
+          audioTrack = newStream.getAudioTracks()[0] || null;
+        }
+      }
+    } catch (err) {
+      console.error('Error getting new media stream:', err);
+    }
+
+    return { videoTrack, audioTrack };
   }
 
   public async initializeLocalStream(
@@ -383,7 +425,55 @@ export class LocalDevicesService {
     return this._localStream.value;
   }
 
-  public logAspectRatio(stream: MediaStream): void {
+  private async replaceDeviceTrack(
+    kind: 'video' | 'audio',
+    currentTrack: MediaStreamTrack,
+    newTrack: MediaStreamTrack,
+    peerConnections: { [key: string]: RTCPeerConnection }
+  ) {
+    this.stopAndRemoveTrack(currentTrack);
+    this.addTrack(newTrack);
+    await this.replaceTrackInPeerConnections(kind, newTrack, peerConnections);
+  }
+
+  private async setUserMediaWithoutAudio(
+    videoDeviceId?: string,
+    audioDeviceId?: string,
+    aspectRatio: string = '16/9'
+  ) {
+    try {
+      const stream = await this.getLocalMediaStream(
+        videoDeviceId,
+        audioDeviceId,
+        aspectRatio,
+        false
+      );
+      this._localStream.next(stream);
+      this.logAspectRatio(this._localStream.value!);
+    } catch (err) {
+      this.logger.error('Error getting media stream without audio:', err);
+    }
+  }
+
+  private async replaceTrackInPeerConnections(
+    kind: 'video' | 'audio',
+    newTrack: MediaStreamTrack,
+    peerConnections: { [key: string]: RTCPeerConnection }
+  ) {
+    for (const socketId in peerConnections) {
+      const peerConnection = peerConnections[socketId];
+      const sender = peerConnection
+        .getSenders()
+        .find((s) => s.track?.kind === kind);
+      if (sender) {
+        await sender.replaceTrack(newTrack);
+      } else {
+        peerConnection.addTrack(newTrack, this._localStream.value!);
+      }
+    }
+  }
+
+  private logAspectRatio(stream: MediaStream): void {
     if (!stream) {
       return;
     }
@@ -404,24 +494,6 @@ export class LocalDevicesService {
       }
     } else {
       this.logger.log('No video track available to determine aspect ratio.');
-    }
-  }
-
-  private async replaceTrackInPeerConnections(
-    kind: 'video' | 'audio',
-    newTrack: MediaStreamTrack,
-    peerConnections: { [key: string]: RTCPeerConnection }
-  ) {
-    for (const socketId in peerConnections) {
-      const peerConnection = peerConnections[socketId];
-      const sender = peerConnection
-        .getSenders()
-        .find((s) => s.track?.kind === kind);
-      if (sender) {
-        await sender.replaceTrack(newTrack);
-      } else {
-        peerConnection.addTrack(newTrack, this._localStream.value!);
-      }
     }
   }
 }

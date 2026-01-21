@@ -219,7 +219,7 @@ export class WebRTCService {
     if (!this.socket) return;
 
     this.socket.on('signal', this.handleSignal);
-    this.socket.on('newPeer', this.handleNewPeer); //how do i know that myself is coming in as a new peer
+    this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
     this.socket.on('message', this.handleMessage);
     this.socket.on('gameEvent', this.handleGameEvent);
@@ -239,10 +239,7 @@ export class WebRTCService {
   ) {
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
-    this.socket?.emit('signal', {
-      to: socketId,
-      signal: peerConnection.localDescription,
-    });
+    this.emitLocalDescription(socketId, peerConnection.localDescription!);
   }
 
   private async updatePeerConnections(mediaStream: MediaStream): Promise<void> {
@@ -391,28 +388,6 @@ export class WebRTCService {
     );
   }
 
-  private notifyConnectionLost() {
-    this.alertService.addAlert(
-      'error',
-      'Lost connection to server. Retrying connection...',
-      5
-    );
-    console.warn('Socket disconnected. Attempting to reconnect...');
-  }
-
-  private notifyReconnecting() {
-    console.log('Reconnected to server. Rejoining room...');
-    this.alertService.addAlert(
-      'warning',
-      'Reconnected to server. Rejoining room...',
-      5
-    );
-  }
-
-  private notifySuccessfulReconnect() {
-    this.alertService.addAlert('success', 'Successfully rejoined room', 5);
-  }
-
   private isIntentionalDisconnect(reason: string): boolean {
     return reason === 'io client disconnect';
   }
@@ -434,10 +409,7 @@ export class WebRTCService {
       );
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
-      this.socket?.emit('signal', {
-        to: from,
-        signal: peerConnection.localDescription,
-      });
+      this.emitLocalDescription(from, peerConnection.localDescription!);
     } else if (signal.type === 'answer') {
       await peerConnection.setRemoteDescription(
         new RTCSessionDescription(signal)
@@ -450,11 +422,9 @@ export class WebRTCService {
   private handleNewPeer = (data: { socketId: string; user: IUser }) => {
     const { socketId } = data;
     if (socketId == this.socket?.id) {
-      //NEW
       return;
     }
 
-    //not sure the correct order of this, trying in front of createPeerConnection
     this.userJoinedSubject.next({ id: socketId, user: data.user });
     this.createPeerConnection(socketId, data.user, true);
   };
@@ -471,7 +441,7 @@ export class WebRTCService {
 
     this.onStreamRemoved.forEach((callback) => {
       callback(socketId);
-    }); //might not need this on peerDisconnectedFromPhone
+    });
   };
 
   private shouldSkipPeerConnection(user: IUser): boolean {
@@ -489,48 +459,52 @@ export class WebRTCService {
     newUser: IUser,
     isNewPeer: boolean = false
   ) {
-    this.logger.log('Creating peer connection: ', socketId, newUser);
 
     if (this.shouldSkipPeerConnection(newUser)) {
       return;
     }
 
     try {
+      this.logger.log('Creating peer connection: ', socketId, newUser);
       const peerConnection = this.initializePeerConnection(socketId, newUser);
 
       if (!this.amISpectator) {
-        try {
-          await this.devicesService.attachTrackToPeerConnection(
-            peerConnection,
-            socketId
-          );
-        } catch (error) {
-          if (this.isSafeToOffer(peerConnection))
-            await this.createReceiveOnlyOffer(peerConnection, socketId);
-        }
+        await this.attachTracksOrFallbackToReceiveOnlyOffer(
+          socketId,
+          peerConnection
+        );
       } else if (isNewPeer) {
-        this.logger.log('signal state: ', peerConnection.signalingState);
-        await this.createReceiveOnlyOffer(peerConnection, socketId);
+        await this.createAndSignalReceiveOnlyOffer(socketId, peerConnection);
       }
     } catch (error) {
       this.logPeerConnectionError(error, socketId, newUser);
     }
   }
 
-  private logPeerConnectionError(
-    error: unknown,
+  private async attachTracksOrFallbackToReceiveOnlyOffer(
     socketId: string,
-    user: IUser
+    peerConnection: RTCPeerConnection
   ) {
-    this.logger.error(
-      'createPeerConnection error',
-      { error: error, socketId, user: user },
-      'WEB RTC createPeerConnection'
-    );
-    this.alertService.addAlert(
-      'error',
-      'There may be an error connecting to a player. Refreshing can help fix this issue'
-    );
+    try {
+      await this.devicesService.attachTrackToPeerConnection(
+        peerConnection,
+        socketId
+      );
+    } catch (error) {
+      if (this.isSafeToOffer(peerConnection)) {
+        await this.createAndSignalReceiveOnlyOffer(socketId, peerConnection);
+      }
+    }
+  }
+
+  private async createAndSignalReceiveOnlyOffer(
+    socketId: string,
+    peerConnection: RTCPeerConnection
+  ) {
+    this.logger.log('signal state: ', peerConnection.signalingState);
+    const offer = await this.createReceiveOnlyOffer(peerConnection);
+    await peerConnection.setLocalDescription(offer);
+    this.emitLocalDescription(socketId, peerConnection.localDescription!);
   }
 
   private initializePeerConnection(
@@ -558,53 +532,40 @@ export class WebRTCService {
     );
   }
 
-  private async createReceiveOnlyOffer(
-    peerConnection: RTCPeerConnection,
-    socketId: string
-  ) {
-    const offerOptions = {
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: true,
-    };
-    const offer = await peerConnection.createOffer(offerOptions);
-    await peerConnection.setLocalDescription(offer);
-    this.socket?.emit('signal', {
-      to: socketId,
-      signal: peerConnection.localDescription,
-    });
-  }
-
   private async handleNegotiationNeeded(
     peerConnection: RTCPeerConnection,
     socketId: string
   ) {
-    this.logger.log(
-      'on negotiation: ',
-      socketId,
-      peerConnection.signalingState
-    );
+    this.logOnNegotation(socketId, peerConnection.signalingState);
 
     try {
       if (peerConnection.signalingState === 'stable') {
-        const offer = await peerConnection.createOffer({
-          offerToReceiveVideo: true,
-          offerToReceiveAudio: true,
-        });
-
+        const offer = await this.createReceiveOnlyOffer(peerConnection);
         await peerConnection.setLocalDescription(offer);
-
-        this.socket?.emit('signal', {
-          to: socketId,
-          signal: peerConnection.localDescription,
-        });
+        this.emitLocalDescription(socketId, peerConnection.localDescription!);
       }
     } catch (error) {
-      this.logger.error(
-        `Error during negotiation: `,
-        { error, socketId, peerConnection },
-        'WEB RTC onnegotiationneeded'
-      );
+      this.logNegotiationError(error, socketId, peerConnection);
     }
+  }
+
+  private emitLocalDescription(
+    socketId: string,
+    localDescription: RTCSessionDescription
+  ): void {
+    this.socket?.emit('signal', {
+      to: socketId,
+      signal: localDescription,
+    });
+  }
+
+  private async createReceiveOnlyOffer(
+    peerConnection: RTCPeerConnection
+  ): Promise<RTCSessionDescriptionInit> {
+    return await peerConnection.createOffer({
+      offerToReceiveVideo: true,
+      offerToReceiveAudio: true,
+    });
   }
 
   private addRemoteStream(socketId: string, user: IUser) {
@@ -679,4 +640,58 @@ export class WebRTCService {
       error.message
     );
   };
+
+  private logPeerConnectionError(
+    error: unknown,
+    socketId: string,
+    user: IUser
+  ) {
+    this.logger.error(
+      'createPeerConnection error',
+      { error: error, socketId, user: user },
+      'WEB RTC createPeerConnection'
+    );
+    this.alertService.addAlert(
+      'error',
+      'There may be an error connecting to a player. Refreshing can help fix this issue'
+    );
+  }
+
+  private logOnNegotation(socketId: string, rtcSignalState: RTCSignalingState) {
+    this.logger.log('on negotiation: ', socketId, rtcSignalState);
+  }
+
+  private logNegotiationError(
+    error: unknown,
+    socketId: string,
+    peerConnection: RTCPeerConnection
+  ) {
+    this.logger.error(
+      `Error during negotiation: `,
+      { error, socketId, peerConnection },
+      'WEB RTC onnegotiationneeded'
+    );
+  }
+
+  private notifyConnectionLost() {
+    this.alertService.addAlert(
+      'error',
+      'Lost connection to server. Retrying connection...',
+      5
+    );
+    console.warn('Socket disconnected. Attempting to reconnect...');
+  }
+
+  private notifyReconnecting() {
+    console.log('Reconnected to server. Rejoining room...');
+    this.alertService.addAlert(
+      'warning',
+      'Reconnected to server. Rejoining room...',
+      5
+    );
+  }
+
+  private notifySuccessfulReconnect() {
+    this.alertService.addAlert('success', 'Successfully rejoined room', 5);
+  }
 }

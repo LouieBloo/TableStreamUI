@@ -34,7 +34,7 @@ export class PhoneCameraService {
       .post<string>(environment.socketUrl + '/qrcodetoken', body, { headers })
       .pipe(
         tap((code: string) => {
-          const url = `https://192.168.1.77:4200/remote-camera/${code}?roomId=${roomId}`;
+          const url = `${environment.clientUrl}/remote-camera/${code}?roomId=${roomId}`;
           this._url.next(url);
         })
       );
