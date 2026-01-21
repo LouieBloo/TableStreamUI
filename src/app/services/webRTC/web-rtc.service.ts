@@ -28,7 +28,7 @@ import { JoinRoomPayload } from './joinRoomPayload';
 export class WebRTCService {
   socket: Socket | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
-  remoteStreams: { [key: string]: MediaStream } = {};//will contain a users phone stream
+  remoteStreams: { [key: string]: MediaStream } = {}; //will contain a users phone stream
   private iceServerList: any = null;
   private userJoinedSubject = new Subject<{ id: string; user: IUser }>();
   public userJoined = this.userJoinedSubject.asObservable();
@@ -37,7 +37,6 @@ export class WebRTCService {
   onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] =
     [];
   onStreamRemoved: ((id: string) => void)[] = [];
-
 
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
@@ -64,21 +63,120 @@ export class WebRTCService {
     callback: (user: IUser, room: IRoom) => void
   ) => {
     const joinRoomPayload = this.getJoinRoomPayload(roomId, password);
-    this.socket = io(environment.socketUrl);
+    this.createSocket();
     if (!this.socket) return;
 
-    this.socket.on('signal', this.handleSignal);
-    this.socket.on('newPeer', this.handleNewPeer);//how do i know that myself is coming in as a new peer
-    this.socket.on('peerDisconnected', this.handlePeerDisconnected);
-    this.socket.on('message', this.handleMessage);
-    this.socket.on('gameEvent', this.handleGameEvent);
-    this.socket.on('errorResponse', this.handleErrorResponse);
-    this.socket.on('historyEvent', this.handleHistory);
-    this.remoteStreams = {};
+    this.registerSocketHandlers();
+    this.setInitialStreamState(joinRoomPayload.userType);
+    this.emitJoinRoom(joinRoomPayload, password, callback);
+  };
+
+  public joinAsPhone = async (token: IPhoneToken) => {
+    this.createSocket();
+    this.registerPhoneSocketHandlers();
+    this.setInitialPhoneStreamState();
+
+    if (this.socket)
+      this.socket.emit(
+        'joinRoomAsPhone',
+        token,
+        this.onServerResponseFromPhone
+      );
+  };
+
+  public async changeDevice(
+    videoDeviceId?: string,
+    audioDeviceId?: string
+  ): Promise<void> {
+    if (!this.devicesService._localStream) {
+      const localStream = await this.devicesService.initializeLocalStream(
+        videoDeviceId!,
+        audioDeviceId!
+      );
+      await this.updatePeerConnections(localStream!);
+      return;
+    }
+
+    this.devicesService.changeDevice(
+      videoDeviceId!,
+      audioDeviceId!,
+      this.peerConnections
+    );
+  }
+
+  public disconnect() {
+    this.disconnectSocket();
+    this.devicesService.stopAndRemoveAllLocalMediaTracks();
+    this.closePeerConnections();
+    this.stopRemoteStreams();
+    this.clearDeviceListeners();
+  }
+
+  public subscribeToStreamAdd(
+    callback: (id: string, stream: MediaStream, user: IUser) => void
+  ) {
+    this.onStreamAdded.push(callback);
+  }
+
+  public subscribeToStreamRemove(callback: (id: string) => void) {
+    this.onStreamRemoved.push(callback);
+  }
+
+  public getRemoteStreamBySocketId(socketId: string): MediaStream | null {
+    return this.remoteStreams[socketId] || null;
+  }
+
+  public sendMessage(message: string) {
+    if (this.socket) {
+      this.socket.emit('message', {
+        text: message,
+      });
+    }
+  }
+
+  public resetRoomPasswordInvalid() {
+    this._roomPasswordValid.next(null);
+  }
+
+  private createSocket() {
+    this.socket = io(environment.socketUrl);
+  }
+
+  private disconnectSocket(): void {
+    if (!this.socket) return;
+
+    this.socket.disconnect();
+    this.socket = null;
+  }
+
+  private closePeerConnections() {
+    for (const pc of Object.values(this.peerConnections)) {
+      pc.getSenders().forEach((sender) => {
+        if (sender.track) {
+          sender.track.stop();
+        }
+      });
+      pc.close();
+    }
     this.peerConnections = {};
+  }
 
-    this.amISpectator = joinRoomPayload.userType == UserType.Spectator;
+  private stopRemoteStreams() {
+    for (const stream of Object.values(this.remoteStreams)) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    this.remoteStreams = {};
+  }
 
+  private clearDeviceListeners(): void {
+    navigator.mediaDevices.ondevicechange = null;
+  }
+
+  private emitJoinRoom(
+    joinRoomPayload: JoinRoomPayload,
+    password: string | null,
+    callback: (user: IUser, room: IRoom) => void
+  ) {
     if (this.socket) {
       this.socket.emit(
         'joinRoom',
@@ -88,18 +186,52 @@ export class WebRTCService {
             this.handleJoinRoomError(error);
             return;
           }
-          this.iceServerList = room.iceServerList;
-          room.messages?.forEach((m) => this.handleMessage(m));
-          room.game?.sharedCards?.forEach((card) =>
-            this.handleGameEvent({ event: GameEvent.ShareCard, response: card })
+          this.handleSuccessfulJoin(
+            joinRoomPayload,
+            room,
+            password,
+            me,
+            callback
           );
-
-          this.registerSocketDisconnect(joinRoomPayload, room, password);
-          callback(me, room);
         }
       );
     }
-  };
+  }
+
+  private handleSuccessfulJoin(
+    joinRoomPayload: JoinRoomPayload,
+    room: IRoom,
+    password: string | null,
+    me: IUser,
+    callback: (user: IUser, room: IRoom) => void
+  ) {
+    this.iceServerList = room.iceServerList;
+    room.messages?.forEach((m) => this.handleMessage(m));
+    room.game?.sharedCards?.forEach((card) =>
+      this.handleGameEvent({ event: GameEvent.ShareCard, response: card })
+    );
+
+    this.registerSocketDisconnect(joinRoomPayload, room, password);
+    callback(me, room);
+  }
+
+  private registerSocketHandlers() {
+    if (!this.socket) return;
+
+    this.socket.on('signal', this.handleSignal);
+    this.socket.on('newPeer', this.handleNewPeer); //how do i know that myself is coming in as a new peer
+    this.socket.on('peerDisconnected', this.handlePeerDisconnected);
+    this.socket.on('message', this.handleMessage);
+    this.socket.on('gameEvent', this.handleGameEvent);
+    this.socket.on('errorResponse', this.handleErrorResponse);
+    this.socket.on('historyEvent', this.handleHistory);
+  }
+
+  private setInitialStreamState(userType: UserType) {
+    this.remoteStreams = {};
+    this.peerConnections = {};
+    this.amISpectator = userType == UserType.Spectator;
+  }
 
   private async renegotiateConnection(
     peerConnection: RTCPeerConnection,
@@ -134,16 +266,6 @@ export class WebRTCService {
         peerConnection.addTrack(track, mediaStream);
       }
     });
-  }
-  
-  public subscribeToStreamAdd(
-    callback: (id: string, stream: MediaStream, user: IUser) => void
-  ) {
-    this.onStreamAdded.push(callback);
-  }
-
-  public subscribeToStreamRemove(callback: (id: string) => void) {
-    this.onStreamRemoved.push(callback);
   }
 
   private getJoinRoomPayload(
@@ -206,20 +328,22 @@ export class WebRTCService {
     }
   }
 
-  public onServerResponseFromPhone = (room: IRoom) => {
+  private onServerResponseFromPhone = (room: IRoom) => {
     this.iceServerList = room.iceServerList;
   };
 
-  public joinAsPhone = async (token: IPhoneToken) => {
+  private setInitialPhoneStreamState() {
+    this.remoteStreams = {};
+    this.peerConnections = {};
+  }
 
+  private registerPhoneSocketHandlers() {
+    if (!this.socket) return;
     this.socket = io(environment.socketUrl);
     this.socket.on('signal', this.handleSignal);
     this.socket.on('newPeer', this.handleNewPeer);
     this.socket.on('peerDisconnected', this.handlePeerDisconnected);
-    this.remoteStreams = {};
-    this.peerConnections = {};
-    this.socket.emit('joinRoomAsPhone', token, this.onServerResponseFromPhone);
-  };
+  }
 
   private registerSocketDisconnect(
     joinRoomPayload: JoinRoomPayload,
@@ -228,83 +352,69 @@ export class WebRTCService {
   ) {
     this.socket?.on('disconnect', (reason: string) => {
       console.log('Reason, ', reason);
-      // this is when the user disconnects on purpose
-      if (reason && reason == 'io client disconnect') {
+
+      if (this.isIntentionalDisconnect(reason)) {
         return;
       }
 
-      this.alertService.addAlert(
-        'error',
-        'Lost connection to server. Retrying connection...',
-        5
-      );
-      console.warn('Socket disconnected. Attempting to reconnect...');
+      this.notifyConnectionLost();
 
       this.socket?.once('connect', () => {
-        console.log('Reconnected to server. Rejoining room...');
-        this.alertService.addAlert(
-          'warning',
-          'Reconnected to server. Rejoining room...',
-          5
-        );
-        this.socket?.emit(
-          'joinRoom',
-          {
-            playerId: joinRoomPayload.playerId,
-            roomId: room.id,
-            gameType: joinRoomPayload.gameType,
-            roomName: joinRoomPayload.roomName,
-            playerName: joinRoomPayload.playerName,
-            password: password && password != 'null' ? password : null,
-            userType: joinRoomPayload.userType,
-            maxPlayers: joinRoomPayload.maxPlayers || 4, //TODO
-            reactionsEnabled: joinRoomPayload.reactionsEnabled,
-            joinerJwtToken: joinRoomPayload.joinerJwtToken,
-          },
-          (newPlayer: IUser, room: IRoom, error: IGameError) => {
-            //TODO
-            this.alertService.addAlert(
-              'success',
-              'Successfully rejoined room',
-              5
-            );
-          }
-        );
+        this.rejoinRoom(joinRoomPayload, room, password);
       });
     });
   }
 
-  public disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-    }
-
-    this.devicesService.stopAndRemoveAllLocalMediaTracks();
-
-    // Close and remove all peer connections
-    for (const pc of Object.values(this.peerConnections)) {
-      pc.getSenders().forEach((sender) => {
-        if (sender.track) {
-          sender.track.stop();
-        }
-      });
-      pc.close();
-    }
-    this.peerConnections = {};
-
-    // Clear remote streams and stop all tracks in the remote streams
-    for (const stream of Object.values(this.remoteStreams)) {
-      stream.getTracks().forEach((track) => track.stop());
-    }
-    this.remoteStreams = {};
-
-    // Optionally, remove any media devices listeners if added
-    navigator.mediaDevices.ondevicechange = null;
+  private rejoinRoom(
+    joinRoomPayload: JoinRoomPayload,
+    room: IRoom,
+    password: string | null
+  ) {
+    this.notifyReconnecting();
+    this.socket?.emit(
+      'joinRoom',
+      {
+        playerId: joinRoomPayload.playerId,
+        roomId: room.id,
+        gameType: joinRoomPayload.gameType,
+        roomName: joinRoomPayload.roomName,
+        playerName: joinRoomPayload.playerName,
+        password: password && password != 'null' ? password : null,
+        userType: joinRoomPayload.userType,
+        maxPlayers: joinRoomPayload.maxPlayers || 4, //TODO
+        reactionsEnabled: joinRoomPayload.reactionsEnabled,
+        joinerJwtToken: joinRoomPayload.joinerJwtToken,
+      },
+      (newPlayer: IUser, room: IRoom, error: IGameError) => {
+        this.notifySuccessfulReconnect();
+      }
+    );
   }
 
-  public getStream(socketId: string) {
-    return this.remoteStreams[socketId] || null;
+  private notifyConnectionLost() {
+    this.alertService.addAlert(
+      'error',
+      'Lost connection to server. Retrying connection...',
+      5
+    );
+    console.warn('Socket disconnected. Attempting to reconnect...');
+  }
+
+  private notifyReconnecting() {
+    console.log('Reconnected to server. Rejoining room...');
+    this.alertService.addAlert(
+      'warning',
+      'Reconnected to server. Rejoining room...',
+      5
+    );
+  }
+
+  private notifySuccessfulReconnect() {
+    this.alertService.addAlert('success', 'Successfully rejoined room', 5);
+  }
+
+  private isIntentionalDisconnect(reason: string): boolean {
+    return reason === 'io client disconnect';
   }
 
   private handleSignal = async (data: {
@@ -338,8 +448,9 @@ export class WebRTCService {
   };
 
   private handleNewPeer = (data: { socketId: string; user: IUser }) => {
-    const { socketId } = data;//GETTING SOCKET ID
-    if(socketId == this.socket?.id){//NEW
+    const { socketId } = data;
+    if (socketId == this.socket?.id) {
+      //NEW
       return;
     }
 
@@ -363,22 +474,36 @@ export class WebRTCService {
     }); //might not need this on peerDisconnectedFromPhone
   };
 
+  private shouldSkipPeerConnection(user: IUser): boolean {
+    const bothAreSpectators =
+      this.amISpectator && user.type === UserType.Spectator;
+
+    if (bothAreSpectators) {
+      this.logger.log('Not adding connection: both users are spectators');
+    }
+    return bothAreSpectators;
+  }
+
   private async createPeerConnection(
     socketId: string,
     newUser: IUser,
     isNewPeer: boolean = false
   ) {
     this.logger.log('Creating peer connection: ', socketId, newUser);
+
+    if (this.shouldSkipPeerConnection(newUser)) {
+      return;
+    }
+
     try {
-      if (this.amISpectator && newUser.type == UserType.Spectator) {
-        this.logger.log("Not adding connection as it's spectator");
-        return;
-      }
       const peerConnection = this.initializePeerConnection(socketId, newUser);
 
       if (!this.amISpectator) {
         try {
-          await this.devicesService.attachTrackToPeerConnection(peerConnection, socketId);
+          await this.devicesService.attachTrackToPeerConnection(
+            peerConnection,
+            socketId
+          );
         } catch (error) {
           if (this.isSafeToOffer(peerConnection))
             await this.createReceiveOnlyOffer(peerConnection, socketId);
@@ -388,16 +513,24 @@ export class WebRTCService {
         await this.createReceiveOnlyOffer(peerConnection, socketId);
       }
     } catch (error) {
-      this.logger.error(
-        'createPeerConnection error',
-        { error: error, socketId, user: newUser },
-        'WEB RTC createPeerConnection'
-      );
-      this.alertService.addAlert(
-        'error',
-        'There may be an error connecting to a player. Refreshing can help fix this issue'
-      );
+      this.logPeerConnectionError(error, socketId, newUser);
     }
+  }
+
+  private logPeerConnectionError(
+    error: unknown,
+    socketId: string,
+    user: IUser
+  ) {
+    this.logger.error(
+      'createPeerConnection error',
+      { error: error, socketId, user: user },
+      'WEB RTC createPeerConnection'
+    );
+    this.alertService.addAlert(
+      'error',
+      'There may be an error connecting to a player. Refreshing can help fix this issue'
+    );
   }
 
   private initializePeerConnection(
@@ -480,8 +613,8 @@ export class WebRTCService {
       const remoteStream = event.streams[0];
 
       this.remoteStreams[socketId] = remoteStream;
-      if(this.gameService.isLocalPlayer(user.id)){
-        this.devicesService.setLocalStream(remoteStream)
+      if (this.gameService.isLocalPlayer(user.id)) {
+        this.devicesService.setLocalStream(remoteStream);
       }
       this.onStreamAdded.forEach((callback) => {
         callback(socketId, this.remoteStreams[socketId], user);
@@ -496,14 +629,6 @@ export class WebRTCService {
     this.logger.log('on ice candidate', event);
     if (event.candidate) {
       this.socket?.emit('signal', { to: socketId, signal: event.candidate });
-    }
-  }
-
-  public sendMessage(message: string) {
-    if (this.socket) {
-      this.socket.emit('message', {
-        text: message,
-      });
     }
   }
 
@@ -554,31 +679,4 @@ export class WebRTCService {
       error.message
     );
   };
-
-  public getRemoteStream(socketId: string): MediaStream | null {
-    return this.remoteStreams[socketId] || null;
-  }
-
-  public resetRoomPasswordInvalid() {
-    this._roomPasswordValid.next(null);
-  }
-
-  public async changeDevice(
-    videoDeviceId?: string,
-    audioDeviceId?: string
-  ): Promise<void> {
-    if (!this.devicesService._localStream) {
-      const localStream = await this.devicesService.initializeLocalStream(
-        videoDeviceId!,
-        audioDeviceId!
-      );
-      await this.updatePeerConnections(localStream!);
-      return;
-    }
-
-    this.devicesService.changeDevice(videoDeviceId!, audioDeviceId!, this.peerConnections);
-    
-  }
-
-
 }

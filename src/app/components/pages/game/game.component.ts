@@ -328,13 +328,7 @@ export class GameComponent {
         (turnOrder - (this.focusedIndex >= 0 ? this.focusedIndex : 0) + n) % n
       );
     } else {
-      // Non-focused: clockwise slots:
-      // n=1: [0]
-      // n=2: [0,1]
-      // n=3: [0,1,2]
-      // n=4: [0,1,3,2]
-      // n=5: [0,1,2,4,3]
-      // n=6: [0,1,2,5,4,3]
+
       const map: Record<number, number[]> = {
         1: [0],
         2: [0, 1],
@@ -426,23 +420,23 @@ export class GameComponent {
     }
   }
 
-    setLayout(layout:string){
-      switch(layout){
-        case "DEFAULT":
-          this.focusedLayout = false;
-          this.settingsService.tokensEnabled = true;
-          break;
-        case "FOCUSED":
-          this.focusedLayout = true;
-          this.settingsService.tokensEnabled = false;
-          this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
-          break;
-      }
+  setLayout(layout:string){
+    switch(layout){
+      case "DEFAULT":
+        this.focusedLayout = false;
+        this.settingsService.tokensEnabled = true;
+        break;
+      case "FOCUSED":
+        this.focusedLayout = true;
+        this.settingsService.tokensEnabled = false;
+        this.alertService.addAlert("warning", "Tokens are automatically disabled in 'Focused' layout. You can re-enable in the tokens settings menu.", 7.5)
+        break;
+    }
   }
 
-    handleUnreadCount(count: number): void {
-      this.unreadMessages = count;
-    }
+  handleUnreadCount(count: number): void {
+    this.unreadMessages = count;
+  }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

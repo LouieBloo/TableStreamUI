@@ -185,7 +185,7 @@ export class UserStreamComponent {
     }
     if (!this.isLocalStream) {
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
-      this.setStream(this.webRTC.getRemoteStream(this.player.socketId));
+      this.setStream(this.webRTC.getRemoteStreamBySocketId(this.player.socketId));
     }
     this.setFlip();
 
@@ -212,7 +212,6 @@ export class UserStreamComponent {
       })
     );
 
-    //local events
     this.subscriptions.add(
       this.webRTC.localGameEvent.subscribe((localGameEvent: IGameEvent) => {
         if (
@@ -247,7 +246,7 @@ export class UserStreamComponent {
 
   streamAdded = (id: string, stream: MediaStream, user: IUser) => {
     if (user.id === this.player.id) {
-      this.setStream(this.webRTC.getStream(this.player.socketId));
+      this.setStream(this.webRTC.getRemoteStreamBySocketId(this.player.socketId));
     }
   };
 
@@ -327,7 +326,7 @@ export class UserStreamComponent {
   }
 
   muteRemoteUser(): void {
-    const remoteStream = this.webRTC.getRemoteStream(this.player.socketId);
+    const remoteStream = this.webRTC.getRemoteStreamBySocketId(this.player.socketId);
     if (remoteStream) {
       remoteStream.getAudioTracks().forEach((track) => (track.enabled = false));
       this.muted = true;
@@ -335,7 +334,7 @@ export class UserStreamComponent {
   }
 
   unmuteRemoteUser(): void {
-    const remoteStream = this.webRTC.getRemoteStream(this.player.socketId);
+    const remoteStream = this.webRTC.getRemoteStreamBySocketId(this.player.socketId);
     if (remoteStream) {
       remoteStream.getAudioTracks().forEach((track) => (track.enabled = true));
       this.muted = false;
