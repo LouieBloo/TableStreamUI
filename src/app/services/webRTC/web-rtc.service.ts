@@ -34,14 +34,14 @@ export class WebRTCService {
   public userJoined = this.userJoinedSubject.asObservable();
   private localGameEventSubject = new Subject<IGameEvent>();
   public localGameEvent = this.localGameEventSubject.asObservable();
-  onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] =
-    [];
+  onStreamAdded: ((id: string, stream: MediaStream, user: IUser) => void)[] = [];
   onStreamRemoved: ((id: string) => void)[] = [];
 
   onMessage: ((message: IMessage) => void)[] = [];
   amISpectator: boolean = false;
-  private _roomPasswordValid: BehaviorSubject<boolean | null> =
-    new BehaviorSubject<boolean | null>(null);
+  private _roomPasswordValid: BehaviorSubject<boolean | null> = new BehaviorSubject<
+    boolean | null
+  >(null);
 
   get roomPasswordValid(): Observable<boolean | null> {
     return this._roomPasswordValid.asObservable();
@@ -77,11 +77,7 @@ export class WebRTCService {
     this.setInitialPhoneStreamState();
 
     if (this.socket)
-      this.socket.emit(
-        'joinRoomAsPhone',
-        token,
-        this.onServerResponseFromPhone
-      );
+      this.socket.emit('joinRoomAsPhone', token, this.onServerResponseFromPhone);
   };
 
   public async changeDevice(): Promise<void> {
@@ -176,13 +172,7 @@ export class WebRTCService {
             this.handleJoinRoomError(error);
             return;
           }
-          this.handleSuccessfulJoin(
-            joinRoomPayload,
-            room,
-            password,
-            me,
-            callback
-          );
+          this.handleSuccessfulJoin(joinRoomPayload, room, password, me, callback);
         }
       );
     }
@@ -255,10 +245,7 @@ export class WebRTCService {
     });
   }
 
-  private getJoinRoomPayload(
-    roomId: string,
-    password: string | null
-  ): JoinRoomPayload {
+  private getJoinRoomPayload(roomId: string, password: string | null): JoinRoomPayload {
     return {
       playerId: this.localStorageService.playerId,
       roomId: roomId,
@@ -276,9 +263,7 @@ export class WebRTCService {
           ? false
           : true,
       isPublic: this.localStorageService.publicGame,
-      joinerJwtToken: this.userService.isLoggedIn
-        ? this.userService.jwtToken
-        : null,
+      joinerJwtToken: this.userService.isLoggedIn ? this.userService.jwtToken : null,
       allowSpectators: this.localStorageService.allowSpectators,
       isSharingImages:
         this.localStorageService.isSharingImages &&
@@ -382,11 +367,7 @@ export class WebRTCService {
     return reason === 'io client disconnect';
   }
 
-  private handleSignal = async (data: {
-    from: string;
-    signal: any;
-    user: IUser;
-  }) => {
+  private handleSignal = async (data: { from: string; signal: any; user: IUser }) => {
     this.logger.log('Handle signal: ', data.from, data.signal);
     const { from, signal } = data;
     if (!this.peerConnections[from]) {
@@ -394,16 +375,12 @@ export class WebRTCService {
     }
     const peerConnection = this.peerConnections[from];
     if (signal.type === 'offer') {
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription(signal)
-      );
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
       this.emitLocalDescription(from, peerConnection.localDescription!);
     } else if (signal.type === 'answer') {
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription(signal)
-      );
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
     } else if (signal.candidate) {
       await peerConnection.addIceCandidate(new RTCIceCandidate(signal));
     }
@@ -435,8 +412,7 @@ export class WebRTCService {
   };
 
   private shouldSkipPeerConnection(user: IUser): boolean {
-    const bothAreSpectators =
-      this.amISpectator && user.type === UserType.Spectator;
+    const bothAreSpectators = this.amISpectator && user.type === UserType.Spectator;
 
     if (bothAreSpectators) {
       this.logger.log('Not adding connection: both users are spectators');
@@ -458,10 +434,7 @@ export class WebRTCService {
       const peerConnection = this.initializePeerConnection(socketId, newUser);
 
       if (!this.amISpectator) {
-        await this.attachTracksOrFallbackToReceiveOnlyOffer(
-          socketId,
-          peerConnection
-        );
+        await this.attachTracksOrFallbackToReceiveOnlyOffer(socketId, peerConnection);
       } else if (isNewPeer) {
         await this.createAndSignalReceiveOnlyOffer(socketId, peerConnection);
       }
@@ -475,10 +448,7 @@ export class WebRTCService {
     peerConnection: RTCPeerConnection
   ) {
     try {
-      await this.devicesService.attachTrackToPeerConnection(
-        peerConnection,
-        socketId
-      );
+      await this.devicesService.attachTrackToPeerConnection(peerConnection, socketId);
     } catch (error) {
       if (this.isSafeToOffer(peerConnection)) {
         await this.createAndSignalReceiveOnlyOffer(socketId, peerConnection);
@@ -496,10 +466,7 @@ export class WebRTCService {
     this.emitLocalDescription(socketId, peerConnection.localDescription!);
   }
 
-  private initializePeerConnection(
-    socketId: string,
-    user: IUser
-  ): RTCPeerConnection {
+  private initializePeerConnection(socketId: string, user: IUser): RTCPeerConnection {
     const configuration = { iceServers: this.iceServerList };
     const peerConnection = new RTCPeerConnection(configuration);
 
@@ -572,10 +539,7 @@ export class WebRTCService {
     };
   }
 
-  private handleIceCandidateEvent(
-    socketId: string,
-    event: RTCPeerConnectionIceEvent
-  ) {
+  private handleIceCandidateEvent(socketId: string, event: RTCPeerConnectionIceEvent) {
     this.logger.log('on ice candidate', event);
     if (event.candidate) {
       this.socket?.emit('signal', { to: socketId, signal: event.candidate });
@@ -630,11 +594,7 @@ export class WebRTCService {
     );
   };
 
-  private logPeerConnectionError(
-    error: unknown,
-    socketId: string,
-    user: IUser
-  ) {
+  private logPeerConnectionError(error: unknown, socketId: string, user: IUser) {
     this.logger.error(
       'createPeerConnection error',
       { error: error, socketId, user: user },
@@ -673,11 +633,7 @@ export class WebRTCService {
 
   private notifyReconnecting() {
     console.log('Reconnected to server. Rejoining room...');
-    this.alertService.addAlert(
-      'warning',
-      'Reconnected to server. Rejoining room...',
-      5
-    );
+    this.alertService.addAlert('warning', 'Reconnected to server. Rejoining room...', 5);
   }
 
   private notifySuccessfulReconnect() {
