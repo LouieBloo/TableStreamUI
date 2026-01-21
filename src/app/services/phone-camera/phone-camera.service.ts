@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -18,15 +18,20 @@ export class PhoneCameraService {
 
   public getQrCode(
     roomId: string | null | undefined,
-    playerId: string | null
+    playerId: string | null,
+    password: string
   ): Observable<any> {
     if (roomId == null || playerId == null) return of(null);
     const body = {
       roomId: roomId,
       playerId: playerId,
     };
+
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${password}`,
+    });
     return this.http
-      .post<string>(environment.socketUrl + '/qrcodetoken', body)
+      .post<string>(environment.socketUrl + '/qrcodetoken', body, { headers })
       .pipe(
         tap((code: string) => {
           const url = `https://192.168.1.77:4200/remote-camera/${code}?roomId=${roomId}`;

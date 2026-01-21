@@ -1,7 +1,7 @@
 import { AsyncPipe, NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of, shareReplay, Subscription } from 'rxjs';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
 import {
   GameEvent,
@@ -95,7 +95,7 @@ export class GameComponent {
   initialLoad: boolean = true;
   showChatbox: boolean = true;
   unreadMessages: number = 0;
-  localPlayer$: Observable<IPlayer | null | undefined> = of(null);
+  localPlayer$: Observable<IPlayer | null | undefined> = of(null).pipe(shareReplay());
   showSideBar: boolean = true;
   showQrCode: boolean = false;
   devicesService = inject(LocalDevicesService);
