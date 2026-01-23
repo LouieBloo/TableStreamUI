@@ -80,14 +80,14 @@ export class WebRTCService {
       this.socket.emit('joinRoomAsPhone', token, this.onServerResponseFromPhone);
   };
 
-  public async changeDevice(): Promise<void> {
+  public async changeDevice(videoDeviceId: string, audioDeviceId: string): Promise<void> {
     if (!this.devicesService._localStream) {
-      const localStream = await this.devicesService.initializeLocalStream();
+      const localStream = await this.devicesService.buildStreamOnDeviceChange(videoDeviceId, audioDeviceId);
       await this.updatePeerConnections(localStream!);
       return;
     }
 
-    this.devicesService.changeDevice(this.peerConnections);
+    await this.devicesService.changeDevice(this.peerConnections, videoDeviceId, audioDeviceId);
   }
 
   public disconnect() {
@@ -531,7 +531,7 @@ export class WebRTCService {
 
       this.remoteStreams[socketId] = remoteStream;
       if (this.gameService.isLocalPlayer(user.id)) {
-        this.devicesService.setLocalStream(remoteStream);
+        this.devicesService.setLocalStream(remoteStream);//this is where the phone stream gets set as local stream
       }
       this.onStreamAdded.forEach((callback) => {
         callback(socketId, this.remoteStreams[socketId], user);

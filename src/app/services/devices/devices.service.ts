@@ -13,43 +13,35 @@ export class LocalDevicesService {
 
   private _audioDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
   private _videoDevices = new BehaviorSubject<MediaDeviceInfo[]>([]);
+
+  public selectedVideoDeviceId = new BehaviorSubject<string>('');
+  public selectedAudioDeviceId = new BehaviorSubject<string>('');
+
   public _localStream = new BehaviorSubject<MediaStream | null>(null);
 
   audioDevices$ = this._audioDevices.asObservable();
   videoDevices$ = this._videoDevices.asObservable();
+  selectedAudioDeviceId$ = this.selectedAudioDeviceId.asObservable();
   localStream$ = this._localStream.asObservable();
-
-  selectedVideoDeviceId = new BehaviorSubject<string>('');
-  selectedAudioDeviceId = new BehaviorSubject<string>('');
-
-  setLocalStream(stream: MediaStream) {
-    this._localStream.next(stream);
-  }
-
-  public buildLocalStreamFromSelectedDevices() {
-    return this.buildLocalStream(
-      this.selectedVideoDeviceId.value,
-      this.selectedAudioDeviceId.value
-    );
-  }
 
   public async buildLocalStream(
     videoDeviceId?: string,
-    audioDeviceId?: string,
+    audioDeviceId?: string
   ): Promise<MediaStream | null> {
-    if (this._localStream.value) {
-      this.logAspectRatio(this._localStream.value);
-      return this._localStream.value;
-    }
-
     try {
-      const stream = await this.getLocalMediaStream(
-        videoDeviceId,
-        audioDeviceId,
-      );
-      this.selectedVideoDeviceId.next(videoDeviceId!);
-      this.selectedAudioDeviceId.next(audioDeviceId!);
-      this.setLocalStream(stream!);
+      const stream = await this.requestLocalMediaStream(videoDeviceId, audioDeviceId);
+      this._localStream.next(stream);
+
+      await this.setAvailableDeviceList();
+
+      if (videoDeviceId) {
+        this.selectedVideoDeviceId.next(videoDeviceId);
+      }
+
+      if (audioDeviceId) {
+        this.selectedAudioDeviceId.next(audioDeviceId!);
+      }
+
       this.logAspectRatio(stream!);
     } catch (err: any) {
       if (this.isPermissionError(err)) {
@@ -64,47 +56,66 @@ export class LocalDevicesService {
     return this._localStream.value;
   }
 
+  setLocalStream(stream: MediaStream) {
+    this._localStream.next(stream);
+  }
+
+  public buildLocalStreamFromSelectedDevices() {
+    return this.buildLocalStream(
+      this.selectedVideoDeviceId.value,
+      this.selectedAudioDeviceId.value
+    );
+  }
+
+  public async buildStreamOnDeviceChange(videoDeviceId: string, audioDeviceId: string) {
+    const stream = await this.requestLocalMediaStream(videoDeviceId, audioDeviceId);
+    this._localStream.next(stream);
+    if (videoDeviceId) {
+      this.selectedVideoDeviceId.next(videoDeviceId);
+    }
+
+    if (audioDeviceId) {
+      this.selectedAudioDeviceId.next(audioDeviceId!);
+    }
+
+    return stream;
+  }
+
   private isPermissionError(err: any) {
     return err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
   }
 
-  async setDevices(): Promise<void> {
+  async setAvailableDeviceList(): Promise<void> {
     const devices = await navigator.mediaDevices.enumerateDevices();
 
     const videoDevices = devices.filter((device) => device.kind === 'videoinput');
     const audioDevices = devices.filter((device) => device.kind === 'audioinput');
-
     this._videoDevices.next(videoDevices);
     this._audioDevices.next(audioDevices);
-    const selectedVideoDeviceId = videoDevices[0].deviceId;
-    const selectedAudioDeviceId = audioDevices[0].deviceId;
-    await this.buildLocalStream(selectedVideoDeviceId, selectedAudioDeviceId);
+
+    //set default video and audio deviceIds
+    if (!this.selectedVideoDeviceId.value && videoDevices.length) {
+      this.selectedVideoDeviceId.next(videoDevices[0].deviceId);
+    }
+
+    if (!this.selectedAudioDeviceId.value && audioDevices.length) {
+      this.selectedAudioDeviceId.next(audioDevices[0].deviceId);
+    }
   }
 
-  async getLocalMediaStreamWithConstraints(
-    videoDeviceChanged: boolean,
-    audioDeviceChanged: boolean
-  ) {
-    const constraints = this.getConstraints(videoDeviceChanged, audioDeviceChanged);
-    return navigator.mediaDevices.getUserMedia(constraints);
-  }
-
-  async getLocalMediaStream(
+  async requestLocalMediaStream(
     videoDeviceId?: string,
     audioDeviceId?: string,
     withAudio: boolean = true
   ): Promise<MediaStream | null> {
-    const constraints = this.getMediaConstraints(
-      videoDeviceId,
-      audioDeviceId,
-    );
+    const constraints = this.getMediaConstraints(videoDeviceId, audioDeviceId);
     if (!withAudio) constraints.audio = false;
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
   public getMediaConstraints(
     videoDeviceId?: string,
-    audioDeviceId?: string,
+    audioDeviceId?: string
   ): MediaStreamConstraints {
     const targetVideoQuality: IVideoQualify = this.getCameraVideoQuality();
 
@@ -123,6 +134,17 @@ export class LocalDevicesService {
           },
       audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true,
     };
+  }
+
+  private async getLocalMediaStreamWithConstraints(
+    videoDeviceChanged: boolean,
+    audioDeviceChanged: boolean,
+    videoDeviceId: string,
+    audioDeviceId: string
+  ) {
+    debugger;
+    const constraints = this.getConstraints(videoDeviceChanged, audioDeviceChanged, videoDeviceId, audioDeviceId);
+    return navigator.mediaDevices.getUserMedia(constraints);
   }
 
   /**
@@ -243,22 +265,20 @@ export class LocalDevicesService {
     return this._localStream.value?.getAudioTracks()[0];
   }
 
-  private hasVideoDeviceChanged(currentVideoTrack?: MediaStreamTrack) {
-    const videoDeviceId = this.selectedVideoDeviceId.value;
+  private hasVideoDeviceChanged(videoDeviceId: string, currentVideoTrack?: MediaStreamTrack) {
     const currentDeviceId = currentVideoTrack?.getSettings().deviceId;
     return videoDeviceId !== undefined && videoDeviceId !== currentDeviceId;
   }
 
-  private hasAudioDeviceChanged(currentAudioTrack?: MediaStreamTrack) {
-    const audioDeviceId = this.selectedAudioDeviceId.value;
+  private hasAudioDeviceChanged(audioDeviceId: string, currentAudioTrack?: MediaStreamTrack) {
     const currentDeviceId = currentAudioTrack?.getSettings().deviceId;
     return audioDeviceId !== undefined && audioDeviceId !== currentDeviceId;
   }
 
-  private getConstraints(videoDeviceChanged: boolean, audioDeviceChanged: boolean) {
+  private getConstraints(videoDeviceChanged: boolean, audioDeviceChanged: boolean, videoDeviceId?: string, audioDeviceId?: string) {
     const videoQuality = this.getCameraVideoQuality();
-    const videoDeviceId = this.selectedVideoDeviceId.value;
-    const audioDeviceId = this.selectedAudioDeviceId.value;
+    // const videoDeviceId = this.selectedVideoDeviceId.value;
+    // const audioDeviceId = this.selectedAudioDeviceId.value;
 
     const constraints: MediaStreamConstraints = {
       video: videoDeviceChanged
@@ -292,13 +312,16 @@ export class LocalDevicesService {
     }
   }
 
-  public async changeDevice(peerConnections: { [key: string]: RTCPeerConnection }) {
+  public async changeDevice(peerConnections: { [key: string]: RTCPeerConnection }, videoDeviceId: string, audioDeviceId: string) {
+    debugger;
     const currentVideoTrack = this.getFirstVideoTrack();
     const currentAudioTrack = this.getFirstAudioTrack();
+    let videoDeviceChanged = false;
 
-    const videoDeviceChanged = this.hasVideoDeviceChanged(currentVideoTrack);
-    const audioDeviceChanged = this.hasAudioDeviceChanged(currentAudioTrack);
-
+    if(videoDeviceId != ""){
+      videoDeviceChanged = this.hasVideoDeviceChanged(videoDeviceId, currentVideoTrack);
+    }
+    const audioDeviceChanged = this.hasAudioDeviceChanged(audioDeviceId, currentAudioTrack);
     if (!videoDeviceChanged && currentVideoTrack) {
       await this.tryApplyingVideoConstraints(currentVideoTrack);
     }
@@ -309,15 +332,15 @@ export class LocalDevicesService {
     if (videoDeviceChanged || audioDeviceChanged) {
       const tracks = await this.acquireNewMediaTracks(
         videoDeviceChanged,
-        audioDeviceChanged
+        audioDeviceChanged,
+        videoDeviceId,
+        audioDeviceId
       );
-
       newVideoTrack = tracks.videoTrack;
       newAudioTrack = tracks.audioTrack;
     }
-
     if (videoDeviceChanged && newVideoTrack) {
-      this.replaceDeviceTrack(
+      await this.replaceDeviceTrack(
         'video',
         currentVideoTrack!,
         newVideoTrack,
@@ -326,7 +349,7 @@ export class LocalDevicesService {
     }
 
     if (audioDeviceChanged && newAudioTrack) {
-      this.replaceDeviceTrack(
+      await this.replaceDeviceTrack(
         'audio',
         currentAudioTrack!,
         newAudioTrack,
@@ -339,7 +362,9 @@ export class LocalDevicesService {
 
   private async acquireNewMediaTracks(
     videoDeviceChanged: boolean,
-    audioDeviceChanged: boolean
+    audioDeviceChanged: boolean,
+    videoDeviceId: string,
+    audioDeviceId: string
   ): Promise<{
     videoTrack: MediaStreamTrack | null;
     audioTrack: MediaStreamTrack | null;
@@ -347,10 +372,13 @@ export class LocalDevicesService {
     let videoTrack: MediaStreamTrack | null = null;
     let audioTrack: MediaStreamTrack | null = null;
 
+    debugger;
     try {
       const newStream = await this.getLocalMediaStreamWithConstraints(
         videoDeviceChanged,
-        audioDeviceChanged
+        audioDeviceChanged,
+        videoDeviceId,
+        audioDeviceId
       );
       if (newStream) {
         if (videoDeviceChanged) {
@@ -367,17 +395,6 @@ export class LocalDevicesService {
     return { videoTrack, audioTrack };
   }
 
-  public async initializeLocalStream() {
-    const videoDeviceId = this.selectedVideoDeviceId.value;
-    const audioDeviceId = this.selectedAudioDeviceId.value;
-
-    if (!this._localStream.value) {
-      const stream = await this.getLocalMediaStream(videoDeviceId, audioDeviceId);
-      this._localStream.next(stream);
-    }
-    return this._localStream.value;
-  }
-
   private async replaceDeviceTrack(
     kind: 'video' | 'audio',
     currentTrack: MediaStreamTrack,
@@ -389,12 +406,9 @@ export class LocalDevicesService {
     await this.replaceTrackInPeerConnections(kind, newTrack, peerConnections);
   }
 
-  private async setUserMediaWithoutAudio(
-    videoDeviceId?: string,
-    audioDeviceId?: string,
-  ) {
+  private async setUserMediaWithoutAudio(videoDeviceId?: string, audioDeviceId?: string) {
     try {
-      const stream = await this.getLocalMediaStream(
+      const stream = await this.requestLocalMediaStream(
         videoDeviceId,
         audioDeviceId,
         false
@@ -411,6 +425,7 @@ export class LocalDevicesService {
     newTrack: MediaStreamTrack,
     peerConnections: { [key: string]: RTCPeerConnection }
   ) {
+    debugger;
     for (const socketId in peerConnections) {
       const peerConnection = peerConnections[socketId];
       const sender = peerConnection.getSenders().find((s) => s.track?.kind === kind);

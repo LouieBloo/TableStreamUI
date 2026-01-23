@@ -1,3 +1,5 @@
+AUDIO DEVICE ID: {{selectedAudioDeviceId$ | async}}
+
 <div class="relative h-full glow" [ngClass]="{'glow':  player.isTakingTurn}">
     <div class="flex justify-center h-full">
         <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 

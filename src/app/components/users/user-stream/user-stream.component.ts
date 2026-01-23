@@ -125,6 +125,7 @@ export class UserStreamComponent {
   classifiedCard: IPlayingCard | null = null;
   popupPosition = { x: 0, y: 0 };
   showCardPopup = false;
+  selectedAudioDeviceId$ = of('')
 
   // only used to change the direction the settings menu renders
   get isBottomRow(): boolean {
@@ -152,6 +153,7 @@ export class UserStreamComponent {
     this.videoQuality = localStorageService.videoQuality || '16/9-1080';
     this.audioInputDevices$ = devicesService.audioDevices$;
     this.videoInputDevices$ = devicesService.videoDevices$;
+    this.selectedAudioDeviceId$ = devicesService.selectedAudioDeviceId$;
     this.subscribeToEvents();
   }
 
@@ -172,7 +174,7 @@ export class UserStreamComponent {
   async ngAfterViewInit() {
     if (this.isLocalStream) {
       this.subscribeToLocalStream();
-      await this.devicesService.setDevices(); //TODO rename method
+      await this.devicesService.buildLocalStream();
     }
     if (!this.isLocalStream) {
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
@@ -255,17 +257,18 @@ export class UserStreamComponent {
   }
 
   changeDevice() {
-    from(this.webRTC.changeDevice())
+    from(this.webRTC.changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
       .pipe(
-        switchMap(() => from(this.devicesService.buildLocalStreamFromSelectedDevices()))
+        switchMap(() =>
+          from(
+            this.devicesService.buildStreamOnDeviceChange(
+              this.selectedVideoDeviceId,
+              this.selectedAudioDeviceId
+            )
+          )
+        )
       )
-      .subscribe({
-        next: (stream: MediaStream | null) => {
-          if (!stream) return;
-          this.displayLocalStream(stream);
-        },
-        error: (err) => console.error('Error changing device:', err),
-      });
+      .subscribe();
   }
 
   onVideoQualityChange(event: any) {
