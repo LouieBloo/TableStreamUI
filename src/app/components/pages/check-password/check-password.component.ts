@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AnalyticsService } from '../../../services/analytics/analytics.service';
 import { Router } from '@angular/router';
@@ -14,30 +14,18 @@ import { LocalStorageService } from '../../../services/local-storage/local-stora
 })
 export class CheckPasswordComponent  {
 
-  password!: string;
-  subscriptions: Subscription = new Subscription();
+  @Output() passwordOutput: EventEmitter<string> = new EventEmitter<string>();
 
-  constructor(private analyticsService: AnalyticsService, private router: Router, private localStorageService:LocalStorageService){
-  }
+  localStorageService = inject(LocalStorageService)
+  password!: string;
 
   ngOnInit() {
     this.password = this.localStorageService.devPassword + "";
   }
 
-  submitPassword(): void {
-    this.subscriptions.add(this.analyticsService.getAnalytic(this.password).subscribe({
-      next: (response) => {
-        this.localStorageService.setDevPassword(this.password);
-        this.router.navigate(['/dev-dashboard']);
-      },
-      error: (error) => {
-        console.error('Error fetching analytics:', error);
-      }
-    }));
+  submitPassword(){
+    this.passwordOutput.emit(this.password);
   }
 
-  ngOnDestroy(){
-    this.subscriptions.unsubscribe();
-  }
 
 }

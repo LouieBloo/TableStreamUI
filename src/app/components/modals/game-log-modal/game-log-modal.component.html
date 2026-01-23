@@ -3,7 +3,7 @@
 
     <div class="modal-box bg-slate-800 text-white absolute top-2 max-w-3xl">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeGameLog">✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 btn-action" id="closeGameLog">✕</button>
         </form>
 
         <div class="flex justify-between items-center mb-4 mt-2">
@@ -17,7 +17,7 @@
         <!-- Scrollable History Container -->
         <div class="bg-slate-900 p-4 rounded-lg max-h-[60vh] overflow-y-auto text-sm" #historyContainer id="historyContainer">
             <!-- History Items -->
-            @for (item of gameService.room.history; track item.createdAt) {
+            @for (item of gameService.roomHistory; track item.createdAt) {
             <div class="flex items-start p-2 mb-2 rounded-md hover:bg-slate-800 transition-colors">
                 <span class="text-slate-500 font-mono text-xs mr-4 mt-1 min-w-20">{{ formatTime(item.createdAt) }}</span>
                 <div class="flex-grow">

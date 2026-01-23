@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -17,7 +17,7 @@ export class CardIdentifierService {
     formData.append('file', photoFile);
     formData.append('x', x.toString());
     formData.append('y', y.toString());
-    formData.append('roomId', this.gameService.room.id + "")
+    formData.append('roomId', this.gameService.roomId + "")
     formData.append('playerId', playerId)
     formData.append('classifier', "CNN_V2")
 

@@ -6,5 +6,6 @@ export class YugiohDomain extends Game {
   override gameType:GameType = GameType.YugiohDomain;
   override searchTag:string = "Yu-Gi-Oh!";
   override name:string = "Yu-Gi-Oh!";
+  override commanderTitle:string = "Deck Master";
   override coinImagePathPrefix: string = "yugioh";
 }

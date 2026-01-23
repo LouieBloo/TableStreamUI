@@ -1,9 +1,24 @@
-import { Component, ElementRef, EventEmitter, Input, NgZone, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  NgZone,
+  Output,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { bootstrapGearFill } from '@ng-icons/bootstrap-icons';
 import { IPlayer, IUser, PlayerProperties } from '../../../interfaces/IPlayer';
-import { GameEvent, IGameEvent, IModifyPlayerProperty, LocalGameEvent } from '../../../interfaces/IGame';
+import {
+  GameEvent,
+  IGameEvent,
+  IModifyPlayerProperty,
+  LocalGameEvent,
+} from '../../../interfaces/IGame';
 import { LifeTotalComponent } from '../../life-total/life-total.component';
 import { CommonModule, NgClass, NgIf } from '@angular/common';
 import { GameService } from '../../../services/game/game.service';
@@ -20,12 +35,27 @@ import { IPlayingCard } from '../../../interfaces/IPlayingCard';
 import { BoundingBoxComponent } from '../../bounding-box/bounding-box.component';
 import { LocalStorageService } from '../../../services/local-storage/local-storage.service';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { catchError, from, Observable, of, Subscription, switchMap, tap } from 'rxjs';
 import { IKickPlayerResponse } from '../../../interfaces/IRoom';
-import { CommanderSideBarComponent } from "../../commander/commander-side-bar/commander-side-bar.component";
+import { CommanderSideBarComponent } from '../../commander/commander-side-bar/commander-side-bar.component';
 import { LifeTotalDropzoneComponent } from '../../life-total/life-total-dropzone/life-total-dropzone.component';
-import { gameCrown, gameHealthNormal, gamePoisonBottle, gamePowerLightning, gameBrokenHeart, gameDiceSixFacesFive, gameFairyWand, gameTorch, gameModernCity, gameSunCloud, gameDeathSkull, gameRadioactive, gameHearts } from '@ng-icons/game-icons';
+import {
+  gameCrown,
+  gameHealthNormal,
+  gamePoisonBottle,
+  gamePowerLightning,
+  gameBrokenHeart,
+  gameDiceSixFacesFive,
+  gameFairyWand,
+  gameTorch,
+  gameModernCity,
+  gameSunCloud,
+  gameDeathSkull,
+  gameRadioactive,
+  gameHearts,
+} from '@ng-icons/game-icons';
 import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-classified-popup.component';
+import { LocalDevicesService } from '../../../services/devices/devices.service';
 
 @Component({
   selector: 'app-user-stream',
@@ -44,44 +74,47 @@ import { CardClassifiedPopupComponent } from '../../card-classified-popup/card-c
     BoundingBoxComponent,
     CommanderSideBarComponent,
     LifeTotalDropzoneComponent,
-    CardClassifiedPopupComponent
-],
+    CardClassifiedPopupComponent,
+  ],
   templateUrl: './user-stream.component.html',
   styleUrl: './user-stream.component.css',
-  viewProviders: [provideIcons({ 
-    bootstrapGearFill,
-    gameCrown,
-    gameHealthNormal,
-    gamePoisonBottle,
-    gamePowerLightning,
-    gameBrokenHeart,
-    gameDiceSixFacesFive,
-    gameFairyWand,
-    gameTorch,
-    gameModernCity,
-    gameSunCloud,
-    gameDeathSkull,
-    gameRadioactive,
-    gameHearts
-  })],
+  viewProviders: [
+    provideIcons({
+      bootstrapGearFill,
+      gameCrown,
+      gameHealthNormal,
+      gamePoisonBottle,
+      gamePowerLightning,
+      gameBrokenHeart,
+      gameDiceSixFacesFive,
+      gameFairyWand,
+      gameTorch,
+      gameModernCity,
+      gameSunCloud,
+      gameDeathSkull,
+      gameRadioactive,
+      gameHearts,
+    }),
+  ],
 })
 export class UserStreamComponent {
   @Input() player!: IPlayer;
-  @Input() localStream: boolean = false;
-  @Input() focusedLayout: boolean = false;
+  @Input() isLocalStream: boolean = false;
+  @Input() isFocusedLayout: boolean = false;
   @Output() reportPlayerEvent: EventEmitter<string> = new EventEmitter<string>();
 
   @ViewChild('videoElement') video!: ElementRef<HTMLVideoElement>;
-  @ViewChildren(LifeTotalComponent) lifeTotalComponents!: QueryList<LifeTotalComponent>;
+  @ViewChildren(LifeTotalComponent)
+  lifeTotalComponents!: QueryList<LifeTotalComponent>;
 
-  magicLifeTotalComponent!:LifeTotalComponent; 
+  magicLifeTotalComponent!: LifeTotalComponent;
 
   private subscriptions: Subscription = new Subscription();
   showCommanderDamage: boolean = true;
   muted: boolean = false;
   volume: number = 1;
-  audioInputDevices: MediaDeviceInfo[] = [];
-  videoInputDevices: MediaDeviceInfo[] = [];
+  audioInputDevices$: Observable<MediaDeviceInfo[]> = of([]);
+  videoInputDevices$: Observable<MediaDeviceInfo[]> = of([]);
   selectedAudioDeviceId: string = '';
   selectedVideoDeviceId: string = '';
   videoQuality: string;
@@ -89,11 +122,22 @@ export class UserStreamComponent {
   isVideoOff: boolean = false;
   loadingCardIdentification: boolean = false;
   boundingBox: any;
-
   classifiedCard: IPlayingCard | null = null;
   popupPosition = { x: 0, y: 0 };
   showCardPopup = false;
-  
+  selectedAudioDeviceId$ = of('')
+
+  // only used to change the direction the settings menu renders
+  get isBottomRow(): boolean {
+    if (!this.isFocusedLayout) {
+      return false;
+    }
+    if (!this.gameService.isActiveGame) {
+      return this.player.turnOrder != 0;
+    }
+
+    return !this.player.isTakingTurn;
+  }
 
   constructor(
     private webRTC: WebRTCService,
@@ -103,115 +147,74 @@ export class UserStreamComponent {
     private alertService: AlertsService,
     private ngZone: NgZone,
     private localStorageService: LocalStorageService,
-    private router: Router
+    private router: Router,
+    public devicesService: LocalDevicesService
   ) {
-    this.videoQuality = localStorageService.videoQuality || '16/9-1080'
+    this.videoQuality = localStorageService.videoQuality || '16/9-1080';
+    this.audioInputDevices$ = devicesService.audioDevices$;
+    this.videoInputDevices$ = devicesService.videoDevices$;
+    this.selectedAudioDeviceId$ = devicesService.selectedAudioDeviceId$;
     this.subscribeToEvents();
   }
 
-  ngOnDestroy(){
+  subscribeToLocalStream() {
+    this.devicesService.localStream$
+      .pipe(
+        tap((stream: MediaStream | null) => {
+          if (stream) this.displayLocalStream(stream);
+        }),
+        catchError((error: Error) => {
+          console.error('Error initializing local stream:', error);
+          return of(null);
+        })
+      )
+      .subscribe();
+  }
+
+  async ngAfterViewInit() {
+    if (this.isLocalStream) {
+      this.subscribeToLocalStream();
+      await this.devicesService.buildLocalStream();
+    }
+    if (!this.isLocalStream) {
+      this.webRTC.subscribeToStreamAdd(this.streamAdded);
+      this.setStream(this.webRTC.getRemoteStreamBySocketId(this.player.socketId));
+    }
+    this.setFlip();
+
+    //so we dont get a ngAfter change error
+    setTimeout(() => {
+      this.lifeTotalComponents.forEach((child) => {
+        if (child.id == 'magicLifeTotal') {
+          this.magicLifeTotalComponent = child;
+        }
+      });
+    }, 100);
+  }
+
+  ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
 
   subscribeToEvents() {
     this.subscriptions.add(
-      this.webRTC.kickedPlayerEvent$.subscribe((event) => {
-        if (this.imKicked(event.response)) {
+      this.gameService.kickedPlayerEvent$.subscribe((event) => {
+        if (this.imKicked(event?.response)) {
           this.router.navigate(['/join']);
         }
       })
     );
 
-    //local events
     this.subscriptions.add(
-      this.webRTC.localGameEvent.subscribe((localGameEvent:IGameEvent)=>{
-        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.localStream) {
+      this.webRTC.localGameEvent.subscribe((localGameEvent: IGameEvent) => {
+        if (localGameEvent.event === LocalGameEvent.RejoinGame && !this.isLocalStream) {
           this.video.nativeElement.play().catch((err) => {
-            console.error('Error auto-playing:', err)
+            console.error('Error auto-playing:', err);
           });
         }
       })
     );
   }
-
-  imKicked(kickedEvent: IKickPlayerResponse){
-    return this.player.id == kickedEvent.kickedPlayer?.id && this.localStream
-  }
-
-  ngAfterViewInit() {
-    if (!this.localStream) {
-      this.webRTC.subscribeToStreamAdd(this.streamAdded);
-      // this.webRTC.subscribeToStreamRemove(this.streamRemoved);
-      this.setStream(this.webRTC.getStream(this.player.socketId));
-    } else {
-      // Local stream
-      // Initialize device lists
-      navigator.mediaDevices.enumerateDevices().then((devices) => {
-        this.audioInputDevices = devices.filter(
-          (device) => device.kind === 'audioinput'
-        );
-        this.videoInputDevices = devices.filter(
-          (device) => device.kind === 'videoinput'
-        );
-
-        // Set default selected devices
-        if (this.videoInputDevices.length > 0) {
-          this.selectedVideoDeviceId = this.videoInputDevices[0].deviceId;
-        }
-        if (this.audioInputDevices.length > 0) {
-          this.selectedAudioDeviceId = this.audioInputDevices[0].deviceId;
-        }
-
-        // Initialize local stream with selected devices
-        this.initLocalStream();
-      });
-    }
-
-    this.setFlip();
-
-    //so we dont get a ngAfter change error
-    setTimeout(() => {
-      this.lifeTotalComponents.forEach(child => {
-      if(child.id == 'magicLifeTotal'){
-        this.magicLifeTotalComponent = child;
-      }
-    });
-    }, 100);
-    
-  }
-
-  initLocalStream() {
-    this.webRTC
-      .initLocalStream(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
-      .then((stream) => {
-        if (this.video.nativeElement) {
-          this.video.nativeElement.srcObject = stream;
-          this.video.nativeElement.muted = true; // Mute local video to prevent echo
-        }
-
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-          this.audioInputDevices = devices.filter((device) => device.kind === 'audioinput');
-          this.videoInputDevices = devices.filter((device) => device.kind === 'videoinput');
-        });
-
-      //check if we have saved a mic muted preference
-      const isMicMuted = this.localStorageService.isMicMuted
-      this.isMutedSelf = isMicMuted && isMicMuted == 'true' ? true: false;
-    })
-  }
-
-  streamAdded = (id: string, stream: MediaStream, user: IUser) => {
-    if (user.id === this.player.id) {
-      //this.setStream(stream);
-      this.setStream(this.webRTC.getStream(this.player.socketId));
-    }
-  };
-
-  streamRemoved = (id: string) => {
-    if (id === this.player.socketId) {
-      this.setStream(null);
-    }
-  };
 
   setStream = (stream: MediaStream | null) => {
     if (this.video.nativeElement && stream) {
@@ -221,7 +224,28 @@ export class UserStreamComponent {
     }
   };
 
-  // Methods for device selection
+  private displayLocalStream(stream: MediaStream): void {
+    if (this.video.nativeElement) {
+      this.video.nativeElement.srcObject = stream;
+      this.video.nativeElement.muted = true;
+    }
+
+    const isMicMuted = this.localStorageService.isMicMuted;
+    this.isMutedSelf = isMicMuted === 'true';
+  }
+
+  streamAdded = (id: string, stream: MediaStream, user: IUser) => {
+    if (user.id === this.player.id) {
+      this.setStream(this.webRTC.getRemoteStreamBySocketId(this.player.socketId));
+    }
+  };
+
+  streamRemoved = (id: string) => {
+    if (id === this.player.socketId) {
+      this.setStream(null);
+    }
+  };
+
   onAudioDeviceChange(event: any) {
     this.selectedAudioDeviceId = event.target.value;
     this.changeDevice();
@@ -233,14 +257,18 @@ export class UserStreamComponent {
   }
 
   changeDevice() {
-    this.webRTC
-      .changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId)
-      .then(() => {
-        this.initLocalStream();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    from(this.webRTC.changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
+      .pipe(
+        switchMap(() =>
+          from(
+            this.devicesService.buildStreamOnDeviceChange(
+              this.selectedVideoDeviceId,
+              this.selectedAudioDeviceId
+            )
+          )
+        )
+      )
+      .subscribe();
   }
 
   onVideoQualityChange(event: any) {
@@ -251,20 +279,20 @@ export class UserStreamComponent {
 
   toggleMuteSelf() {
     this.isMutedSelf = !this.isMutedSelf;
-    this.localStorageService.setMicMuted(this.isMutedSelf + "");
+    this.localStorageService.setMicMuted(this.isMutedSelf + '');
     if (this.isMutedSelf) {
-      this.webRTC.muteSelf();
+      this.devicesService.muteSelf();
     } else {
-      this.webRTC.unmuteSelf();
+      this.devicesService.unmuteSelf();
     }
   }
 
   toggleVideo() {
     this.isVideoOff = !this.isVideoOff;
     if (this.isVideoOff) {
-      this.webRTC.turnOffVideo();
+      this.devicesService.turnOffVideo();
     } else {
-      this.webRTC.turnOnVideo();
+      this.devicesService.turnOnVideo();
     }
   }
 
@@ -277,7 +305,7 @@ export class UserStreamComponent {
   }
 
   muteRemoteUser(): void {
-    const remoteStream = this.webRTC.getRemoteStream(this.player.socketId);
+    const remoteStream = this.webRTC.getRemoteStreamBySocketId(this.player.socketId);
     if (remoteStream) {
       remoteStream.getAudioTracks().forEach((track) => (track.enabled = false));
       this.muted = true;
@@ -285,7 +313,7 @@ export class UserStreamComponent {
   }
 
   unmuteRemoteUser(): void {
-    const remoteStream = this.webRTC.getRemoteStream(this.player.socketId);
+    const remoteStream = this.webRTC.getRemoteStreamBySocketId(this.player.socketId);
     if (remoteStream) {
       remoteStream.getAudioTracks().forEach((track) => (track.enabled = true));
       this.muted = false;
@@ -295,14 +323,14 @@ export class UserStreamComponent {
   makeAdmin = (player: IPlayer) => {
     const payload: IModifyPlayerProperty = {
       property: PlayerProperties.isAdmin,
-      value: player.id
-    }
+      value: player.id,
+    };
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyPlayerProperty,
       payload: payload,
     });
-    this.alertService.addAlert("success","Admin given to " + player.name);
-  }
+    this.alertService.addAlert('success', 'Admin given to ' + player.name);
+  };
 
   modifyLifeTotal = (amount: number) => {
     let payload: IModifyPlayerProperty = {
@@ -364,7 +392,9 @@ export class UserStreamComponent {
   };
 
   setFlip() {
-    this.video.nativeElement.style.transform = this.player.cameraFlipped ? 'scaleX(-1) scaleY(-1)' : 'scaleX(1) scaleY(1)';
+    this.video.nativeElement.style.transform = this.player.cameraFlipped
+      ? 'scaleX(-1) scaleY(-1)'
+      : 'scaleX(1) scaleY(1)';
   }
 
   toggleFlip(): void {
@@ -372,30 +402,23 @@ export class UserStreamComponent {
     this.setFlip();
   }
 
-  kickPlayer(playerId: string) {
-    // this.webRTC.sendGameEvent({
-    //   event: GameEvent.KickPlayer,
-    //   payload: {
-    //     playerId: playerId,
-    //   },
-    // });
+  kickPlayer() {
     this.reportPlayerEvent.emit(this.player.id);
   }
 
-  toggleImageSharing = async()=>{
-    this.localStorageService.setIsSharingImages(!this.player.isSharingImages + "");
-    let payload:IModifyPlayerProperty = {value: !this.player.isSharingImages, property: PlayerProperties.sharingImages}
+  toggleImageSharing = async () => {
+    this.localStorageService.setIsSharingImages(!this.player.isSharingImages + '');
+    let payload: IModifyPlayerProperty = {
+      value: !this.player.isSharingImages,
+      property: PlayerProperties.sharingImages,
+    };
     let response = await this.webRTC.sendPrivateGameEvent({
       event: GameEvent.ModifyPlayerProperty,
-      payload:payload
-    })
-  }
+      payload: payload,
+    });
+  };
 
-  modifyCommanderDamage = (
-    playerId: string,
-    amount: number,
-    card: IPlayingCard
-  ) => {
+  modifyCommanderDamage = (playerId: string, amount: number, card: IPlayingCard) => {
     this.webRTC.sendGameEvent({
       event: GameEvent.ModifyPlayerCommanderDamage,
       payload: {
@@ -406,38 +429,28 @@ export class UserStreamComponent {
     });
   };
 
-  getModifyCommanderDamageCallback = (playerId: string, card: IPlayingCard): ((amount: number) => void) => {
+  getModifyCommanderDamageCallback = (
+    playerId: string,
+    card: IPlayingCard
+  ): ((amount: number) => void) => {
     return (amount: number): void => {
       this.modifyCommanderDamage(playerId, amount, card);
     };
   };
-  
-
-  getKeys(object: any): string[] {
-    return Object.keys(object);
-  }
 
   isFirefox(): boolean {
     return /firefox/i.test(navigator.userAgent);
   }
 
-  // only used to change the direction the settings menu renders
-  get isBottomRow():boolean{
-    if(!this.focusedLayout){ return false;}
-    if(!this.gameService.room?.game?.active){
-      return this.player.turnOrder != 0;
-    }
-
-    return !this.player.isTakingTurn;
-  }
-
   onVideoClick(event: MouseEvent) {
     if (this.loadingCardIdentification) {
-      this.alertService.addAlert("error", "Only 1 image can be classified at once");
+      this.alertService.addAlert('error', 'Only 1 image can be classified at once');
       return;
     }
 
-    if(!environment.cardIdentifierActive || !this.gameService.room.game?.classifierActive){return;}
+    if (!environment.cardIdentifierActive || !this.gameService.isClassifierActive) {
+      return;
+    }
 
     this.loadingCardIdentification = true;
 
@@ -480,26 +493,34 @@ export class UserStreamComponent {
               type: 'image/jpeg',
             });
 
-              // Send the file and normalized click position to the classification service
-              this.cardIdentifierService.classifyImage(photoFile, normalizedX, normalizedY, this.player.id).subscribe(
-                  (response:any) => {
-                    this.ngZone.run(() => {
-                      if(response && response.scryfall_data){
-                        this.classifiedCard = { ...response.scryfall_data, classificationConfidence: response.classification_confidence };
-                        this.popupPosition = { x: event.clientX, y: event.clientY}; 
-                        this.showCardPopup = true; // This will make the popup appear
-                        this.boundingBox = response.bounding_box;
-                      }
-                      this.loadingCardIdentification = false;
-                    });
-                  },
-                  (error:any) => {
-                      this.logger.error('Error classifying image:', error);
-                      
-                      this.ngZone.run(() => {
-                        this.loadingCardIdentification = false;
-                      });
-                  }
+            // Send the file and normalized click position to the classification service
+            this.cardIdentifierService
+              .classifyImage(photoFile, normalizedX, normalizedY, this.player.id)
+              .subscribe(
+                (response: any) => {
+                  this.ngZone.run(() => {
+                    if (response && response.scryfall_data) {
+                      this.classifiedCard = {
+                        ...response.scryfall_data,
+                        classificationConfidence: response.classification_confidence,
+                      };
+                      this.popupPosition = {
+                        x: event.clientX,
+                        y: event.clientY,
+                      };
+                      this.showCardPopup = true; // This will make the popup appear
+                      this.boundingBox = response.bounding_box;
+                    }
+                    this.loadingCardIdentification = false;
+                  });
+                },
+                (error: any) => {
+                  this.logger.error('Error classifying image:', error);
+
+                  this.ngZone.run(() => {
+                    this.loadingCardIdentification = false;
+                  });
+                }
               );
           }
 
@@ -515,10 +536,13 @@ export class UserStreamComponent {
    * Handles the (share) event emitted from the card popup.
    * @param card The card data to be shared.
    */
-  shareCard = ({ card, sharePublic }: { card: IPlayingCard, sharePublic: boolean }) => {
-    this.webRTC.sendLocalGameEvent({event:LocalGameEvent.ShareCard, payload: {card, sharePublic }});
+  shareCard = ({ card, sharePublic }: { card: IPlayingCard; sharePublic: boolean }) => {
+    this.webRTC.sendLocalGameEvent({
+      event: LocalGameEvent.ShareCard,
+      payload: { card, sharePublic },
+    });
     this.dismissCardPopup();
-  }
+  };
 
   /**
    * Hides the popup and clears its data.
@@ -527,5 +551,9 @@ export class UserStreamComponent {
   dismissCardPopup() {
     this.showCardPopup = false;
     this.classifiedCard = null;
+  }
+
+  private imKicked(kickedEvent: IKickPlayerResponse) {
+    return this.player.id == kickedEvent.kickedPlayer?.id && this.isLocalStream;
   }
 }

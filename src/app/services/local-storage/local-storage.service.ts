@@ -144,7 +144,6 @@ export class LocalStorageService {
 
   removeSeenImages() {
     localStorage.removeItem(this.SEEN_IMAGES);
-    console.log('Seen images cache cleared.');
   }
 
   setSeenImages(seenImages: string) {

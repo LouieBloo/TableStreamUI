@@ -3,7 +3,7 @@
 <dialog id="reportModal" class="modal">
     <div class="modal-box bg-slate-800 text-white absolute top-2">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeReportModal" >✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 btn-action" id="closeReportModal" >✕</button>
         </form>
 
         <div *ngIf="!acceptedKnownBugs">
@@ -13,7 +13,7 @@
             <li>Clicking to search for a card on a stream is in alpha and has a low succeess rate. Try bringing the card closer to the camera for better results.</li>
           </ul>
 
-          <button type="button" class="btn w-full btn-outline text-white py-2 px-4 rounded" (click)="acceptedKnownBugs = true;">I have a different issue</button>
+          <button type="button" class="btn w-full btn-outline text-white py-2 px-4 rounded btn-action" (click)="acceptedKnownBugs = true;">I have a different issue</button>
         </div>
 
         <div *ngIf="acceptedKnownBugs">
@@ -58,7 +58,7 @@
             </div>
             <button
               type="submit"
-              class="w-full btn btn-outline text-white py-2 px-4 rounded"
+              class="w-full btn btn-outline text-white py-2 px-4 rounded btn-action"
               [disabled]="!reportForm.valid || loading"
             >
               Submit Issue

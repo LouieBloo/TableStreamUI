@@ -25,7 +25,7 @@ export class SidebarGameInfoComponent {
   }
 
   get adjustedRoomName(){
-    return this.gameService.room.name.length > 20 ? this.gameService.room.name.slice(0,19) + ".." : this.gameService.room.name;
+    return this.gameService.adjustedRoomName;
   }
 
   openUserLogin(){

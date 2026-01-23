@@ -1,7 +1,9 @@
+AUDIO DEVICE ID: {{selectedAudioDeviceId$ | async}}
+
 <div class="relative h-full glow" [ngClass]="{'glow':  player.isTakingTurn}">
     <div class="flex justify-center h-full">
         <video #videoElement autoplay  class="w-full cursor-crosshair" [ngClass]="{'cursor-pointer' : !loadingCardIdentification, 'cursor-wait': loadingCardIdentification}" (click)="onVideoClick($event)" 
-            [muted]="localStream || muted"></video>
+            [muted]="isLocalStream || muted"></video>
         <app-bounding-box
             *ngIf="boundingBox"
             [boundingBox]="boundingBox"
@@ -23,7 +25,7 @@
           *ngIf="gameService.isMagicGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"
-          [editable]="localStream"
+          [editable]="isLocalStream"
           [modifyPoisonCallback]="modifyPoisonTotal"
           [modifyEnergyCallback]="modifyEnergyTotal"
           [modifyRadiationCallback]="modifyRadiationTotal"
@@ -33,12 +35,18 @@
           *ngIf="gameService.isPokemonGame()"
           [player]="player"
           [modifyCallback]="modifyPrizeCardTotal"
-          [editable]="localStream">
+          [editable]="isLocalStream">
         </app-life-total>
         <app-life-total *ngIf="gameService.isYugiohGame()"
           [player]="player"
           [modifyCallback]="modifyLifeTotal"
-          [editable]="localStream"
+          [editable]="isLocalStream"
+        >
+        </app-life-total>
+        <app-life-total *ngIf="gameService.isOnePieceGame()"
+          [player]="player"
+          [modifyCallback]="modifyLifeTotal"
+          [editable]="isLocalStream"
         >
         </app-life-total>
     </div>
@@ -48,16 +56,16 @@
             <p>Avg: <app-timer [date]="(player.totalTurnTime/ ( (player.totalTurns) || 1 ) )"></app-timer></p>
         </div>
 
-        <div *ngIf="player && (gameService.isCommanderGame() || gameService.isDomainGame())" class="mt-2">
-            <app-set-commander [player]="player" [editable]="localStream" [commander]="player.commanders[0]" [index]="0" [label]="gameService.isDomainGame() ? 'Deck Master' : 'Commander'"></app-set-commander>
-            <app-set-commander *ngIf="gameService.isCommanderGame()" [player]="player" [editable]="localStream" [commander]="player.commanders[1]" [index]="1"></app-set-commander>
+        <div *ngIf="player && (gameService.isCommanderGame() || gameService.isDomainGame() || gameService.isOnePieceGame())" class="mt-2">
+            <app-set-commander [player]="player" [editable]="isLocalStream" [commander]="player.commanders[0]" [index]="0" [label]="gameService.commanderTitle || ''"></app-set-commander>
+            <app-set-commander *ngIf="gameService.isCommanderGame()" [player]="player" [editable]="isLocalStream" [commander]="player.commanders[1]" [index]="1"></app-set-commander>
         </div>
 
         <div *ngIf="magicLifeTotalComponent != null" class="mt-2">
             <app-life-total-dropzone
                 [id]="'leftDropZone' + player.id"
                 [dropList]="magicLifeTotalComponent.leftDropZoneList"
-                [editable]="localStream"
+                [editable]="isLocalStream"
                 [totalFunction]="magicLifeTotalComponent.getTotal"
                 [modifyCallbackFunction]="magicLifeTotalComponent.getCallback"
                 [isDragging]="magicLifeTotalComponent.isDragging"
@@ -70,7 +78,7 @@
         </div>
 
         <div class="flex flex-col max-w-44 mt-1" style="width: fit-content;" *ngIf="showCommanderDamage">
-            <app-commander-side-bar [player]="this.player" [localStream]="localStream" [getModifyCommanderDamageCallback]="getModifyCommanderDamageCallback"></app-commander-side-bar>
+            <app-commander-side-bar [player]="this.player" [localStream]="isLocalStream" [getModifyCommanderDamageCallback]="getModifyCommanderDamageCallback"></app-commander-side-bar>
         </div>
         
     </div>
@@ -83,7 +91,7 @@
                 <app-life-total-dropzone
                     [id]="'rightDropZone' + player.id"
                     [dropList]="magicLifeTotalComponent.rightDropZoneList"
-                    [editable]="localStream"
+                    [editable]="isLocalStream"
                     [totalFunction]="magicLifeTotalComponent.getTotal"
                     [modifyCallbackFunction]="magicLifeTotalComponent.getCallback"
                     [isDragging]="magicLifeTotalComponent.isDragging"
@@ -107,7 +115,7 @@
                         <img src="assets/images/icons/death-icon.png" alt="Death" class="w-12">
                     </p>
                 </div>
-                <div *ngIf="gameService.room.game?.dayNightCycle != ''">
+                <div *ngIf="gameService.dayNightCycle != ''">
                     <p *ngIf="gameService.isDay" class="text-center text-4xl"  appTooltip="Daytime" [tooltipDirection]="'bottom'" [tooltipStartOpen]="false">
                         <img src="assets/images/icons/sun-icon.png" alt="Daytime" class="w-12">
                     </p>
@@ -138,12 +146,12 @@
             <div tabindex="0" role="button" class="btn btn-xs bg-white"><ng-icon name="bootstrapGearFill" class="text-gray-800"></ng-icon></div>
             <ul tabindex="0" class="dropdown-content menu popupColors rounded-box z-[1] w-60 p-2 shadow bg-white ">
                 <li (click)="toggleFlip()" class="text-slate-800"><a>Flip Video</a></li>
-                <li *ngIf="!localStream && gameService.room.allowPlayerKicking" (click)="kickPlayer(player.id)" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
-                <li *ngIf="!localStream && !player.admin" (click)="makeAdmin(player)" class="text-slate-800">
+                <li *ngIf="!isLocalStream && gameService.isAllowPlayerKicked" (click)="kickPlayer()" class="text-slate-800"><a>Kick ({{player.name}})</a></li>
+                <li *ngIf="!isLocalStream && !player.isAdmin" (click)="makeAdmin(player)" class="text-slate-800">
                     <a>Make admin</a>
                 </li>
                 <!-- Local Stream Controls -->
-                <ng-container *ngIf="localStream">
+                <ng-container *ngIf="isLocalStream">
                     <li (click)="toggleMuteSelf()" class="text-slate-800">
                         <a>{{ isMutedSelf ? 'Unmute Mic' : 'Mute Mic' }}</a>
                     </li>
@@ -159,7 +167,7 @@
                             <label class="block text-sm font-medium mb-1">Video Device:</label>
                             <select (change)="onVideoDeviceChange($event)"
                                 class="select select-bordered w-full max-w-xs bg-white">
-                                <option *ngFor="let device of videoInputDevices" [value]="device.deviceId"
+                                <option *ngFor="let device of videoInputDevices$ | async" [value]="device.deviceId"
                                     [selected]="device.deviceId === selectedVideoDeviceId">
                                     {{ device.label || 'Camera ' + device.deviceId }}
                                 </option>
@@ -188,7 +196,7 @@
                             <label class="block text-sm font-medium mb-1">Audio Device:</label>
                             <select (change)="onAudioDeviceChange($event)"
                                 class="select select-bordered w-full max-w-xs bg-white">
-                                <option *ngFor="let device of audioInputDevices" [value]="device.deviceId"
+                                <option *ngFor="let device of audioInputDevices$ | async" [value]="device.deviceId"
                                     [selected]="device.deviceId === selectedAudioDeviceId">
                                     {{ device.label || 'Microphone ' + device.deviceId }}
                                 </option>
@@ -199,7 +207,7 @@
                 </ng-container>
 
                 <!-- Remote Stream Controls -->
-                <ng-container *ngIf="!localStream">
+                <ng-container *ngIf="!isLocalStream">
                     <li *ngIf="!muted" (click)="muteRemoteUser()" class="text-slate-800">
                         <a>Mute Player</a>
                     </li>

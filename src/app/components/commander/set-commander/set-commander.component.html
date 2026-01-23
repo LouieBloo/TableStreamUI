@@ -19,9 +19,9 @@
         </div>
     
         <div class="flex flex-row items-center ml-2 text-pop" appTooltip="Times Cast" [tooltipDirection]="'right'">
-            <button *ngIf="editable" type="button" (click)="modifyCommanderCastAmount(-1)" class="text-sm mr-1">-</button>
+            <button *ngIf="editable" type="button" (click)="modifyCommanderCastAmount(-1)" class="text-sm mr-1 btn-action">-</button>
             <p class="text-sm mb-0" >{{commander.castAmount}}</p>
-            <button *ngIf="editable" type="button" (click)="modifyCommanderCastAmount(1)" class="text-sm ml-1">+</button>
+            <button *ngIf="editable" type="button" (click)="modifyCommanderCastAmount(1)" class="text-sm ml-1 btn-action">+</button>
         </div>
     </div>
     

@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { WebRTCService } from '../../../services/webRTC/web-rtc.service';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { GameService } from '../../../services/game/game.service';
-import { IPlayer, UserType } from '../../../interfaces/IPlayer';
+import { IPlayer } from '../../../interfaces/IPlayer';
 import { GameEvent } from '../../../interfaces/IGame';
 
 @Component({
   selector: 'app-player-turn-order-modal',
   standalone: true,
-  imports: [NgIf,NgFor],
+  imports: [NgFor],
   templateUrl: './player-turn-order-modal.component.html',
   styleUrl: './player-turn-order-modal.component.css'
 })
@@ -20,8 +20,6 @@ export class PlayerTurnOrderModalComponent {
   constructor(private webRTC:WebRTCService, public gameService:GameService){
   }
 
-  ngOnDestroy(): void {
-  }
 
   open() {
     const dialogCheckbox = document.getElementById('playerTurnOrderToggleModal');
@@ -29,7 +27,7 @@ export class PlayerTurnOrderModalComponent {
       dialogCheckbox.click();
     }
 
-    this.temporaryPlayers = JSON.parse(JSON.stringify(this.gameService.room.players));
+    this.temporaryPlayers = JSON.parse(JSON.stringify(this.gameService.players));
   }
 
   close(){

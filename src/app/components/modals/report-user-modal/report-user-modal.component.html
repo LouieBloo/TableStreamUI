@@ -3,7 +3,7 @@
 <dialog id="reportUserModal" class="modal">
     <div class="modal-box bg-slate-800 text-white absolute top-2">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" id="closeReportUserModal">✕</button>
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 btn-action" id="closeReportUserModal">✕</button>
         </form>
 
         <div>
@@ -41,7 +41,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded mt-2" [disabled]="submitting">
+            <button type="submit" class="w-full btn btn-outline text-white py-2 px-4 rounded mt-2 btn-action" [disabled]="submitting">
                 Kick Player
             </button>
 
