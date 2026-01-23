@@ -329,7 +329,7 @@ export class WebRTCService {
         return;
       }
 
-      this.notifyConnectionLost();
+      this.alertConnectionLost();
 
       this.socket?.once('connect', () => {
         this.rejoinRoom(joinRoomPayload, room, password);
@@ -622,7 +622,7 @@ export class WebRTCService {
     );
   }
 
-  private notifyConnectionLost() {
+  private alertConnectionLost() {
     this.alertService.addAlert(
       'error',
       'Lost connection to server. Retrying connection...',

@@ -34,7 +34,6 @@ export class QrCodeComponent {
       password
     ).pipe(
       tap(response => {
-        debugger;
         if(response){
           this.validated = true;
         }

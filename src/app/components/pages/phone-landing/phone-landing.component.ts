@@ -31,21 +31,4 @@ export class PhoneLandingComponent {
     };
     this.webRtcService.joinAsPhone(phoneToken);
   }
-
-  onVideoQualityChange(event: any) {
-    this.videoQuality = event.target.value;
-    this.localStorageService.setVideoQuality(this.videoQuality);
-    this.changeDevice();
-  }
-
-  changeDevice() {
-    from(this.webRtcService.changeDevice())
-      .pipe(
-        switchMap(() => from(this.devicesService.buildLocalStreamFromSelectedDevices()))
-      )
-      .subscribe({
-        next: (stream: MediaStream | null) => {},
-        error: (err) => console.error('Error changing device:', err),
-      });
-  }
 }

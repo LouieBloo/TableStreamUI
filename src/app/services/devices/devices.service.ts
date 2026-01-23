@@ -36,7 +36,6 @@ export class LocalDevicesService {
   public async buildLocalStream(
     videoDeviceId?: string,
     audioDeviceId?: string,
-    aspectRatio: string = '16/9'
   ): Promise<MediaStream | null> {
     if (this._localStream.value) {
       this.logAspectRatio(this._localStream.value);
@@ -47,7 +46,6 @@ export class LocalDevicesService {
       const stream = await this.getLocalMediaStream(
         videoDeviceId,
         audioDeviceId,
-        aspectRatio
       );
       this.selectedVideoDeviceId.next(videoDeviceId!);
       this.selectedAudioDeviceId.next(audioDeviceId!);
@@ -57,7 +55,7 @@ export class LocalDevicesService {
       if (this.isPermissionError(err)) {
         this.logger.log('Permission error: Trying again without audio');
 
-        await this.setUserMediaWithoutAudio(videoDeviceId, audioDeviceId, aspectRatio);
+        await this.setUserMediaWithoutAudio(videoDeviceId, audioDeviceId);
       } else {
         throw err;
       }
@@ -91,17 +89,14 @@ export class LocalDevicesService {
     return navigator.mediaDevices.getUserMedia(constraints);
   }
 
-  //confirm with luke that this name makes sense
   async getLocalMediaStream(
     videoDeviceId?: string,
     audioDeviceId?: string,
-    videoQuality?: string,
     withAudio: boolean = true
   ): Promise<MediaStream | null> {
     const constraints = this.getMediaConstraints(
       videoDeviceId,
       audioDeviceId,
-      videoQuality
     );
     if (!withAudio) constraints.audio = false;
     return navigator.mediaDevices.getUserMedia(constraints);
@@ -110,7 +105,6 @@ export class LocalDevicesService {
   public getMediaConstraints(
     videoDeviceId?: string,
     audioDeviceId?: string,
-    videoQuality: string = '16/9-1080'
   ): MediaStreamConstraints {
     const targetVideoQuality: IVideoQualify = this.getCameraVideoQuality();
 
@@ -398,13 +392,11 @@ export class LocalDevicesService {
   private async setUserMediaWithoutAudio(
     videoDeviceId?: string,
     audioDeviceId?: string,
-    aspectRatio: string = '16/9'
   ) {
     try {
       const stream = await this.getLocalMediaStream(
         videoDeviceId,
         audioDeviceId,
-        aspectRatio,
         false
       );
       this._localStream.next(stream);
