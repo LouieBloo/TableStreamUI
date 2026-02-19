@@ -115,9 +115,7 @@ export class UserStreamComponent {
   volume: number = 1;
   audioInputDevices$: Observable<MediaDeviceInfo[]> = of([]);
   videoInputDevices$: Observable<MediaDeviceInfo[]> = of([]);
-  selectedAudioDeviceId: string = '';
-  selectedVideoDeviceId: string = '';
-  videoQuality: string;
+  videoQuality$: Observable<string> = of("16/9-1080");
   isMutedSelf: boolean = false;
   isVideoOff: boolean = false;
   loadingCardIdentification: boolean = false;
@@ -125,7 +123,8 @@ export class UserStreamComponent {
   classifiedCard: IPlayingCard | null = null;
   popupPosition = { x: 0, y: 0 };
   showCardPopup = false;
-  selectedAudioDeviceId$ = of('')
+  selectedAudioDeviceId$ = of('');
+  selectedVideoDeviceId$ = of('');
 
   // only used to change the direction the settings menu renders
   get isBottomRow(): boolean {
@@ -150,10 +149,11 @@ export class UserStreamComponent {
     private router: Router,
     public devicesService: LocalDevicesService
   ) {
-    this.videoQuality = localStorageService.videoQuality || '16/9-1080';
+    this.videoQuality$ = this.devicesService.videoQuality$; 
     this.audioInputDevices$ = devicesService.audioDevices$;
     this.videoInputDevices$ = devicesService.videoDevices$;
     this.selectedAudioDeviceId$ = devicesService.selectedAudioDeviceId$;
+    this.selectedVideoDeviceId$ = devicesService.selectedVideoDeviceId$
     this.subscribeToEvents();
   }
 
@@ -174,7 +174,7 @@ export class UserStreamComponent {
   async ngAfterViewInit() {
     if (this.isLocalStream) {
       this.subscribeToLocalStream();
-      await this.devicesService.buildLocalStream();
+      await this.devicesService.setLocalStream();
     }
     if (!this.isLocalStream) {
       this.webRTC.subscribeToStreamAdd(this.streamAdded);
@@ -246,35 +246,19 @@ export class UserStreamComponent {
     }
   };
 
-  onAudioDeviceChange(event: any) {
-    this.selectedAudioDeviceId = event.target.value;
-    this.changeDevice();
+  async onAudioDeviceChange(event: any) {
+    const audioDeviceId = event.target.value;
+    await this.devicesService.changeAudioDevice(audioDeviceId);
   }
 
-  onVideoDeviceChange(event: any) {
-    this.selectedVideoDeviceId = event.target.value;
-    this.changeDevice();
-  }
-
-  changeDevice() {
-    from(this.webRTC.changeDevice(this.selectedVideoDeviceId, this.selectedAudioDeviceId))
-      .pipe(
-        switchMap(() =>
-          from(
-            this.devicesService.buildStreamOnDeviceChange(
-              this.selectedVideoDeviceId,
-              this.selectedAudioDeviceId
-            )
-          )
-        )
-      )
-      .subscribe();
+  async onVideoDeviceChange(event: any) {
+    const videoDeviceId = event.target.value;
+    await this.devicesService.changeVideoDevice(videoDeviceId);
   }
 
   onVideoQualityChange(event: any) {
-    this.videoQuality = event.target.value;
-    this.localStorageService.setVideoQuality(this.videoQuality);
-    this.changeDevice();
+    const videoQuality = event.target.value;
+    this.devicesService.changeVideoQuality(videoQuality);
   }
 
   toggleMuteSelf() {
@@ -554,6 +538,9 @@ export class UserStreamComponent {
   }
 
   private imKicked(kickedEvent: IKickPlayerResponse) {
-    return this.player.id == kickedEvent.kickedPlayer?.id && this.isLocalStream;
+    if(kickedEvent == null){
+      return false;
+    }
+    return this.player?.id == kickedEvent.kickedPlayer?.id && this.isLocalStream;
   }
 }
