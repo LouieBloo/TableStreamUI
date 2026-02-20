@@ -409,7 +409,7 @@ export class LocalDevicesService {
   public async changeAudioDevice(audioDeviceId: string) {
     const currentAudioTrack = this.getFirstAudioTrack();
 
-    const newAudioTrack = await this.acquireNewAudioTracks(audioDeviceId);
+    const newAudioTrack = await this.acquireNewAudioTrack(audioDeviceId);
 
     if (newAudioTrack) {
       await this.replaceDeviceTrack(currentAudioTrack!, newAudioTrack);
@@ -420,7 +420,7 @@ export class LocalDevicesService {
 
   public async changeVideoDevice(videoDeviceId: string) {
     const currentVideoTrack = this.getCurrentVideoTrack();
-    const newVideoTrack = await this.acquireNewVideoTracks(videoDeviceId);
+    const newVideoTrack = await this.acquireNewVideoTrack(videoDeviceId);
     if (newVideoTrack) {
       await this.replaceDeviceTrack(currentVideoTrack!, newVideoTrack);
     }
@@ -464,7 +464,7 @@ export class LocalDevicesService {
     this.logAspectRatio(this._localStream.value!);
   }
 
-  private async acquireNewVideoTracks(videoDeviceId: string) {
+  private async acquireNewVideoTrack(videoDeviceId: string) {
     let videoTrack: MediaStreamTrack | null = null;
     try {
       const newStream = await this.getLocalMediaStreamWithVideoConstraints(videoDeviceId);
@@ -478,7 +478,7 @@ export class LocalDevicesService {
     return videoTrack;
   }
 
-  private async acquireNewAudioTracks(
+  private async acquireNewAudioTrack(
     audioDeviceId: string
   ): Promise<MediaStreamTrack | null> {
     let audioTrack: MediaStreamTrack | null = null;
