@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, from, Observable, Subject, switchMap, tap } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import {
@@ -26,6 +26,14 @@ import { JoinRoomPayload } from './joinRoomPayload';
   providedIn: 'root',
 })
 export class WebRTCService {
+  private alertService = inject(AlertsService);
+  private logger = inject(LoggerService);
+  private localStorageService = inject(LocalStorageService);
+  private router = inject(Router);
+  private userService = inject(UserService);
+  private gameService = inject(GameService);
+  private devicesService = inject(LocalDevicesService);
+
   socket: Socket | null = null;
   peerConnections: { [key: string]: RTCPeerConnection } = {};
   remoteStreams: { [key: string]: MediaStream } = {}; //will contain a users phone stream
@@ -47,15 +55,55 @@ export class WebRTCService {
     return this._roomPasswordValid.asObservable();
   }
 
-  constructor(
-    private alertService: AlertsService,
-    private logger: LoggerService,
-    private localStorageService: LocalStorageService,
-    private router: Router,
-    private userService: UserService,
-    private gameService: GameService,
-    private devicesService: LocalDevicesService
-  ) {}
+  constructor() {
+    this.devicesService.localStream$
+      .pipe(
+      switchMap((stream: MediaStream | null) =>
+        from(this.replaceTrackInPeerConnections(stream))
+      )
+      )
+      .subscribe();
+  }
+
+
+private async replaceTrackInPeerConnections(mediaStream: MediaStream | null) {
+  if (!mediaStream) return;
+
+  const newAudioTrack = mediaStream.getAudioTracks()[0] ?? null;
+  const newVideoTrack = mediaStream.getVideoTracks()[0] ?? null;
+
+  const renegotiations: Promise<void>[] = [];
+
+  for (const socketId in this.peerConnections) {
+    const peerConnection = this.peerConnections[socketId];
+    const senders = peerConnection.getSenders();
+
+    if (newAudioTrack) {
+      const audioSender = senders.find(s => s.track?.kind === 'audio');
+      if (audioSender) {
+        await audioSender.replaceTrack(newAudioTrack);
+      } else {
+        peerConnection.addTrack(newAudioTrack, mediaStream);
+      }
+    }
+
+    if (newVideoTrack) {
+      const videoSender = senders.find(s => s.track?.kind === 'video');
+      if (videoSender) {
+        await videoSender.replaceTrack(newVideoTrack);
+      } else {
+        peerConnection.addTrack(newVideoTrack, mediaStream);
+      }
+    }
+
+    renegotiations.push(
+      this.renegotiateConnection(peerConnection, socketId)
+    );
+  }
+
+  await Promise.all(renegotiations);
+}
+
 
   public joinRoom = async (
     roomId: string,
@@ -79,16 +127,6 @@ export class WebRTCService {
     if (this.socket)
       this.socket.emit('joinRoomAsPhone', token, this.onServerResponseFromPhone);
   };
-
-  public async changeDevice(videoDeviceId: string, audioDeviceId: string): Promise<void> {
-    if (!this.devicesService._localStream) {
-      const localStream = await this.devicesService.buildStreamOnDeviceChange(videoDeviceId, audioDeviceId);
-      await this.updatePeerConnections(localStream!);
-      return;
-    }
-
-    await this.devicesService.changeDevice(this.peerConnections, videoDeviceId, audioDeviceId);
-  }
 
   public disconnect() {
     this.disconnectSocket();
@@ -222,13 +260,7 @@ export class WebRTCService {
     this.emitLocalDescription(socketId, peerConnection.localDescription!);
   }
 
-  private async updatePeerConnections(mediaStream: MediaStream): Promise<void> {
-    for (const socketId in this.peerConnections) {
-      const peerConnection = this.peerConnections[socketId];
-      this.replaceOrAddTracks(peerConnection, mediaStream);
-      await this.renegotiateConnection(peerConnection, socketId);
-    }
-  }
+
 
   private replaceOrAddTracks(
     peerConnection: RTCPeerConnection,
@@ -531,7 +563,7 @@ export class WebRTCService {
 
       this.remoteStreams[socketId] = remoteStream;
       if (this.gameService.isLocalPlayer(user.id)) {
-        this.devicesService.setLocalStream(remoteStream);//this is where the phone stream gets set as local stream
+        this.devicesService.setLocalStreamTest(remoteStream); //this is where the phone stream gets set as local stream
       }
       this.onStreamAdded.forEach((callback) => {
         callback(socketId, this.remoteStreams[socketId], user);

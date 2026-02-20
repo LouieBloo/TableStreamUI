@@ -168,7 +168,7 @@ AUDIO DEVICE ID: {{selectedAudioDeviceId$ | async}}
                             <select (change)="onVideoDeviceChange($event)"
                                 class="select select-bordered w-full max-w-xs bg-white">
                                 <option *ngFor="let device of videoInputDevices$ | async" [value]="device.deviceId"
-                                    [selected]="device.deviceId === selectedVideoDeviceId">
+                                    [selected]="device.deviceId === (selectedVideoDeviceId$ | async)">
                                     {{ device.label || 'Camera ' + device.deviceId }}
                                 </option>
                             </select>
@@ -180,13 +180,13 @@ AUDIO DEVICE ID: {{selectedAudioDeviceId$ | async}}
                           <select (change)="onVideoQualityChange($event)"
                               class="select select-bordered w-full max-w-xs bg-white">
                             <!-- For 16:9 -->
-                            <option value="16/9-720" [selected]="videoQuality === '16/9-720'">16:9 - 720p</option>
-                            <option value="16/9-1080" [selected]="videoQuality === '16/9-1080'">16:9 - 1080p</option>
-                            <option value="16/9-2k" [selected]="videoQuality === '16/9-2k'">16:9 - 2K</option>
+                            <option value="16/9-720" [selected]="(videoQuality$ | async) === '16/9-720'">16:9 - 720p</option>
+                            <option value="16/9-1080" [selected]="(videoQuality$ | async) === '16/9-1080'">16:9 - 1080p</option>
+                            <option value="16/9-2k" [selected]="(videoQuality$ | async) === '16/9-2k'">16:9 - 2K</option>
                             <!-- For 4:3 -->
-                            <option value="4/3-720" [selected]="videoQuality === '4/3-720'">4:3 - 720p</option>
-                            <option value="4/3-960" [selected]="videoQuality === '4/3-960'">4:3 - Standard</option>
-                            <option value="4/3-2k" [selected]="videoQuality === '4/3-2k'">4:3 - 2K</option>
+                            <option value="4/3-720" [selected]="(videoQuality$ | async) === '4/3-720'">4:3 - 720p</option>
+                            <option value="4/3-960" [selected]="(videoQuality$ | async) === '4/3-960'">4:3 - Standard</option>
+                            <option value="4/3-2k" [selected]="(videoQuality$ | async) === '4/3-2k'">4:3 - 2K</option>
                           </select>
                         </div>
                         <p *ngIf="isFirefox()" class="text-xs text-center text-red-500">Firefox may not support aspect ratio changing</p>
@@ -197,7 +197,7 @@ AUDIO DEVICE ID: {{selectedAudioDeviceId$ | async}}
                             <select (change)="onAudioDeviceChange($event)"
                                 class="select select-bordered w-full max-w-xs bg-white">
                                 <option *ngFor="let device of audioInputDevices$ | async" [value]="device.deviceId"
-                                    [selected]="device.deviceId === selectedAudioDeviceId">
+                                    [selected]="device.deviceId === (selectedAudioDeviceId$ | async)">
                                     {{ device.label || 'Microphone ' + device.deviceId }}
                                 </option>
                             </select>

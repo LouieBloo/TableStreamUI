@@ -5,7 +5,7 @@ import { of, Subscription, tap } from 'rxjs';
 import { IPlayer } from '../../interfaces/IPlayer';
 import { GameService } from '../../services/game/game.service';
 import { PhoneCameraService } from '../../services/phone-camera/phone-camera.service';
-import { CheckPasswordComponent } from "../pages/check-password/check-password.component";
+import { CheckPasswordComponent } from '../pages/check-password/check-password.component';
 
 @Component({
   selector: 'app-qr-code',
@@ -28,18 +28,18 @@ export class QrCodeComponent {
   }
 
   getQrCode(password: string) {
-    this.phoneCameraService.getQrCode(
-      this.player?.roomId,
-      this.player?.id ?? null,
-      password
-    ).pipe(
-      tap(response => {
-        if(response){
-          this.validated = true;
-        }
-      })
-      
-    ).subscribe();
+    this.subscriptions.add(
+      this.phoneCameraService
+        .getQrCode(this.player?.roomId, this.player?.id ?? null, password)
+        .pipe(
+          tap((response) => {
+            if (response) {
+              this.validated = true;
+            }
+          })
+        )
+        .subscribe()
+    );
   }
 
   ngOnDestroy() {
