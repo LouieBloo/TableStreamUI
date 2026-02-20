@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, tap } from 'rxjs';
+import { BehaviorSubject, from, Observable, Subject, switchMap, tap } from 'rxjs';
 import io, { Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import {
@@ -58,44 +58,52 @@ export class WebRTCService {
   constructor() {
     this.devicesService.localStream$
       .pipe(
-        tap((stream: MediaStream | null) => {
-          this.replaceTrackInPeerConnections(stream); //todo await
-        })
+      switchMap((stream: MediaStream | null) =>
+        from(this.replaceTrackInPeerConnections(stream))
+      )
       )
       .subscribe();
   }
 
-  //TODO - FIX DOUBLE FOR LOOP
-  private async replaceTrackInPeerConnections(mediaStream: MediaStream | null) {
-    if (mediaStream == null) return;
 
-    const newAudioTrack = mediaStream.getAudioTracks()[0];
-    const newVideoTrack = mediaStream.getVideoTracks()[0];
+private async replaceTrackInPeerConnections(mediaStream: MediaStream | null) {
+  if (!mediaStream) return;
 
-    for (const socketId in this.peerConnections) {
-      const peerConnection = this.peerConnections[socketId];
-      const sender = peerConnection.getSenders().find((s) => s.track?.kind === 'audio');
-      if (sender) {
-        await sender.replaceTrack(newAudioTrack);
+  const newAudioTrack = mediaStream.getAudioTracks()[0] ?? null;
+  const newVideoTrack = mediaStream.getVideoTracks()[0] ?? null;
+
+  const renegotiations: Promise<void>[] = [];
+
+  for (const socketId in this.peerConnections) {
+    const peerConnection = this.peerConnections[socketId];
+    const senders = peerConnection.getSenders();
+
+    if (newAudioTrack) {
+      const audioSender = senders.find(s => s.track?.kind === 'audio');
+      if (audioSender) {
+        await audioSender.replaceTrack(newAudioTrack);
       } else {
         peerConnection.addTrack(newAudioTrack, mediaStream);
       }
-      await this.renegotiateConnection(peerConnection, socketId);
-
     }
 
-    for (const socketId in this.peerConnections) {
-      const peerConnection = this.peerConnections[socketId];
-      const sender = peerConnection.getSenders().find((s) => s.track?.kind === 'video');
-      if (sender) {
-        await sender.replaceTrack(newVideoTrack);
+    if (newVideoTrack) {
+      const videoSender = senders.find(s => s.track?.kind === 'video');
+      if (videoSender) {
+        await videoSender.replaceTrack(newVideoTrack);
       } else {
         peerConnection.addTrack(newVideoTrack, mediaStream);
       }
-      await this.renegotiateConnection(peerConnection, socketId);
-
     }
+
+    renegotiations.push(
+      this.renegotiateConnection(peerConnection, socketId)
+    );
   }
+
+  await Promise.all(renegotiations);
+}
+
 
   public joinRoom = async (
     roomId: string,
@@ -119,23 +127,6 @@ export class WebRTCService {
     if (this.socket)
       this.socket.emit('joinRoomAsPhone', token, this.onServerResponseFromPhone);
   };
-
-  // public async changeDevice(videoDeviceId: string, audioDeviceId: string): Promise<void> {
-  //   if (!this.devicesService._localStream) {
-  //     const localStream = await this.devicesService.buildStreamOnDeviceChange(
-  //       videoDeviceId,
-  //       audioDeviceId
-  //     );
-  //     await this.updatePeerConnections(localStream!);
-  //     return;
-  //   }
-
-  //   await this.devicesService.changeDevice(
-  //     this.peerConnections,
-  //     videoDeviceId,
-  //     audioDeviceId
-  //   );
-  // }
 
   public disconnect() {
     this.disconnectSocket();
