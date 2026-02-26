@@ -1,12 +1,8 @@
 import { Component, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 import { CardSearchService } from '../../services/search/card-search.service';
-import { GameEvent, GameType } from '../../interfaces/IGame';
-import { Game } from '../../classes/game/game';
-import { CardComponent } from '../card/card.component';
+import { GameEvent } from '../../interfaces/IGame';
 import { NgIf } from '@angular/common';
-import { IPlayingCard } from '../../interfaces/IPlayingCard';
 import { bootstrapRecord, bootstrapRecordFill, bootstrapClockHistory } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { GameService } from '../../services/game/game.service';
@@ -20,7 +16,7 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
 @Component({
   selector: 'app-speech-to-text',
   standalone: true,
-  imports: [CardComponent, NgIf, NgIcon, TooltipDirective],
+  imports: [NgIf, NgIcon, TooltipDirective],
   templateUrl: './speech-to-text.component.html',
   styleUrl: './speech-to-text.component.css',
   viewProviders: [provideIcons({ bootstrapRecordFill, bootstrapRecord, bootstrapClockHistory })]
@@ -109,16 +105,14 @@ export class SpeechToTextComponent {
     const formData = new FormData();
     formData.append('audio', audioBlob);
 
-    let searchTag: string = this.gameService.room.game?.searchTag || 'commander'
-
     this.cardIdentifierService.transcribe(audioBlob).subscribe((response: any) => {
 
-      if (response.transcript && this.gameService.room.game) {
+      if (response.transcript && this.gameService.game) {
         this.alertsService.addAlert("info",`Searching for card name '${response.transcript}'`)
         this.searchService.searchCards(
           response.transcript,
           true,
-          this.gameService.room.game,
+          this.gameService.game,
           null
         )
           .subscribe(

@@ -14,6 +14,8 @@ import { VerifyEmailComponent } from './components/pages/verify-email/verify-ema
 import { ResetPasswordComponent } from './components/pages/reset-password/reset-password.component';
 import { UserEditComponent } from './components/pages/user-edit/user-edit.component';
 import { DevDragComponent } from './components/pages/dev-drag/dev-drag.component';
+import { PhoneLandingComponent } from './components/pages/phone-landing/phone-landing.component';
+import { DevAccessComponent } from './components/dev-access/dev-access.component';
 
 export const routes: Routes = [
     {
@@ -42,7 +44,7 @@ export const routes: Routes = [
         canActivate: [dashboardGuard]
     },
     {
-        path: 'check-password', component: CheckPasswordComponent
+        path: 'check-password', component: DevAccessComponent
     },
     {
         path: 'card-test', component: CardTestComponent
@@ -58,5 +60,8 @@ export const routes: Routes = [
     },
     {
         path: 'dev-drag', component: DevDragComponent
+    },
+    {
+        path: 'remote-camera/:playerToken', component: PhoneLandingComponent
     }
 ];

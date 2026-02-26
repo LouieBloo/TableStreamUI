@@ -17,7 +17,7 @@ export class UserService {
   private logoutTimer: any = null;
   private focusSub!: Subscription;
 
-  private userSubject = new BehaviorSubject<IUser | null>(null);
+  private userSubject = new BehaviorSubject<IUser | null>(null);//is this the local player?
   public user$ = this.userSubject.asObservable();
 
   get user(): IUser | null {

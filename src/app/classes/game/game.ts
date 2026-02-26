@@ -38,7 +38,7 @@ export class Game {
     // }
 
     //not sure if we need to manually do this but keeping for now
-    modifyProperty = (game:Game)=>{
+    updateDayNightCycle = (game:Game)=>{
         this.dayNightCycle = game.dayNightCycle;
     }
 

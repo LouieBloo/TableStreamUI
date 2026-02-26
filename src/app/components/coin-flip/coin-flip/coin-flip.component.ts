@@ -40,11 +40,11 @@ export class CoinFlipComponent {
   }
 
   get headsImg(){
-    return `${this.gameService.room.game?.coinImagePathPrefix}-heads.png`
+    return `${this.gameService.coinImagePathPrexis}-heads.png`
   }
 
   get tailsImg(){
-    return `${this.gameService.room.game?.coinImagePathPrefix}-tails.png`
+    return `${this.gameService.coinImagePathPrexis}-tails.png`
   }
 
   get winnerImg(){

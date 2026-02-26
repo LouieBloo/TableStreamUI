@@ -18,6 +18,7 @@ import { UserService } from '../../../services/user/user.service';
 import { IRoom } from '../../../interfaces/IRoom';
 import { RoomListComponent } from '../../room-list/room-list.component';
 import { TooltipDirective } from '../../../directives/tooltip.directive';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -34,20 +35,15 @@ import { TooltipDirective } from '../../../directives/tooltip.directive';
     DonationButtonComponent,
     DonationModalComponent,
     RoomListComponent,
-    TooltipDirective
-  ],
+    TooltipDirective,
+],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
 export class HomeComponent {
-  @ViewChild(IpAddressWarningModalComponent)
-  ipAddressModal!: IpAddressWarningModalComponent;
-
-  @ViewChild(PrivacyPolicyModalComponent)
-  privacyPolicyModal!: PrivacyPolicyModalComponent;
-
+  @ViewChild(IpAddressWarningModalComponent) ipAddressModal!: IpAddressWarningModalComponent;
+  @ViewChild(PrivacyPolicyModalComponent) privacyPolicyModal!: PrivacyPolicyModalComponent;
   @ViewChild(DonationModalComponent) donationModal!: DonationModalComponent;
-
   @ViewChild(UserLoginModalComponent) userLoginModal!: UserLoginModalComponent;
 
   private subscriptions: Subscription = new Subscription();
@@ -69,6 +65,10 @@ export class HomeComponent {
     allowSpectators: false
   };
 
+  get showTermsOfService(): boolean {
+    return !this.showRoomList || this.activeTab == 'create'
+  }
+
   constructor(
     private router: Router,
     private webRTC: WebRTCService,
@@ -78,25 +78,18 @@ export class HomeComponent {
   ) { }
 
   ngOnInit() {
-    const joinRoomId = this.route.snapshot.queryParamMap.get('id')!;
+    this.handleQueryParams();
+    this.resetWebRTC();
+    this.updateLocalStorage();
+    this.setPlayerName();
+    this.subscribeToUserChanges();
+  }
 
-    if (joinRoomId) {
-      this.setJoinRoomId(joinRoomId);
-    }
-
-    this.webRTC.disconnect();
-    this.localStorageService.removeStorageOnHomeLoad();
-    this.localStorageService.setUserInteractedWithSite(true);
-
-    this.loadInitialValues();
-
-    //when the user changes we should update our name (if its been set in localstorage)
-    //also update any form configs
+  private subscribeToUserChanges(){
     this.subscriptions.add(
       this.userService.user$
         .subscribe(user => {
-          this.loadInitialValues();
-
+          this.setPlayerName();
           if(!this.userService.isLoggedIn){
             this.player.public = false;
           }
@@ -104,11 +97,22 @@ export class HomeComponent {
     );
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+  private updateLocalStorage(){
+    this.localStorageService.removeStorageOnHomeLoad();
+    this.localStorageService.setUserInteractedWithSite(true);
   }
 
-  loadInitialValues() {
+  private resetWebRTC(): void {
+    this.webRTC.disconnect();
+  }
+
+
+  private handleQueryParams(): void {
+    const roomId = this.route.snapshot.queryParamMap.get('id');
+    if (roomId) this.setRoomId(roomId);
+  }
+
+  private setPlayerName() {
     if (this.localStorageService.playerName) {
       this.player.name = this.localStorageService.playerName!;
     }
@@ -118,13 +122,13 @@ export class HomeComponent {
     this.activeTab = tab;
   }
 
-  setJoinRoomId = (roomId:string)=>{
+  setRoomId = (roomId:string)=>{
     this.setTab('join')
     this.player.roomId = roomId;
     this.showRoomList = false;
   }
 
-  publicToggled = ()=>{
+  publicToggled() {
     if(!this.player.public){
       this.player.allowSpectators = false;
 
@@ -143,7 +147,6 @@ export class HomeComponent {
       return;
     }
 
-    //this.ipAddressModal.open();
     this.onAgreeClicked();
   }
 
@@ -155,12 +158,11 @@ export class HomeComponent {
       this.navigateOnJoin();
       return;
     }
-    //this.ipAddressModal.open();
     this.onAgreeClicked();
   }
 
   onRoomClick = (room:IRoom)=>{
-    this.setJoinRoomId(room.id + "");
+    this.setRoomId(room.id + "");
   }
 
   onCreateGameButtonClicked = ()=>{
@@ -178,7 +180,6 @@ export class HomeComponent {
   }
 
   onGameTypeChange(selectedValue: string) {
-    // Find the selected game type based on the selected value
     const selectedGameTypeValue = Number(selectedValue);
     const selectedGameType = GAME_TYPES.find(
       (gameType: any) => gameType.value === selectedGameTypeValue
@@ -235,7 +236,8 @@ export class HomeComponent {
     this.userLoginModal.open();
   }
 
-  get showTermsOfService(): boolean{
-    return !this.showRoomList || this.activeTab == 'create'
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
+
 }
